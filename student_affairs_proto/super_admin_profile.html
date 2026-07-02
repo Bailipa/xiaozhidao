@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<!--
+  角色:super_admin(技术员 / 李工)
+  说明:技术人员个人中心,显示账号信息、运维手册、版本信息、退出登录。
+  底部 5 tab:平台 / 账号 / 审计 / 系统 / 我的(当前)
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>我的 - 学工助手</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+        :root { --color-primary: #1E5AE6; --color-bg-page: #F5F6F8; }
+        body { background-color: #1a1a1a; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+        .phone-shell { width: 375px; height: 812px; background: var(--color-bg-page); border-radius: 40px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+        .status-bar { height: 44px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #000; flex-shrink: 0; line-height: 1; }
+        .status-bar iconify-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            font-size: 16px;
+        }
+        .content { flex: 1; overflow-y: auto; }
+        .tab-bar { height: 84px; background: #fff; border-top: 1px solid #E5E7EB; display: flex; justify-content: space-around; align-items: center; padding-bottom: 20px; flex-shrink: 0; }
+        .tab-item { display: flex; flex-direction: column; align-items: center; text-align: center; color: #9CA3AF; text-decoration: none; }
+        .tab-item.active { color: var(--color-primary); }
+        .tab-item iconify-icon { font-size: 24px; margin-bottom: 4px; }
+        .tab-item span { font-size: 11px; }
+        .profile-header { background: #1E5AE6; padding: 40px 20px 60px; color: white; border-radius: 0 0 30px 30px; }
+        .menu-list { background: #fff; border-radius: 20px; margin: -30px 16px 12px; padding: 4px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .menu-item { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid #F3F4F6; }
+        .menu-item:last-child { border-bottom: 0; }
+        .home-indicator { height:34px; background:#fff; display:flex; justify-content:center; align-items:flex-end; padding-bottom:8px; flex-shrink:0; }
+        .home-indicator .bar { width:134px; height:5px; border-radius:3px; background:#000; opacity:0.85; }
+    </style>
+</head>
+<body>
+<div class="phone-shell">
+<div class="status-bar">
+<span>12:20</span>
+<div class="flex gap-1.5 text-white">
+<iconify-icon icon="mingcute:signal-fill"></iconify-icon>
+<iconify-icon icon="mingcute:wifi-fill"></iconify-icon>
+<iconify-icon icon="mingcute:battery-fill"></iconify-icon>
+</div>
+</div>
+<div class="content">
+<div class="profile-header text-center">
+<div class="w-20 h-20 rounded-full border-2 border-white/50 overflow-hidden mb-3 mx-auto shadow-lg bg-gray-900 flex items-center justify-center text-white">
+<iconify-icon class="text-3xl" icon="solar:settings-bold"></iconify-icon>
+</div>
+<h2 class="text-xl font-bold">李工</h2>
+<p class="text-xs opacity-70 mt-1">技术运维 · 超级管理员</p>
+<div class="flex gap-6 mt-5 justify-center">
+<div class="text-center">
+<div class="text-lg font-bold">86</div>
+<div class="text-[10px] opacity-70 uppercase">账号数</div>
+</div>
+<div class="w-px h-8 bg-white/20"></div>
+<div class="text-center">
+<div class="text-lg font-bold">3</div>
+<div class="text-[10px] opacity-70 uppercase">学部</div>
+</div>
+<div class="w-px h-8 bg-white/20"></div>
+<div class="text-center">
+<div class="text-lg font-bold">99.98%</div>
+<div class="text-[10px] opacity-70 uppercase">可用性</div>
+</div>
+</div>
+</div>
+<div class="menu-list">
+<a class="menu-item" href="super_admin_accounts.html">
+<iconify-icon class="text-xl text-blue-600" icon="solar:users-group-rounded-bold-duotone"></iconify-icon>
+<span class="flex-1 text-sm font-medium text-gray-700">账号管理</span>
+<iconify-icon class="text-gray-300" icon="solar:alt-arrow-right-linear"></iconify-icon>
+</a>
+<a class="menu-item" href="super_admin_audit_logs.html">
+<iconify-icon class="text-xl text-purple-600" icon="solar:document-text-bold-duotone"></iconify-icon>
+<span class="flex-1 text-sm font-medium text-gray-700">审计日志</span>
+<iconify-icon class="text-gray-300" icon="solar:alt-arrow-right-linear"></iconify-icon>
+</a>
+<a class="menu-item" href="super_admin_system.html">
+<iconify-icon class="text-xl text-emerald-600" icon="solar:pulse-bold-duotone"></iconify-icon>
+<span class="flex-1 text-sm font-medium text-gray-700">服务监控</span>
+<iconify-icon class="text-gray-300" icon="solar:alt-arrow-right-linear"></iconify-icon>
+</a>
+<a class="menu-item" href="privacy_policy.html">
+<iconify-icon class="text-xl text-gray-500" icon="solar:shield-keyhole-bold-duotone"></iconify-icon>
+<span class="flex-1 text-sm font-medium text-gray-700">隐私政策</span>
+<iconify-icon class="text-gray-300" icon="solar:alt-arrow-right-linear"></iconify-icon>
+</a>
+</div>
+<div class="menu-list">
+<a class="menu-item" href="#" onclick="confirmLogout(); return false;">
+<iconify-icon class="text-xl text-red-500" icon="solar:logout-bold-duotone"></iconify-icon>
+<span class="flex-1 text-sm font-medium text-red-500">退出登录</span>
+</a>
+</div>
+<div class="text-center py-8">
+<p class="text-[10px] text-gray-300">学工助手 企业版 v1.0.0 · 技术运维后台</p>
+</div>
+</div>
+<div class="tab-bar">
+<a class="tab-item" href="super_admin_workbench.html">
+<iconify-icon icon="solar:widget-2-linear"></iconify-icon>
+<span>平台</span>
+</a>
+<a class="tab-item" href="super_admin_accounts.html">
+<iconify-icon icon="solar:users-group-rounded-linear"></iconify-icon>
+<span>账号</span>
+</a>
+<a class="tab-item" href="super_admin_audit_logs.html">
+<iconify-icon icon="solar:document-text-linear"></iconify-icon>
+<span>审计</span>
+</a>
+<a class="tab-item" href="super_admin_system.html">
+<iconify-icon icon="solar:pulse-linear"></iconify-icon>
+<span>系统</span>
+</a>
+<a class="tab-item active" href="super_admin_profile.html">
+<iconify-icon icon="solar:user-circle-bold"></iconify-icon>
+<span>我的</span>
+</a>
+</div>
+<div class="home-indicator"><div class="bar"></div></div>
+</div>
+<script>
+function confirmLogout() {
+  var m = document.createElement('div');
+  m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99;display:flex;align-items:center;justify-content:center;padding:0 32px;';
+  m.innerHTML = '<div style="background:#fff;border-radius:14px;width:100%;overflow:hidden;">'
+    + '<div style="padding:24px 20px;text-align:center;">'
+    + '<iconify-icon style="font-size:32px;color:#DC2626;" icon="solar:logout-bold-duotone"></iconify-icon>'
+    + '<div style="font-size:16px;font-weight:700;color:#191919;margin-top:10px;">确认退出登录?</div>'
+    + '<div style="font-size:12px;color:#888;margin-top:6px;line-height:1.6;">退出后需重新输入账号密码登录,本次操作将记入审计日志。</div>'
+    + '</div>'
+    + '<div style="display:flex;border-top:1px solid #F0F0F0;">'
+    + '<button data-cancel style="flex:1;height:48px;background:#fff;color:#888;font-size:15px;border:none;border-right:1px solid #F0F0F0;cursor:pointer;">取消</button>'
+    + '<button data-ok style="flex:1;height:48px;background:#fff;color:#DC2626;font-size:15px;font-weight:600;border:none;cursor:pointer;">确认退出</button>'
+    + '</div></div>';
+  document.body.appendChild(m);
+  m.querySelector('[data-cancel]').onclick = function() { m.remove(); };
+  m.querySelector('[data-ok]').onclick = function() {
+    m.remove();
+    window.location.href = 'login.html';
+  };
+}
+</script>
+</body>
+</html>
