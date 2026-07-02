@@ -138,7 +138,7 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 
 <!-- 系统日志面板 -->
 <div class="tab-pane active" id="pane-system">
-  <div class="chip-row">
+  <div class="xzd-hscroll chip-row" id="catChips">
     <div class="chip on" data-cat="" onclick="filterCat('')">全部</div>
     <div class="chip cat-1" data-cat="c1" onclick="filterCat('c1')">谈心谈话</div>
     <div class="chip cat-2" data-cat="c2" onclick="filterCat('c2')">进宿舍</div>
@@ -146,7 +146,7 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
     <div class="chip cat-4" data-cat="c4" onclick="filterCat('c4')">组织班会</div>
     <div class="chip cat-5" data-cat="c5" onclick="filterCat('c5')">班干会议</div>
   </div>
-  <div class="chip-row chip-row no-border" style="padding-top:0;">
+  <div class="xzd-hscroll chip-row chip-row no-border" id="stChips" style="padding-top:0;">
     <div class="chip on" data-st="" onclick="filterStatus('')">全部状态</div>
     <div class="chip" data-st="submitted" onclick="filterStatus('submitted')">已提交</div>
     <div class="chip" data-st="draft" onclick="filterStatus('draft')">草稿箱</div>
@@ -157,7 +157,7 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 
 <!-- 自定义记录面板 -->
 <div class="tab-pane" id="pane-custom">
-  <div class="chip-row">
+  <div class="xzd-hscroll chip-row" id="modChips">
     <div class="chip on" data-mod="" onclick="filterMod('')">全部模块</div>
     <div class="chip" data-mod="M001" onclick="filterMod('M001')">工作心得</div>
     <div class="chip" data-mod="M002" onclick="filterMod('M002')">班会反思</div>
@@ -199,8 +199,15 @@ var filters = { cat: '', status: '', mod: '' };
   try { DATA = JSON.parse(document.getElementById('page-data').textContent); } catch(e) { return; }
   document.getElementById('sysCount').textContent = DATA.systemLogs.length;
   document.getElementById('cusCount').textContent = DATA.customRecords.length;
+  // 把日志数据存到 localStorage,供 log_edit.html 的 ?lid= 回填使用
+  try { localStorage.setItem('xzd_logs', JSON.stringify(DATA.systemLogs)); } catch(e) {}
   renderSystem();
   renderCustom();
+  // 复用 log_edit.html 的横向滚动增强 (桌面端鼠标支持)
+  ['catChips','stChips','modChips'].forEach(function(id) {
+    var w = document.getElementById(id);
+    if (w) initHScroll(w);
+  });
 })();
 
 function switchSource(s) {
@@ -246,7 +253,7 @@ function renderSystem() {
   var html = '';
   logs.forEach(function(l) {
     var draftCls = l.status === 'draft' ? ' opacity-80' : '';
-    var editHref = 'counselor_log_edit.html';
+    var editHref = 'counselor_log_edit.html?lid=' + encodeURIComponent(l.log_id);
     var editLabel = l.status === 'draft' ? '继续填写' : '编辑';
     html += '<div class="log-card' + draftCls + '">'
       + '<div class="head">'
@@ -261,7 +268,7 @@ function renderSystem() {
       + '<div class="foot">'
       + '<div class="left-meta">关联:<span class="v">' + l.linked_student + '</span></div>'
       + '<div class="actions">'
-      + (l.status === 'draft' ? '<a class="del" href="#" onclick="delLog(\'' + l.id + '\'); return false;">删除</a>' : '<a class="view" href="#" onclick="return false;">查看详情</a>')
+      + (l.status === 'draft' ? '<a class="del" href="#" onclick="delLog(\'' + l.log_id + '\'); return false;">删除</a>' : '<a class="view" href="#" onclick="showLogDetail(\'' + l.log_id + '\'); return false;">查看详情</a>')
       + '<a class="edit" href="' + editHref + '">' + editLabel + '</a>'
       + '</div></div></div>';
   });
@@ -273,6 +280,65 @@ function delLog(id) {
     desc: '草稿删除后无法恢复,此操作将记入审计日志。',
     danger: true,
     onConfirm: () => { toast('已删除 ' + id); }
+  });
+}
+function showLogDetail(id) {
+  var log = DATA.systemLogs.find(function(x) { return x.log_id === id; });
+  if (!log) return;
+  var m = document.createElement('div');
+  m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99;display:flex;align-items:flex-end;justify-content:center;';
+  m.innerHTML = '<div style="background:#fff;width:375px;max-width:100%;border-radius:16px 16px 0 0;padding:16px 20px 24px;max-height:80%;overflow-y:auto;">'
+    + '<div style="width:36px;height:4px;background:#E5E7EB;border-radius:2px;margin:0 auto 14px;"></div>'
+    + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+    + '<span style="font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600;background:#EFF6FF;color:#1E5AE6;">' + log.category_name + '</span>'
+    + '<span style="font-size:11px;color:#9CA3AF;">' + log.time + '</span>'
+    + '</div>'
+    + '<h3 style="font-size:18px;font-weight:700;color:#111827;margin-bottom:8px;">' + log.title + '</h3>'
+    + '<div style="font-size:11px;color:#888;margin-bottom:12px;">关联:<span style="color:#111827;font-weight:600;">' + log.linked_student + '</span> · ' + (log.status === 'submitted' ? '已提交' : '草稿') + '</div>'
+    + '<div style="font-size:14px;color:#374151;line-height:1.7;padding:14px;background:#F9FAFB;border-radius:10px;">' + log.body + '</div>'
+    + '<div style="display:flex;gap:10px;margin-top:18px;">'
+    + '<button data-close style="flex:1;height:42px;background:#F2F3F5;color:#444;border:0;border-radius:21px;font-size:14px;font-weight:600;cursor:pointer;">关闭</button>'
+    + '<a href="counselor_log_edit.html?lid=' + encodeURIComponent(log.log_id) + '" style="flex:1;height:42px;background:#1E5AE6;color:#fff;border-radius:21px;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;text-decoration:none;">编辑此日志</a>'
+    + '</div></div>';
+  document.body.appendChild(m);
+  m.querySelector('[data-close]').onclick = function() { m.remove(); };
+  m.addEventListener('click', function(e) { if (e.target === m) m.remove(); });
+}
+
+/* 横向滚动 carousel 增强(桌面端鼠标支持) — 复用 log_edit.html */
+function initHScroll(wrapper) {
+  if (!wrapper) return;
+  var scroll = wrapper.querySelector(':scope > .hscroll-area') || wrapper;
+  // chip-row 直接就是 flex,不需要内部 area
+  var navBtns = wrapper.querySelectorAll('.nav-btn');
+  var leftBtn = navBtns[0], rightBtn = navBtns[1];
+  // 滚轮 hijack
+  scroll.addEventListener('wheel', function(e) {
+    if (e.deltaY === 0) return;
+    e.preventDefault();
+    scroll.scrollLeft += e.deltaY;
+  }, { passive: false });
+  // 拖拽
+  var isDown = false, startX = 0, startScroll = 0;
+  scroll.addEventListener('mousedown', function(e) {
+    isDown = true; startX = e.pageX; startScroll = scroll.scrollLeft;
+    scroll.style.cursor = 'grabbing';
+  });
+  ['mouseleave', 'mouseup'].forEach(function(evt) {
+    scroll.addEventListener(evt, function() {
+      isDown = false; scroll.style.cursor = '';
+    });
+  });
+  scroll.addEventListener('mousemove', function(e) {
+    if (!isDown) return;
+    e.preventDefault();
+    scroll.scrollLeft = startScroll - (e.pageX - startX) * 1.5;
+  });
+  // 键盘左右箭头
+  scroll.setAttribute('tabindex', '0');
+  scroll.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft')  { e.preventDefault(); scroll.scrollBy({ left: -120, behavior: 'smooth' }); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); scroll.scrollBy({ left:  120, behavior: 'smooth' }); }
   });
 }
 function showConfirm(o) {

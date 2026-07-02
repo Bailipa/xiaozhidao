@@ -265,12 +265,20 @@ function renderModules() {
       ' ' + pad(dt.getHours()) + ':' + pad(dt.getMinutes());
 
     var visEl = card.querySelector('.visibility .v');
+    var togBtn = card.querySelector('.toggle-btn');
+    var togIcon = togBtn.querySelector('iconify-icon');
     if (m.visibility === 'shared') {
       visEl.className = 'v shared';
       visEl.textContent = '已授权书记查看';
+      togIcon.setAttribute('icon', 'solar:lock-keyhole-unlock-bold');
+      togBtn.style.background = '#ECFDF5';
+      togBtn.style.color = '#07C160';
     } else {
       visEl.className = 'v private';
       visEl.textContent = '仅自己';
+      togIcon.setAttribute('icon', 'solar:lock-keyhole-bold');
+      togBtn.style.background = '#F5F5F5';
+      togBtn.style.color = '#444';
     }
 
     card.querySelector('.enter').href =
@@ -296,6 +304,17 @@ function toggleVisibility(event) {
   var visEl = card.querySelector('.visibility .v');
   visEl.className = 'v ' + next;
   visEl.textContent = nextLabel;
+  var togBtn = card.querySelector('.toggle-btn');
+  var togIcon = togBtn.querySelector('iconify-icon');
+  if (next === 'shared') {
+    togIcon.setAttribute('icon', 'solar:lock-keyhole-unlock-bold');
+    togBtn.style.background = '#ECFDF5';
+    togBtn.style.color = '#07C160';
+  } else {
+    togIcon.setAttribute('icon', 'solar:lock-keyhole-bold');
+    togBtn.style.background = '#F5F5F5';
+    togBtn.style.color = '#444';
+  }
   alert('已更新可见性(演示)');
 }
 

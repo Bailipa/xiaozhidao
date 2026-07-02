@@ -99,8 +99,8 @@
 </div>
 <div class="content pt-2" id="studentList">
 <form id="xzdForm" onsubmit="event.preventDefault();" novalidate autocomplete="on">
-<!-- 学生列表项 -->
-<a class="student-item block" href="counselor_student_detail.html">
+<!-- 学生列表项 (按 chip 选项覆盖 4 班级 + 4 风险 + 4 宿舍) -->
+<a class="student-item block" href="counselor_student_detail.html?no=2024001" data-no="2024001" data-class="计科1班" data-risk="红档风险" data-dorm="3号楼" data-search="张晓明 2024001">
 <div class="flex items-center gap-3">
 <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
 <img alt="Student" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=张&background=1E5AE6&color=fff&size=128&bold=true&font-size=0.5" title="Male student avatar"/>
@@ -110,12 +110,12 @@
 <span class="font-bold text-gray-900">张晓明</span>
 <span class="px-2 py-0.5 bg-red-50 text-red-600 text-[10px] rounded font-bold">红档风险</span>
 </div>
-<div class="text-[11px] text-gray-500 mt-1">计算机系 2024级(3)班 · 2024001</div>
+<div class="text-[11px] text-gray-500 mt-1">计算机系 计科1班 · 2024001</div>
 </div>
 <iconify-icon class="text-gray-300" icon="solar:alt-arrow-right-linear"></iconify-icon>
 </div>
 </a>
-<a class="student-item block" href="counselor_student_detail.html">
+<a class="student-item block" href="counselor_student_detail.html?no=2024002" data-no="2024002" data-class="计科2班" data-risk="无风险" data-dorm="1号楼" data-search="李华 2024002">
 <div class="flex items-center gap-3">
 <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
 <img alt="Student" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=李&background=1E5AE6&color=fff&size=128&bold=true&font-size=0.5" title="Female student avatar"/>
@@ -125,12 +125,12 @@
 <span class="font-bold text-gray-900">李华</span>
 <span class="px-2 py-0.5 bg-gray-100 text-gray-500 text-[10px] rounded font-bold">无风险</span>
 </div>
-<div class="text-[11px] text-gray-500 mt-1">计算机系 2024级(3)班 · 2024002</div>
+<div class="text-[11px] text-gray-500 mt-1">计算机系 计科2班 · 2024002</div>
 </div>
 <iconify-icon class="text-gray-300" icon="solar:alt-arrow-right-linear"></iconify-icon>
 </div>
 </a>
-<a class="student-item block" href="counselor_student_detail.html">
+<a class="student-item block" href="counselor_student_detail.html?no=2024005" data-no="2024005" data-class="软工1班" data-risk="黄档风险" data-dorm="2号楼" data-search="赵子涵 2024005">
 <div class="flex items-center gap-3">
 <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
 <img alt="Student" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=赵&background=1E5AE6&color=fff&size=128&bold=true&font-size=0.5" title="Student avatar"/>
@@ -140,12 +140,12 @@
 <span class="font-bold text-gray-900">赵子涵</span>
 <span class="px-2 py-0.5 bg-yellow-50 text-yellow-600 text-[10px] rounded font-bold">黄档风险</span>
 </div>
-<div class="text-[11px] text-gray-500 mt-1">计算机系 2024级(3)班 · 2024005</div>
+<div class="text-[11px] text-gray-500 mt-1">计算机系 软工1班 · 2024005</div>
 </div>
 <iconify-icon class="text-gray-300" icon="solar:alt-arrow-right-linear"></iconify-icon>
 </div>
 </a>
-<a class="student-item block" href="counselor_student_detail.html">
+<a class="student-item block" href="counselor_student_detail.html?no=2024009" data-no="2024009" data-class="大数据1班" data-risk="蓝档风险" data-dorm="5号楼" data-search="孙宇轩 2024009">
 <div class="flex items-center gap-3">
 <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
 <img alt="Student" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=孙&background=1E5AE6&color=fff&size=128&bold=true&font-size=0.5" title="Student avatar"/>
@@ -155,7 +155,67 @@
 <span class="font-bold text-gray-900">孙宇轩</span>
 <span class="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] rounded font-bold">蓝档风险</span>
 </div>
-<div class="text-[11px] text-gray-500 mt-1">计算机系 2024级(3)班 · 2024009</div>
+<div class="text-[11px] text-gray-500 mt-1">计算机系 大数据1班 · 2024009</div>
+</div>
+<iconify-icon class="text-gray-300" icon="solar:alt-arrow-right-linear"></iconify-icon>
+</div>
+</a>
+<a class="student-item block" href="counselor_student_detail.html?no=2024003" data-no="2024003" data-class="计科1班" data-risk="黄档风险" data-dorm="3号楼" data-search="王五 2024003">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+<img alt="Student" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=王&background=1E5AE6&color=fff&size=128&bold=true&font-size=0.5" title="Student avatar"/>
+</div>
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<span class="font-bold text-gray-900">王五</span>
+<span class="px-2 py-0.5 bg-yellow-50 text-yellow-600 text-[10px] rounded font-bold">黄档风险</span>
+</div>
+<div class="text-[11px] text-gray-500 mt-1">计算机系 计科1班 · 2024003</div>
+</div>
+<iconify-icon class="text-gray-300" icon="solar:alt-arrow-right-linear"></iconify-icon>
+</div>
+</a>
+<a class="student-item block" href="counselor_student_detail.html?no=2024004" data-no="2024004" data-class="计科2班" data-risk="黄档风险" data-dorm="2号楼" data-search="赵六 2024004">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+<img alt="Student" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=赵&background=1E5AE6&color=fff&size=128&bold=true&font-size=0.5" title="Student avatar"/>
+</div>
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<span class="font-bold text-gray-900">赵六</span>
+<span class="px-2 py-0.5 bg-yellow-50 text-yellow-600 text-[10px] rounded font-bold">黄档风险</span>
+</div>
+<div class="text-[11px] text-gray-500 mt-1">计算机系 计科2班 · 2024004</div>
+</div>
+<iconify-icon class="text-gray-300" icon="solar:alt-arrow-right-linear"></iconify-icon>
+</div>
+</a>
+<a class="student-item block" href="counselor_student_detail.html?no=2024006" data-no="2024006" data-class="软工1班" data-risk="红档风险" data-dorm="2号楼" data-search="孙八 2024006">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+<img alt="Student" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=孙&background=1E5AE6&color=fff&size=128&bold=true&font-size=0.5" title="Student avatar"/>
+</div>
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<span class="font-bold text-gray-900">孙八</span>
+<span class="px-2 py-0.5 bg-red-50 text-red-600 text-[10px] rounded font-bold">红档风险</span>
+</div>
+<div class="text-[11px] text-gray-500 mt-1">计算机系 软工1班 · 2024006</div>
+</div>
+<iconify-icon class="text-gray-300" icon="solar:alt-arrow-right-linear"></iconify-icon>
+</div>
+</a>
+<a class="student-item block" href="counselor_student_detail.html?no=2024007" data-no="2024007" data-class="大数据1班" data-risk="无风险" data-dorm="5号楼" data-search="周九 2024007">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+<img alt="Student" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=周&background=1E5AE6&color=fff&size=128&bold=true&font-size=0.5" title="Student avatar"/>
+</div>
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<span class="font-bold text-gray-900">周九</span>
+<span class="px-2 py-0.5 bg-gray-100 text-gray-500 text-[10px] rounded font-bold">无风险</span>
+</div>
+<div class="text-[11px] text-gray-500 mt-1">计算机系 大数据1班 · 2024007</div>
 </div>
 <iconify-icon class="text-gray-300" icon="solar:alt-arrow-right-linear"></iconify-icon>
 </div>
@@ -164,9 +224,8 @@
 <div class="w-32 h-32 bg-gray-50 rounded-full mx-auto flex items-center justify-center mb-4 border-2 border-dashed border-gray-200">
 <iconify-icon class="text-5xl text-gray-200" icon="solar:user-rounded-bold-duotone"></iconify-icon>
 </div>
-<h3 class="text-base font-bold text-gray-900">暂无学生数据</h3>
-<p class="text-xs text-gray-400 mt-2">请先导入学生花名册或联系系统管理员</p>
-<a class="block mt-6 w-full py-3 text-white rounded-xl font-bold shadow-lg text-center" style="background:#1E5AE6;box-shadow:0 4px 12px rgba(30,90,230,0.3);" href="counselor_import_students.html">导入学生花名册</a>
+<h3 class="text-base font-bold text-gray-900">未找到匹配的学生</h3>
+<p class="text-xs text-gray-400 mt-2">请调整筛选条件或搜索关键字</p>
 </div>
 </div>
 <div class="tab-bar relative">
@@ -214,6 +273,7 @@ const FILTER_DATA = {
   risk:  ['全部风险','红档风险','黄档风险','蓝档风险','无风险'],
   dorm:  ['全部宿舍','1号楼','2号楼','3号楼','5号楼']
 };
+const FILTER_KEY = { class: 'class', risk: 'risk', dorm: 'dorm' };
 let curType = null, curSelected = null, curChip = null;
 function openFilter(type, chip, title) {
   curType = type; curSelected = '全部' + (type==='class'?'班级':type==='risk'?'风险':'宿舍'); curChip = chip;
@@ -233,11 +293,35 @@ function closeFilter() {
   document.getElementById('fsm').classList.remove('show');
   document.getElementById('fs').classList.remove('show');
 }
+function getChipText(type) {
+  var chip = document.querySelector('.filter-chip[data-type="' + type + '"]');
+  return chip ? chip.firstChild.textContent.trim().replace(/\s+$/, '') : null;
+}
+function applyAllFilters() {
+  var c = getChipText('class');
+  var r = getChipText('risk');
+  var d = getChipText('dorm');
+  var q = (document.getElementById('studentSearch').value || '').trim().toLowerCase();
+  var items = document.querySelectorAll('.student-item');
+  var visible = 0;
+  items.forEach(function(item) {
+    var show = true;
+    if (c && c !== '全部班级' && item.dataset.class !== c) show = false;
+    if (r && r !== '全部风险' && item.dataset.risk !== r) show = false;
+    if (d && d !== '全部宿舍' && item.dataset.dorm !== d) show = false;
+    if (q && (item.dataset.search || '').toLowerCase().indexOf(q) < 0) show = false;
+    item.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  var empty = document.getElementById('emptyState');
+  if (empty) empty.style.display = visible === 0 ? '' : 'none';
+}
 function confirmFilter() {
   if (curChip) {
     curChip.firstChild.textContent = curSelected + ' ';
   }
   closeFilter();
+  applyAllFilters();
   showToast('已应用筛选：' + curSelected);
 }
 function showToast(msg) {
@@ -247,6 +331,7 @@ function showToast(msg) {
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 1500);
 }
+document.getElementById('studentSearch').addEventListener('input', applyAllFilters);
 </script></form>
 
 

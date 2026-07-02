@@ -160,10 +160,10 @@
 <label for="logDate">日志日期</label>
 <input type="date" id="logDate" name="logDate" value="2026-06-30"/>
 </div>
-<div class="input-row" onclick="openStudentPicker('single', [], onLogStudentPicked)">
-<label for="logPlace">关联学生</label>
+<div class="input-row" onclick="openStudentPicker('multi', [], onLogStudentPicked)">
+<label for="logStudent">关联学生</label>
 <div class="picker-trigger">
-  <span class="value placeholder" id="logStudentDisplay">点击选择</span>
+  <span class="value placeholder" id="logStudentDisplay">点击选择（多选，支持整班）</span>
   <iconify-icon class="text-gray-300" icon="solar:alt-arrow-right-linear"></iconify-icon>
 </div>
 </div>
@@ -175,16 +175,20 @@
 <div class="form-group p-0">
 <textarea id="logContent" name="logContent" class="w-full p-4 h-40 outline-none text-sm text-gray-800 placeholder-gray-400 rounded-2xl" placeholder="详细描述谈话内容、学生反馈及后续计划..."></textarea>
 </div>
-<div class="form-group flex items-center justify-between py-4">
+<div class="form-group">
+<div class="flex items-center justify-between py-3 border-b border-gray-100">
 <span class="text-sm text-gray-500">图片附件</span>
-<div class="w-16 h-16 bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl flex items-center justify-center text-gray-300">
+<label class="w-16 h-16 bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl flex items-center justify-center text-gray-300 cursor-pointer hover:bg-blue-50 hover:border-blue-300 hover:text-blue-500 transition-colors">
+<input type="file" accept="image/*" multiple class="hidden" onchange="onFilesPicked(this)"/>
 <iconify-icon class="text-2xl" icon="solar:camera-bold"></iconify-icon>
+</label>
 </div>
+<div id="attachPreview" class="flex gap-2 py-3 flex-wrap"></div>
 </div>
 </div>
 <div class="action-bar">
 <button class="w-1/3 py-3 text-gray-500 font-bold" onclick="saveDraft()">保存草稿</button>
-<button class="w-2/3 py-3 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-100" onclick="window.location.href='counselor_logs.html'">立即提交</button>
+<button class="w-2/3 py-3 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-100" id="submitBtn" onclick="submitLog()">立即提交</button>
 </div>
 </div>
 <!-- 学生选择器(底部弹起) -->
@@ -411,22 +415,30 @@
           closeStudentPicker();
         }
 
-        /* ====== 表单回调:写日志 ====== */
+        /* ====== 表单回调:写日志(多选模式) ====== */
         function onLogStudentPicked(selected) {
           const display = document.getElementById('logStudentDisplay');
           if (selected.length === 0) {
-            display.textContent = '点击选择';
+            display.textContent = '点击选择（多选，支持整班）';
             display.classList.add('placeholder');
             return;
           }
           display.classList.remove('placeholder');
-          const item = selected[0];
-          if (item.startsWith('__class:')) {
-            const cls = item.substring(8);
-            display.textContent = cls + ' (整班)';
+          const classSelections = selected.filter(s => s.startsWith('__class:')).map(s => s.substring(8));
+          const classStudents = new Set();
+          classSelections.forEach(cls => STUDENTS.filter(s => s.class === cls).forEach(s => classStudents.add(s.no)));
+          const explicitStudents = selected.filter(s => !s.startsWith('__class:'));
+          explicitStudents.forEach(no => classStudents.add(no));
+          if (classSelections.length === 1 && explicitStudents.length === 0) {
+            const cls = classSelections[0];
+            display.textContent = cls + ' (整班 ' + STUDENTS.filter(s => s.class === cls).length + ' 人)';
+          } else if (classSelections.length > 1) {
+            display.textContent = classSelections.join(' + ') + ' 共 ' + classStudents.size + ' 人';
+          } else if (explicitStudents.length === 1) {
+            const s = STUDENTS.find(x => x.no === explicitStudents[0]);
+            display.textContent = s ? s.name : explicitStudents[0];
           } else {
-            const s = STUDENTS.find(x => x.no === item);
-            display.textContent = s ? s.name : item;
+            display.textContent = '自定义 (' + classStudents.size + ' 人)';
           }
         }
     </script>
@@ -442,6 +454,48 @@ function showToast(msg) {
 function saveDraft() {
   showToast('保存草稿成功');
 }
+function submitLog() {
+  showToast('日志已提交（演示）');
+  setTimeout(function() { window.location.href = 'counselor_logs.html'; }, 600);
+}
+function onFilesPicked(input) {
+  var preview = document.getElementById('attachPreview');
+  preview.innerHTML = '';
+  var files = Array.from(input.files || []);
+  files.forEach(function(f) {
+    var url = URL.createObjectURL(f);
+    var img = document.createElement('img');
+    img.src = url;
+    img.style.cssText = 'width:56px;height:56px;object-fit:cover;border-radius:8px;border:1px solid #E5E7EB;';
+    preview.appendChild(img);
+  });
+  if (files.length > 0) showToast('已添加 ' + files.length + ' 张图片（演示，未上传）');
+}
+
+// ?lid= 回填(从 localStorage 读取,需要 counselor_logs.html 先写入)
+(function() {
+  var lid = new URLSearchParams(window.location.search).get('lid');
+  if (!lid) return;
+  var logs = [];
+  try { logs = JSON.parse(localStorage.getItem('xzd_logs') || '[]'); } catch(e) {}
+  var log = logs.find(function(x) { return x.log_id === lid; });
+  if (!log) { showToast('未找到日志 ' + lid + '（请先访问工作日志页）'); return; }
+  document.getElementById('logDate').value = (log.time || '').split(' ')[0];
+  document.getElementById('logPlace').value = log.place || '';
+  document.getElementById('logContent').value = log.body || '';
+  var display = document.getElementById('logStudentDisplay');
+  display.textContent = log.linked_student || '点击选择（多选，支持整班）';
+  display.classList.remove('placeholder');
+  var submitBtn = document.getElementById('submitBtn');
+  if (submitBtn) submitBtn.textContent = '更新日志';
+  var catMap = { 'c1':'谈心谈话', 'c2':'进宿舍', 'c3':'进课堂', 'c4':'组织班会', 'c5':'班干会议' };
+  document.querySelectorAll('.template-card').forEach(function(c) {
+    var lbl = c.querySelector('span') ? c.querySelector('span').textContent : '';
+    if (lbl === catMap[log.category]) c.classList.add('active');
+    else c.classList.remove('active');
+  });
+  showToast('已加载日志 ' + lid);
+})();
 </script></form>
 
 

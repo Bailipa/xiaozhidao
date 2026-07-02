@@ -212,9 +212,35 @@ document.querySelectorAll('.filter-tabs span[data-filter]').forEach(span => {
     document.querySelectorAll('.filter-tabs span[data-filter]').forEach(s => s.classList.remove('on'));
     span.classList.add('on');
     const label = span.firstChild ? span.firstChild.textContent : span.textContent.replace(/\d+/g, '').trim();
+    filterLogRows(span.dataset.filter);
     showToast('已筛选：' + label);
   });
 });
+function filterLogRows(key) {
+  document.querySelectorAll('.log-card').forEach(card => {
+    var rows = card.querySelectorAll('.log-row');
+    var visibleRows = 0;
+    rows.forEach(row => {
+      var show = key === 'all';
+      if (!show) {
+        var chips = row.querySelectorAll('.ch');
+        for (var i = 0; i < chips.length; i++) {
+          var cls = chips[i].className;
+          if (key === 'delivered'   && cls.indexOf('delivered') >= 0) { show = true; break; }
+          if (key === 'read'        && cls.indexOf('read') >= 0)      { show = true; break; }
+          if (key === 'undelivered' && cls.indexOf('pending') >= 0)   { show = true; break; }
+          if (key === 'failed'      && cls.indexOf('failed') >= 0)    { show = true; break; }
+        }
+      }
+      row.style.display = show ? '' : 'none';
+      if (show) visibleRows++;
+    });
+    var hide = (visibleRows === 0 && key !== 'all');
+    card.style.display = hide ? 'none' : '';
+    var h = card.querySelector('.h');
+    if (h) h.style.display = hide ? 'none' : '';
+  });
+}
 function showToast(msg) {
   const t = document.createElement('div');
   t.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.78);color:#fff;padding:10px 20px;border-radius:20px;font-size:14px;z-index:9999;';

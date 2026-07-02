@@ -54,9 +54,11 @@
 <div class="filter-tab" data-filter="red" style="cursor:pointer;">红档</div>
 <div class="filter-tab" data-filter="yellow" style="cursor:pointer;">黄档</div>
 <div class="filter-tab" data-filter="blue" style="cursor:pointer;">蓝档</div>
-<div class="filter-tab" data-filter="关注" style="cursor:pointer;">已关注</div>
+<div class="filter-tab" data-filter="未跟进" style="cursor:pointer;">未跟进</div>
+<div class="filter-tab" data-filter="已关注" style="cursor:pointer;">已关注</div>
 <div class="filter-tab" data-filter="已约谈" style="cursor:pointer;">已约谈</div>
 <div class="filter-tab" data-filter="已结案" style="cursor:pointer;">已结案</div>
+<div class="filter-tab" data-filter="未结案" style="cursor:pointer;">未结案</div>
 </div>
 <!-- 晚归专项入口 -->
 <a class="mx-4 mt-3 mb-1 flex items-center gap-3 p-3 bg-gradient-to-r from-blue-500 to-blue-500 text-white rounded-xl shadow-sm" href="counselor_late_returns.html">
@@ -192,9 +194,11 @@ const EMPTY_MSG = {
   'red':      { icon: 'solar:shield-cross-bold-duotone',    iconBg: 'bg-red-50',    iconColor: 'text-red-500',    title: '暂无红档异常',         sub: '目前没有需要重点关注的学生' },
   'yellow':   { icon: 'solar:shield-warning-bold-duotone',  iconBg: 'bg-yellow-50', iconColor: 'text-yellow-500', title: '暂无黄档异常',         sub: '目前没有需要一般关注的学生' },
   'blue':     { icon: 'solar:info-circle-bold-duotone',     iconBg: 'bg-blue-50',   iconColor: 'text-blue-500',   title: '暂无蓝档提醒',         sub: '目前没有需要普通提醒的学生' },
-  '关注':     { icon: 'solar:eye-bold-duotone',             iconBg: 'bg-gray-100',  iconColor: 'text-gray-500',   title: '暂无已关注项',         sub: '对新异常点击"关注"后会显示在这里' },
+  '未跟进':   { icon: 'solar:bell-bing-bold-duotone',       iconBg: 'bg-red-50',    iconColor: 'text-red-500',    title: '暂无未跟进异常',       sub: '所有异常均已开始跟进,继续保持' },
+  '已关注':   { icon: 'solar:eye-bold-duotone',             iconBg: 'bg-gray-100',  iconColor: 'text-gray-500',   title: '暂无已关注项',         sub: '对新异常点击"关注"后会显示在这里' },
   '已约谈':   { icon: 'solar:chat-round-dots-bold-duotone', iconBg: 'bg-blue-50',   iconColor: 'text-blue-500',   title: '暂无已约谈记录',       sub: '完成首次约谈后会显示在这里' },
-  '已结案':   { icon: 'solar:check-circle-bold-duotone',    iconBg: 'bg-gray-100',  iconColor: 'text-gray-500',   title: '暂无已结案异常',       sub: '结案归档后会显示在这里,可在历史查看' }
+  '已结案':   { icon: 'solar:check-circle-bold-duotone',    iconBg: 'bg-gray-100',  iconColor: 'text-gray-500',   title: '暂无已结案异常',       sub: '结案归档后会显示在这里,可在历史查看' },
+  '未结案':   { icon: 'solar:clock-circle-bold-duotone',    iconBg: 'bg-orange-50', iconColor: 'text-orange-500', title: '暂无未结案异常',       sub: '所有异常均已结案,继续保持' }
 };
 
 function renderEmpty(key) {
@@ -216,7 +220,10 @@ document.querySelectorAll('.filter-tab').forEach(function(tab) {
     var key = tab.dataset.filter;
     var visible = 0;
     document.querySelectorAll('.anomaly-card').forEach(function(card) {
-      var show = (key === 'all' || card.dataset.risk === key || card.dataset.status === key);
+      var show = false;
+      if (key === 'all') show = true;
+      else if (key === '未结案') show = (card.dataset.status !== '已结案');
+      else show = (card.dataset.risk === key || card.dataset.status === key);
       card.style.display = show ? '' : 'none';
       if (show) visible++;
     });

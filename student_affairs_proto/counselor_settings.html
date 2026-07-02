@@ -178,5 +178,81 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 </div>
 <div class="home-indicator"><div class="bar"></div></div>
 </div>
+<script>
+// 通知 4 个 toggle 切换
+document.querySelectorAll('.toggle').forEach(function(t) {
+  t.style.cursor = 'pointer';
+  t.setAttribute('role', 'switch');
+  t.addEventListener('click', function() {
+    t.classList.toggle('off');
+    var on = !t.classList.contains('off');
+    var card = t.closest('.card');
+    var label = card && t.parentElement && t.parentElement.querySelector('.k') ? t.parentElement.querySelector('.k').textContent : '设置';
+    showToast(label + ' 已' + (on ? '开启' : '关闭'));
+  });
+});
+
+// 主题 / 字号 seg (每组互斥单选)
+document.querySelectorAll('.seg').forEach(function(seg) {
+  seg.querySelectorAll('span').forEach(function(s) {
+    s.style.cursor = 'pointer';
+    s.addEventListener('click', function() {
+      seg.querySelectorAll('span').forEach(function(x) { x.classList.remove('on'); });
+      s.classList.add('on');
+      showToast('已选择:' + s.textContent);
+    });
+  });
+});
+
+// 4 个 href="#" 死链(免打扰/清除缓存/导出/检查更新) → 演示 toast
+document.querySelectorAll('a.cell[href="#"]').forEach(function(a) {
+  a.addEventListener('click', function(e) {
+    e.preventDefault();
+    var label = a.querySelector('.k') ? a.querySelector('.k').textContent.trim() : '操作';
+    if (label.indexOf('免打扰') >= 0) {
+      showTimeSheet(label);
+    } else {
+      showToast('演示:' + label + '（原型阶段未启用）');
+    }
+  });
+});
+
+function showTimeSheet(label) {
+  var m = document.createElement('div');
+  m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99;display:flex;align-items:flex-end;justify-content:center;';
+  m.innerHTML = '<div style="background:#fff;width:375px;max-width:100%;border-radius:16px 16px 0 0;padding:20px;">'
+    + '<div style="width:36px;height:4px;background:#E5E7EB;border-radius:2px;margin:0 auto 14px;"></div>'
+    + '<h3 style="font-size:16px;font-weight:700;color:#191919;margin-bottom:14px;">' + label + '</h3>'
+    + '<div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;">'
+    + '<span style="font-size:13px;color:#888;width:50px;">开始</span>'
+    + '<input type="time" id="qtStart" value="22:00" style="flex:1;padding:10px;background:#F5F5F5;border:0;border-radius:8px;font-size:14px;outline:none;"/>'
+    + '</div>'
+    + '<div style="display:flex;gap:10px;align-items:center;margin-bottom:18px;">'
+    + '<span style="font-size:13px;color:#888;width:50px;">结束</span>'
+    + '<input type="time" id="qtEnd" value="07:00" style="flex:1;padding:10px;background:#F5F5F5;border:0;border-radius:8px;font-size:14px;outline:none;"/>'
+    + '</div>'
+    + '<div style="display:flex;gap:10px;">'
+    + '<button data-cancel style="flex:1;height:42px;background:#F2F3F5;color:#444;border:0;border-radius:21px;font-size:14px;font-weight:600;cursor:pointer;">取消</button>'
+    + '<button data-ok style="flex:1;height:42px;background:#1E5AE6;color:#fff;border:0;border-radius:21px;font-size:14px;font-weight:600;cursor:pointer;">保存</button>'
+    + '</div></div>';
+  document.body.appendChild(m);
+  m.querySelector('[data-cancel]').onclick = function() { m.remove(); };
+  m.querySelector('[data-ok]').onclick = function() {
+    var s = document.getElementById('qtStart').value;
+    var e2 = document.getElementById('qtEnd').value;
+    m.remove();
+    showToast('已设置免打扰:' + s + ' - ' + e2);
+  };
+  m.addEventListener('click', function(ev) { if (ev.target === m) m.remove(); });
+}
+
+function showToast(msg) {
+  var t = document.createElement('div');
+  t.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.78);color:#fff;padding:10px 20px;border-radius:20px;font-size:14px;z-index:9999;';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function() { t.style.opacity = '0'; setTimeout(function() { t.remove(); }, 250); }, 1500);
+}
+</script>
 </body>
 </html>

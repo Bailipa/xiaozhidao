@@ -200,16 +200,90 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 <div class="home-indicator"><div class="bar"></div></div>
 </div>
 <script>
+// 3 条提醒的 mock 数据(原型演示)
+const REMINDER_DETAIL = {
+  'R001': {
+    title: '下午班会提醒',
+    type: '事务提醒 · 提前 30 分钟',
+    remindAt: '2026-06-30 14:30',
+    created: '王辅导员 · 状态:已送达',
+    content: '今天下午 3 点在 6 号楼 302 召开班会,讨论期末复习安排。请全体同学准时参加。',
+    wcSub: 32, wcDel: 30, wcFail: 2, wcRead: '18 / 30',
+    smsSend: 2, smsDel: 2, smsFail: 0,
+    logs: [
+      { ch:'wechat', name:'张三',  sub:'14:00:12',                  status:'read',      scls:'ok'   },
+      { ch:'wechat', name:'李四',  sub:'14:00:12',                  status:'read',      scls:'ok'   },
+      { ch:'wechat', name:'王五',  sub:'14:00:12',                  status:'delivered', scls:'ok'   },
+      { ch:'sms',    name:'赵六(139****5678)', sub:'14:00:25 · 微信失败兜底', status:'delivered', scls:'ok' },
+      { ch:'sms',    name:'钱七(138****9012)', sub:'14:00:25 · 微信失败兜底', status:'delivered', scls:'ok' }
+    ]
+  },
+  'R002': {
+    title: '离校信息统计填报',
+    type: '信息收集 · 截止今天 18:00',
+    remindAt: '2026-06-30 12:00',
+    created: '王辅导员 · 状态:未送达',
+    content: '请未填报暑期离校信息的同学于今日 18:00 前完成填写,系统将自动汇总至学院。',
+    wcSub: 12, wcDel: 0, wcFail: 12, wcRead: '0 / 0',
+    smsSend: 12, smsDel: 0, smsFail: 12,
+    logs: [
+      { ch:'wechat', name:'孙八',     sub:'12:00:05',                       status:'failed', scls:'fail', err:'用户未授权订阅消息' },
+      { ch:'wechat', name:'周九',     sub:'12:00:05',                       status:'failed', scls:'fail', err:'用户未授权订阅消息' },
+      { ch:'wechat', name:'吴十',     sub:'12:00:05',                       status:'failed', scls:'fail', err:'用户未授权订阅消息' },
+      { ch:'sms',    name:'郑十一(136****0011)', sub:'12:00:18 · 微信失败兜底', status:'failed', scls:'fail', err:'号码空号' },
+      { ch:'sms',    name:'冯十二(135****0022)', sub:'12:00:18 · 微信失败兜底', status:'failed', scls:'fail', err:'号码空号' }
+    ]
+  },
+  'R003': {
+    title: '奖学金申报截止提醒',
+    type: '事务提醒 · 提前 3 天',
+    remindAt: '2026-06-25 09:00',
+    created: '王辅导员 · 状态:已送达',
+    content: '2025-2026 学年奖学金申报截止时间为 6 月 28 日 17:00,请符合条件的同学及时登录系统完成申报。',
+    wcSub: 320, wcDel: 318, wcFail: 2, wcRead: '305 / 318',
+    smsSend: 2, smsDel: 2, smsFail: 0,
+    logs: [
+      { ch:'wechat', name:'陈十三',           sub:'09:00:12',                  status:'read',      scls:'ok'   },
+      { ch:'wechat', name:'褚十四',           sub:'09:00:12',                  status:'read',      scls:'ok'   },
+      { ch:'wechat', name:'卫十五',           sub:'09:00:12',                  status:'read',      scls:'ok'   },
+      { ch:'sms',    name:'校外学生A(159****0001)', sub:'09:00:25 · 微信失败兜底', status:'delivered', scls:'ok' },
+      { ch:'sms',    name:'校外学生B(158****0002)', sub:'09:00:25 · 微信失败兜底', status:'delivered', scls:'ok' }
+    ]
+  }
+};
+function bindReminder(id) {
+  var d = REMINDER_DETAIL[id] || REMINDER_DETAIL['R001'];
+  document.title = d.title + ' - 学工助手';
+  document.querySelector('.reminder-card .type').textContent = d.type;
+  document.querySelector('.reminder-card .title').textContent = d.title;
+  document.querySelector('.reminder-card .meta').textContent = '触发时间:' + d.remindAt + ' · 创建:' + d.created;
+  document.querySelector('.reminder-card .content').textContent = d.content;
+  var rows = document.querySelectorAll('.deliver-card .stat-row .v');
+  rows[0].textContent = d.wcSub; rows[1].textContent = d.wcDel; rows[1].className = 'v success'; rows[2].textContent = d.wcFail; rows[2].className = 'v danger'; rows[3].textContent = d.wcRead;
+  rows[4].textContent = d.smsSend; rows[5].textContent = d.smsDel; rows[5].className = 'v success'; rows[6].textContent = d.smsFail; rows[6].className = 'v ' + (d.smsFail > 0 ? 'danger' : 'success');
+  var logCard = document.querySelector('.log-card');
+  logCard.innerHTML = d.logs.map(function(l) {
+    return '<div class="log-row">'
+      + '<span class="ch ' + l.ch + '">' + (l.ch === 'wechat' ? '微信' : '短信') + '</span>'
+      + '<div class="info"><div class="name">' + l.name + '</div><div class="sub">' + l.sub + (l.err ? ' · ' + l.err : '') + '</div></div>'
+      + '<span class="status ' + l.scls + '">' + ({'read':'已读','delivered':'已送达','failed':'失败'})[l.status] + '</span>'
+      + '</div>';
+  }).join('');
+  document.querySelector('.section-h:last-of-type').textContent = '发送日志 (近 ' + d.logs.length + ' 条)';
+}
+
 function resendReminder() {
   var t = document.getElementById('toast');
   document.getElementById('toastText').textContent = '已重新发送';
   t.classList.add('show');
   setTimeout(function(){ t.classList.remove('show'); }, 1800);
 }
-// 如果 URL 带 ?resent=true 自动提示
+// 根据 ?id= 切换数据
 (function(){
-  var p = new URLSearchParams(window.location.search);
-  if (p.get('resent') === 'true') {
+  var id = new URLSearchParams(window.location.search).get('id') || 'R001';
+  bindReminder(id);
+  // 如果 URL 带 ?resent=true 自动提示
+  if (new URLSearchParams(window.location.search).get('resent') === 'true') {
     setTimeout(resendReminder, 300);
   }
 })();

@@ -84,14 +84,14 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 <div class="content pb-10">
 <div class="card flex items-center gap-4">
 <div class="w-16 h-16 rounded-full overflow-hidden border-2 border-blue-50 flex-shrink-0">
-<img alt="Student" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=张&background=1E5AE6&color=fff&size=128&bold=true&font-size=0.5"/>
+<img alt="Student" class="w-full h-full object-cover" id="stdAvatar" src="https://ui-avatars.com/api/?name=张&background=1E5AE6&color=fff&size=128&bold=true&font-size=0.5"/>
 </div>
 <div class="flex-1">
 <div class="flex items-center gap-2">
-<span class="text-lg font-bold text-gray-900">张晓明</span>
-<span class="risk-tag high">红档风险</span>
+<span class="text-lg font-bold text-gray-900" id="stdName">张晓明</span>
+<span class="risk-tag" id="stdRisk">红档风险</span>
 </div>
-<div class="text-xs text-gray-500 mt-0.5">计算机系 2024级(3)班 · 2024001 · 男</div>
+<div class="text-xs text-gray-500 mt-0.5" id="stdMeta">计算机系 2024级(3)班 · 2024001 · 男</div>
 </div>
 </div>
 
@@ -107,24 +107,24 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 <div class="card">
 <h3 class="text-xs font-bold text-gray-400 mb-3 uppercase">基础信息</h3>
 <div class="kv">
-<span class="k">学号</span><span class="v">2024001</span>
-<span class="k">姓名</span><span class="v">张晓明</span>
-<span class="k">性别</span><span class="v">男</span>
+<span class="k">学号</span><span class="v" id="kvNo">2024001</span>
+<span class="k">姓名</span><span class="v" id="kvName">张晓明</span>
+<span class="k">性别</span><span class="v" id="kvGender">男</span>
 <span class="k">政治面貌</span><span class="v">共青团员</span>
-<span class="k">班级</span><span class="v">计算机系 2024级(3)班</span>
-<span class="k">宿舍</span><span class="v">3 号楼 101 室</span>
+<span class="k">班级</span><span class="v" id="kvClass">计算机系 计科1班</span>
+<span class="k">宿舍</span><span class="v" id="kvDorm">3 号楼 101 室</span>
 </div>
 </div>
 
 <div class="card">
 <h3 class="text-xs font-bold text-gray-400 mb-3 uppercase">联系方式</h3>
 <div class="view-action">
-<span class="label">本人手机 <span class="phone-masked text-gray-400">138****8001</span></span>
-<a href="?audit=1">查看完整(记录审计) →</a>
+<span class="label">本人手机 <span class="phone-masked text-gray-400" id="phoneOwn">138****8001</span></span>
+<a href="#" onclick="showAudit(1); return false;">查看完整(记录审计) →</a>
 </div>
 <div class="view-action">
-<span class="label">紧急联系人 <span class="phone-masked text-gray-400">139****1234</span></span>
-<a href="?audit=2">查看完整(记录审计) →</a>
+<span class="label">紧急联系人 <span class="phone-masked text-gray-400" id="phoneEmg">139****1234</span></span>
+<a href="#" onclick="showAudit(2); return false;">查看完整(记录审计) →</a>
 </div>
 <div class="view-action">
 <span class="label">家庭住址</span>
@@ -305,6 +305,71 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 <div class="home-indicator"><div class="bar"></div></div>
 </div>
 <script>
+// 学生多 mock (按 ?no= 切换)
+const STU_DATA = {
+  '2024001': { name:'张晓明', surname:'张', gender:'男', risk:'high',  riskText:'红档风险', no:'2024001', klass:'计算机系 计科1班', dorm:'3 号楼 101 室', phoneOwn:'138 1234 8001', phoneEmg:'139 8765 1234', emgRel:'母亲 · 王秀英' },
+  '2024002': { name:'李华',   surname:'李', gender:'女', risk:'none', riskText:'无风险',   no:'2024002', klass:'计算机系 计科2班', dorm:'1 号楼 205 室', phoneOwn:'137 5555 2002', phoneEmg:'136 1111 2222', emgRel:'父亲 · 李建国' },
+  '2024005': { name:'赵子涵', surname:'赵', gender:'男', risk:'mid',  riskText:'黄档风险', no:'2024005', klass:'计算机系 软工1班', dorm:'2 号楼 308 室', phoneOwn:'135 6666 5005', phoneEmg:'134 3333 4444', emgRel:'母亲 · 赵美华' },
+  '2024009': { name:'孙宇轩', surname:'孙', gender:'男', risk:'low',  riskText:'蓝档风险', no:'2024009', klass:'计算机系 大数据1班', dorm:'5 号楼 402 室', phoneOwn:'158 7777 9009', phoneEmg:'157 9999 8888', emgRel:'父亲 · 孙志强' }
+};
+function maskPhone(p) { return p.replace(/(\d{3})\s?\d{4}\s?(\d{4})/, '$1****$2'); }
+function bindStudent(no) {
+  var s = STU_DATA[no] || STU_DATA['2024001'];
+  document.title = s.name + ' - 学工助手';
+  document.getElementById('stdAvatar').src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(s.surname) + '&background=1E5AE6&color=fff&size=128&bold=true&font-size=0.5';
+  document.getElementById('stdName').textContent = s.name;
+  var risk = document.getElementById('stdRisk');
+  risk.className = 'risk-tag ' + s.risk;
+  risk.textContent = s.riskText;
+  document.getElementById('stdMeta').textContent = s.klass + ' · ' + s.no + ' · ' + s.gender;
+  document.getElementById('kvNo').textContent = s.no;
+  document.getElementById('kvName').textContent = s.name;
+  document.getElementById('kvGender').textContent = s.gender;
+  document.getElementById('kvClass').textContent = s.klass;
+  document.getElementById('kvDorm').textContent = s.dorm;
+  document.getElementById('phoneOwn').textContent = maskPhone(s.phoneOwn);
+  document.getElementById('phoneEmg').textContent = maskPhone(s.phoneEmg);
+  window.__stu = s;
+}
+function showAudit(idx) {
+  var s = window.__stu || STU_DATA['2024001'];
+  var target = idx === 1 ? { label: '本人手机', val: s.phoneOwn } : { label: '紧急联系人', val: s.phoneEmg + ' (' + s.emgRel + ')' };
+  var m = document.createElement('div');
+  m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99;display:flex;align-items:center;justify-content:center;padding:0 32px;';
+  m.innerHTML = '<div style="background:#fff;border-radius:14px;width:100%;overflow:hidden;">'
+    + '<div style="padding:24px 20px;text-align:center;">'
+    + '<iconify-icon style="font-size:32px;color:#FA9D3B;" icon="solar:shield-keyhole-bold"></iconify-icon>'
+    + '<div style="font-size:16px;font-weight:700;color:#191919;margin-top:10px;">查看完整联系方式</div>'
+    + '<div style="font-size:12px;color:#888;margin-top:6px;line-height:1.6;">查看 ' + s.name + ' 的' + target.label + '将被记录在审计日志中,留存 365 天。</div>'
+    + '</div>'
+    + '<div style="display:flex;border-top:1px solid #F0F0F0;">'
+    + '<button data-cancel style="flex:1;height:48px;background:#fff;color:#888;font-size:15px;border:none;border-right:1px solid #F0F0F0;cursor:pointer;">取消</button>'
+    + '<button data-ok style="flex:1;height:48px;background:#fff;color:#1E5AE6;font-size:15px;font-weight:600;border:none;cursor:pointer;">确认查看</button>'
+    + '</div></div>';
+  document.body.appendChild(m);
+  m.querySelector('[data-cancel]').onclick = function() { m.remove(); };
+  m.querySelector('[data-ok]').onclick = function() {
+    m.remove();
+    var full = document.createElement('div');
+    full.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99;display:flex;align-items:center;justify-content:center;padding:0 32px;';
+    full.innerHTML = '<div style="background:#fff;border-radius:14px;width:100%;padding:24px 20px;">'
+      + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+      + '<iconify-icon style="font-size:18px;color:#07C160;" icon="solar:check-circle-bold"></iconify-icon>'
+      + '<span style="font-size:14px;font-weight:600;color:#191919;">' + target.label + '</span>'
+      + '</div>'
+      + '<div style="font-size:18px;font-weight:700;color:#1E5AE6;font-family:monospace;letter-spacing:1px;padding:14px;background:#F0F7FF;border-radius:10px;text-align:center;">' + target.val + '</div>'
+      + '<div style="font-size:11px;color:#888;margin-top:10px;text-align:center;">已记录: 王辅导员 · ' + new Date().toLocaleString('zh-CN') + '</div>'
+      + '<button data-close style="width:100%;height:42px;background:#1E5AE6;color:#fff;border:0;border-radius:21px;font-size:14px;font-weight:600;cursor:pointer;margin-top:14px;">关闭</button>'
+      + '</div>';
+    document.body.appendChild(full);
+    full.querySelector('[data-close]').onclick = function() { full.remove(); };
+  };
+}
+(function() {
+  var no = new URLSearchParams(window.location.search).get('no') || '2024001';
+  bindStudent(no);
+})();
+
 document.querySelectorAll('.tab-bar a').forEach(t => {
   t.addEventListener('click', e => {
     e.preventDefault();
