@@ -29,6 +29,17 @@
         .plus-tab { width: 52px; height: 52px; background: var(--color-primary); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #fff; position: absolute; top: -16px; left: 50%; transform: translateX(-50%); box-shadow: 0 4px 12px rgba(30, 90, 230, 0.4); border: 2px solid #fff; }
         .search-box { background: #fff; padding: 12px 16px; }
         .student-item { background: #fff; border-radius: 12px; margin: 8px 16px; padding: 12px; display: flex; align-items: center; gap: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
+        .quick-tools { background: #fff; padding: 0 16px 12px; display: flex; gap: 8px; }
+        .quick-tool {
+            display: flex; align-items: center; gap: 4px;
+            padding: 6px 12px; border-radius: 16px;
+            background: #F5F6F8; color: #444;
+            font-size: 12px; text-decoration: none;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+        .quick-tool iconify-icon { font-size: 14px; }
+        .quick-tool:hover { background: #EFF6FF; color: #1E5AE6; border-color: #1E5AE6; }
     
         .filter-sheet-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 60; display: none; }
         .filter-sheet-mask.show { display: block; }
@@ -75,6 +86,16 @@
 <div class="filter-chip px-3 py-1 bg-gray-50 text-gray-600 rounded-full text-xs font-medium border border-gray-100 flex items-center gap-1 bg-gray-50 text-gray-600" data-type="dorm" onclick="openFilter('dorm', this, '宿舍楼')">宿舍楼 <iconify-icon icon="solar:alt-arrow-down-linear"></iconify-icon>
 </div>
 </div>
+</div>
+<div class="quick-tools">
+  <a class="quick-tool" href="counselor_imports.html" aria-label="数据导入">
+    <iconify-icon icon="solar:upload-square-bold-duotone"></iconify-icon>
+    数据导入
+  </a>
+  <a class="quick-tool" href="counselor_student_dorm.html" aria-label="宿舍">
+    <iconify-icon icon="solar:home-smile-angle-bold-duotone"></iconify-icon>
+    宿舍
+  </a>
 </div>
 <div class="content pt-2" id="studentList">
 <form id="xzdForm" onsubmit="event.preventDefault();" novalidate autocomplete="on">

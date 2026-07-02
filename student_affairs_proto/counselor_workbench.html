@@ -31,6 +31,40 @@
         .tab-item span { font-size: 11px; }
         .plus-tab { width: 52px; height: 52px; background: var(--color-primary); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #fff; position: absolute; top: -16px; left: 50%; transform: translateX(-50%); box-shadow: 0 4px 12px rgba(30, 90, 230, 0.4); border: 2px solid #fff; }
         .card { background: #fff; border-radius: 16px; margin: 12px 16px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        /* 工作台 4 卡片 */
+        .workbench-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-height: 110px;
+            text-decoration: none;
+            border: 1px solid #F3F4F6;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .workbench-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            border-color: transparent;
+        }
+        .workbench-card .ic {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 4px;
+        }
+        .workbench-card .ic iconify-icon { font-size: 22px; }
+        .workbench-card .title { font-size: 14px; font-weight: 700; color: #191919; }
+        .workbench-card .desc { font-size: 10px; color: #9CA3AF; margin-top: auto; }
+        .workbench-card .badge {
+            position: absolute; top: 12px; right: 12px;
+            background: #DC2626; color: #fff;
+            font-size: 10px; font-weight: 700;
+            padding: 2px 6px; border-radius: 10px;
+        }
         .risk-red { color: #DC2626; }
         .risk-yellow { color: #F59E0B; }
         .risk-blue { color: #6B7280; }
@@ -79,86 +113,36 @@
 </div>
 </div>
 </div>
-<!-- 快捷入口 -->
-<div class="grid grid-cols-4 gap-2 px-4 mb-4">
-<a class="flex flex-col items-center gap-2" href="counselor_log_edit.html">
-<div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-blue-600 shadow-sm border border-gray-50">
-<iconify-icon class="text-2xl" icon="solar:pen-new-square-bold-duotone"></iconify-icon>
-</div>
-<span class="text-xs font-medium text-gray-700">写日志</span>
-</a>
-<a class="flex flex-col items-center gap-2" href="counselor_students.html">
-<div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-green-600 shadow-sm border border-gray-50">
-<iconify-icon class="text-2xl" icon="solar:users-group-two-rounded-bold-duotone"></iconify-icon>
-</div>
-<span class="text-xs font-medium text-gray-700">学生管理</span>
-</a>
-<a class="flex flex-col items-center gap-2" href="counselor_anomalies.html">
-<div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-red-500 shadow-sm border border-gray-50">
-<iconify-icon class="text-2xl" icon="solar:danger-bold-duotone"></iconify-icon>
-</div>
-<span class="text-xs font-medium text-gray-700">异常跟进</span>
-</a>
-<a class="flex flex-col items-center gap-2" href="counselor_reminders.html">
-<div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-orange-500 shadow-sm border border-gray-50">
-<iconify-icon class="text-2xl" icon="solar:bell-bing-bold-duotone"></iconify-icon>
-</div>
-<span class="text-xs font-medium text-gray-700">新建提醒</span>
-</a>
-</div>
-<!-- 第二行快捷入口:晚归 / 导入 -->
-<div class="grid grid-cols-4 gap-2 px-4 mb-4">
-<a class="flex flex-col items-center gap-2" href="counselor_late_returns.html">
-<div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-blue-600 shadow-sm border border-gray-50">
-<iconify-icon class="text-2xl" icon="solar:login-3-bold-duotone"></iconify-icon>
-</div>
-<span class="text-xs font-medium text-gray-700">晚归专项</span>
-</a>
-<a class="flex flex-col items-center gap-2" href="counselor_imports.html">
-<div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-cyan-600 shadow-sm border border-gray-50">
-<iconify-icon class="text-2xl" icon="solar:upload-square-bold-duotone"></iconify-icon>
-</div>
-<span class="text-xs font-medium text-gray-700">数据导入</span>
-</a>
-<a class="flex flex-col items-center gap-2" href="counselor_student_dorm.html">
-<div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-rose-600 shadow-sm border border-gray-50">
-<iconify-icon class="text-2xl" icon="solar:home-smile-angle-bold-duotone"></iconify-icon>
-</div>
-<span class="text-xs font-medium text-gray-700">宿舍</span>
-</a>
-<a class="flex flex-col items-center gap-2" href="counselor_statistics.html">
-<div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-amber-600 shadow-sm border border-gray-50">
-<iconify-icon class="text-2xl" icon="solar:chart-square-bold-duotone"></iconify-icon>
-</div>
-<span class="text-xs font-medium text-gray-700">统计</span>
-</a>
-</div>
-<!-- 第三行快捷入口:自定义模块 -->
-<div class="grid grid-cols-4 gap-2 px-4 mb-4">
-<a class="flex flex-col items-center gap-2" href="counselor_custom_modules.html">
-<div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-violet-600 shadow-sm border border-gray-50">
-<iconify-icon class="text-2xl" icon="solar:clipboard-list-bold-duotone"></iconify-icon>
-</div>
-<span class="text-xs font-medium text-gray-700">自定义模块</span>
-</a>
-<a class="flex flex-col items-center gap-2" href="counselor_logs.html">
-<div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-blue-500 shadow-sm border border-gray-50">
-<iconify-icon class="text-2xl" icon="solar:document-text-bold-duotone"></iconify-icon>
-</div>
-<span class="text-xs font-medium text-gray-700">我的日志</span>
-</a>
-<a class="flex flex-col items-center gap-2" href="counselor_class_anomaly_board.html">
-<div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-pink-500 shadow-sm border border-gray-50">
-<iconify-icon class="text-2xl" icon="solar:graph-new-up-bold-duotone"></iconify-icon>
-</div>
-<span class="text-xs font-medium text-gray-700">数据看板</span>
-</a>
-<a class="flex flex-col items-center gap-2" href="counselor_settings.html">
-<div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-slate-600 shadow-sm border border-gray-50">
-<iconify-icon class="text-2xl" icon="solar:settings-bold-duotone"></iconify-icon>
-</div>
-<span class="text-xs font-medium text-gray-700">设置</span>
-</a>
+<!-- 快捷入口:4 大卡片(2x2) -->
+<div class="grid grid-cols-2 gap-3 px-4 mb-4">
+  <a class="workbench-card" href="counselor_late_returns.html">
+    <div class="ic bg-blue-50 text-blue-600">
+      <iconify-icon icon="solar:login-3-bold-duotone"></iconify-icon>
+    </div>
+    <div class="title">晚归专项</div>
+    <div class="desc">22:30 后入校记录</div>
+  </a>
+  <a class="workbench-card" href="counselor_logs.html">
+    <div class="ic bg-green-50 text-green-600">
+      <iconify-icon icon="solar:document-text-bold-duotone"></iconify-icon>
+    </div>
+    <div class="title">我的日志</div>
+    <div class="desc">128 条记录 · 2 草稿</div>
+  </a>
+  <a class="workbench-card" href="counselor_data_analytics.html">
+    <div class="ic bg-violet-50 text-violet-600">
+      <iconify-icon icon="solar:chart-square-bold-duotone"></iconify-icon>
+    </div>
+    <div class="title">数据分析</div>
+    <div class="desc">统计 + 班级看板</div>
+  </a>
+  <a class="workbench-card" href="counselor_toolbox.html">
+    <div class="ic bg-gray-100 text-gray-600">
+      <iconify-icon icon="solar:widget-2-bold-duotone"></iconify-icon>
+    </div>
+    <div class="title">工具箱</div>
+    <div class="desc">提醒 · 自定义 · 导入 · 宿舍</div>
+  </a>
 </div>
 <!-- 待办事项 -->
 <div class="px-5 mt-6 mb-3 flex justify-between items-center">

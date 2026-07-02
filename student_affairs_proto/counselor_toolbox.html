@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>工具箱 - 学工助手</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+        :root { --color-primary: #1E5AE6; --color-bg-page: #F5F6F8; }
+        body { background-color: #1a1a1a; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+        .phone-shell { width: 375px; height: 812px; background: var(--color-bg-page); border-radius: 40px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+        .status-bar { height: 44px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #000; flex-shrink: 0; line-height: 1; }
+        .status-bar iconify-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            font-size: 16px;
+        }
+        .nav-bar { height: 44px; display: flex; align-items: center; padding: 0 16px; background: #fff; border-bottom: 1px solid #F3F4F6; flex-shrink: 0; }
+        .content { flex: 1; overflow-y: auto; }
+        .tab-bar { height: 84px; background: #fff; border-top: 1px solid #E5E7EB; display: flex; justify-content: space-around; align-items: center; padding-bottom: 20px; position: relative; flex-shrink: 0; }
+        .tab-item { display: flex; flex-direction: column; align-items: center; text-align: center; color: #9CA3AF; text-decoration: none; }
+        .tab-item.active { color: var(--color-primary); }
+        .tab-item iconify-icon { font-size: 24px; margin-bottom: 4px; }
+        .tab-item span { font-size: 11px; }
+        .plus-tab { width: 52px; height: 52px; background: var(--color-primary); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #fff; position: absolute; top: -16px; left: 50%; transform: translateX(-50%); box-shadow: 0 4px 12px rgba(30, 90, 230, 0.4); border: 2px solid #fff; }
+        .section-h { padding: 16px 20px 8px; font-size: 12px; color: #6B7280; font-weight: 600; }
+        .card { background: #fff; margin: 0 16px 12px; border-radius: 12px; overflow: hidden; }
+        .tool-row { display: flex; align-items: center; padding: 14px 16px; gap: 12px; text-decoration: none; color: inherit; transition: background 0.15s; }
+        .tool-row:hover { background: #F8FAFC; }
+        .tool-row + .tool-row { border-top: 1px solid #F3F4F6; }
+        .tool-row .ic {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .tool-row .ic iconify-icon { font-size: 20px; }
+        .tool-row .body { flex: 1; min-width: 0; }
+        .tool-row .title { font-size: 14px; font-weight: 600; color: #191919; }
+        .tool-row .desc { font-size: 11px; color: #9CA3AF; margin-top: 2px; }
+        .tool-row .arrow { color: #C0C4CC; font-size: 16px; }
+        .tool-row .badge {
+            background: #DC2626; color: #fff;
+            font-size: 10px; font-weight: 700;
+            padding: 1px 6px; border-radius: 8px;
+            margin-right: 4px;
+        }
+        .home-indicator { height:34px; background:#fff; display:flex; justify-content:center; align-items:flex-end; padding-bottom:8px; flex-shrink:0; }
+        .home-indicator .bar { width:134px; height:5px; border-radius:3px; background:#000; opacity:0.85; }
+    </style>
+</head>
+<body>
+<div class="phone-shell">
+<div class="status-bar">
+<span>12:20</span>
+<div class="flex gap-1.5 text-[#000]">
+<iconify-icon icon="mingcute:signal-fill"></iconify-icon>
+<iconify-icon icon="mingcute:wifi-fill"></iconify-icon>
+<iconify-icon icon="mingcute:battery-fill"></iconify-icon>
+</div>
+</div>
+<div class="nav-bar">
+<a class="p-2 -ml-2" href="counselor_workbench.html" aria-label="返回工作台"><iconify-icon class="text-xl" icon="solar:alt-arrow-left-linear"></iconify-icon></a>
+<h1 class="flex-1 text-center text-base font-bold text-gray-900">工具箱</h1>
+<span class="p-2 -mr-2 w-8"></span>
+</div>
+<div class="content">
+<div class="section-h">事务工具</div>
+<div class="card">
+<a class="tool-row" href="counselor_reminders.html">
+<div class="ic bg-orange-50 text-orange-500">
+<iconify-icon icon="solar:bell-bing-bold-duotone"></iconify-icon>
+</div>
+<div class="body">
+<div class="title">提醒</div>
+<div class="desc">查寝 / 班会 / 任务通知</div>
+</div>
+<span class="badge">3 待发</span>
+<iconify-icon class="arrow" icon="solar:alt-arrow-right-linear"></iconify-icon>
+</a>
+<a class="tool-row" href="counselor_custom_modules.html">
+<div class="ic bg-violet-50 text-violet-500">
+<iconify-icon icon="solar:clipboard-list-bold-duotone"></iconify-icon>
+</div>
+<div class="body">
+<div class="title">自定义模块</div>
+<div class="desc">工作心得 / 班会反思 / 重点观察</div>
+</div>
+<span class="badge">3 个</span>
+<iconify-icon class="arrow" icon="solar:alt-arrow-right-linear"></iconify-icon>
+</a>
+</div>
+
+<div class="section-h">数据工具</div>
+<div class="card">
+<a class="tool-row" href="counselor_imports.html">
+<div class="ic bg-cyan-50 text-cyan-600">
+<iconify-icon icon="solar:upload-square-bold-duotone"></iconify-icon>
+</div>
+<div class="body">
+<div class="title">数据导入</div>
+<div class="desc">学生 / 宿舍 / 门禁 / 辅导员映射</div>
+</div>
+<iconify-icon class="arrow" icon="solar:alt-arrow-right-linear"></iconify-icon>
+</a>
+<a class="tool-row" href="counselor_student_dorm.html">
+<div class="ic bg-rose-50 text-rose-600">
+<iconify-icon icon="solar:home-smile-angle-bold-duotone"></iconify-icon>
+</div>
+<div class="body">
+<div class="title">宿舍</div>
+<div class="desc">宿舍分配 / 床位 / 卫生检查</div>
+</div>
+<iconify-icon class="arrow" icon="solar:alt-arrow-right-linear"></iconify-icon>
+</a>
+</div>
+</div>
+<div class="tab-bar">
+<a class="tab-item" href="counselor_workbench.html">
+<iconify-icon icon="solar:home-2-bold"></iconify-icon>
+<span>工作台</span>
+</a>
+<a class="tab-item" href="counselor_students.html">
+<iconify-icon icon="solar:users-group-rounded-linear"></iconify-icon>
+<span>学生</span>
+</a>
+<a class="plus-tab" href="counselor_log_edit.html" aria-label="写日志">
+<iconify-icon icon="solar:add-square-bold" style="font-size:30px;"></iconify-icon>
+</a>
+<div class="w-12"></div>
+<a class="tab-item" href="counselor_anomalies.html">
+<iconify-icon icon="solar:danger-linear"></iconify-icon>
+<span>异常</span>
+</a>
+<a class="tab-item" href="counselor_profile.html">
+<iconify-icon icon="solar:user-circle-linear"></iconify-icon>
+<span>我的</span>
+</a>
+</div>
+<div class="home-indicator"><div class="bar"></div></div>
+</div>
+</body>
+</html>
