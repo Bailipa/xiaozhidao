@@ -152,7 +152,7 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
     <div class="chip" data-st="draft" onclick="filterStatus('draft')">草稿箱</div>
   </div>
   <div id="systemList"></div>
-  <a class="fab" href="counselor_log_edit.html"><iconify-icon class="text-2xl" icon="solar:pen-bold"></iconify-icon></a>
+  <a class="fab" href="counselor_log_edit.html" aria-label="写日志"><iconify-icon class="text-2xl" icon="solar:pen-bold"></iconify-icon></a>
 </div>
 
 <!-- 自定义记录面板 -->
@@ -164,11 +164,11 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
     <div class="chip" data-mod="M003" onclick="filterMod('M003')">重点观察</div>
   </div>
   <div id="customList"></div>
-  <a class="fab" href="counselor_custom_modules.html"><iconify-icon class="text-2xl" icon="solar:clipboard-list-bold"></iconify-icon></a>
+  <a class="fab" href="counselor_custom_modules.html" aria-label="自定义模块"><iconify-icon class="text-2xl" icon="solar:clipboard-list-bold"></iconify-icon></a>
 </div>
 
 <div class="tab-bar">
-  <a class="tab-item" href="counselor_workbench.html">
+  <a class="tab-item active" href="counselor_workbench.html">
     <iconify-icon icon="solar:home-2-linear"></iconify-icon>
     <span>工作台</span>
   </a>
@@ -176,7 +176,7 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
     <iconify-icon icon="solar:users-group-rounded-linear"></iconify-icon>
     <span>学生</span>
   </a>
-  <a class="plus-tab" href="counselor_log_edit.html">
+  <a class="plus-tab" href="counselor_log_edit.html" aria-label="写日志">
     <iconify-icon icon="solar:add-square-bold" style="font-size:30px;"></iconify-icon>
   </a>
   <div class="w-12"></div>

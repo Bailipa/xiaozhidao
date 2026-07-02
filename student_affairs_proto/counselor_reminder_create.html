@@ -83,7 +83,7 @@
 </div>
 </div>
 <div class="nav-bar">
-<a class="p-2 -ml-2" href="counselor_reminders.html">
+<a class="p-2 -ml-2" href="counselor_reminders.html" aria-label="提醒列表">
 <iconify-icon class="text-xl" icon="solar:alt-arrow-left-linear"></iconify-icon>
 </a>
 <h1 class="flex-1 text-center text-base font-bold text-gray-900">新建提醒</h1>
@@ -92,24 +92,24 @@
 <form id="xzdForm" onsubmit="event.preventDefault();" novalidate autocomplete="on">
 <div class="form-group">
 <div class="input-row">
-<label>提醒标题</label>
+<label for="reminderTitle">提醒标题</label>
 <input id="reminderTitle" name="reminderTitle" placeholder="如：明天班会通知" type="text"/>
 </div>
 <div class="input-row">
-<label>提醒时间</label>
+<label for="reminderTime">提醒时间</label>
 <input type="datetime-local" id="reminderTime" name="reminderTime" value="2026-06-30T18:00"/>
 </div>
 </div>
 <div class="form-group">
 <div class="input-row" onclick="openStudentPicker('multi', [], onReminderStudentsPicked)">
-<label>关联范围</label>
+<label for="reminderLead">关联范围</label>
 <div class="picker-trigger">
   <span class="value placeholder" id="reminderRangeDisplay">点击选择</span>
   <iconify-icon class="text-gray-300" icon="solar:alt-arrow-right-linear"></iconify-icon>
 </div>
 </div>
 <div class="input-row">
-<label>提前提醒</label>
+<label for="reminderLead">提前提醒</label>
 <select id="reminderLead" name="reminderLead">
 <option>30分钟</option>
 <option>1小时</option>

@@ -90,7 +90,7 @@
 </div>
 </div>
 <div class="nav-bar">
-<a class="p-2 -ml-2" href="counselor_logs.html">
+<a class="p-2 -ml-2" href="counselor_logs.html" aria-label="我的日志">
 <iconify-icon class="text-xl" icon="solar:close-circle-linear"></iconify-icon>
 </a>
 <h1 class="flex-1 text-center text-base font-bold text-gray-900">新建日志</h1>
@@ -124,18 +124,18 @@
 </div>
 <div class="form-group">
 <div class="input-row">
-<label>日志日期</label>
+<label for="logDate">日志日期</label>
 <input type="date" id="logDate" name="logDate" value="2026-06-30"/>
 </div>
 <div class="input-row" onclick="openStudentPicker('single', [], onLogStudentPicked)">
-<label>关联学生</label>
+<label for="logPlace">关联学生</label>
 <div class="picker-trigger">
   <span class="value placeholder" id="logStudentDisplay">点击选择</span>
   <iconify-icon class="text-gray-300" icon="solar:alt-arrow-right-linear"></iconify-icon>
 </div>
 </div>
 <div class="input-row">
-<label>地点</label>
+<label for="logPlace">地点</label>
 <input id="logPlace" name="logPlace" placeholder="请输入谈话地点" type="text" value="学生辅导办公室"/>
 </div>
 </div>
