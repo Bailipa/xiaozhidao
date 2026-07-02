@@ -23,6 +23,31 @@
         .content { flex: 1; overflow-y: auto; }
         .template-card { min-width: 100px; height: 120px; background: #fff; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; items-center justify-content: center; text-align: center; border: 2px solid transparent; transition: all 0.2s; }
         .template-card.active { border-color: var(--color-primary); background: #E8F0FE; }
+        /* 横向滚动桌面端鼠标增强 */
+        .xzd-hscroll { position: relative; }
+        .xzd-hscroll .hscroll-area {
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            cursor: grab;
+        }
+        .xzd-hscroll .hscroll-area.dragging { cursor: grabbing; scroll-behavior: auto; }
+        .xzd-hscroll .nav-btn {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            width: 28px; height: 28px;
+            background: rgba(255,255,255,0.95);
+            border: 1px solid #E5E7EB; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 5; cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            opacity: 0; transition: opacity 0.2s;
+            color: #6B7280;
+            font-size: 16px;
+        }
+        .xzd-hscroll:hover .nav-btn,
+        .xzd-hscroll .nav-btn:focus { opacity: 1; }
+        .xzd-hscroll .nav-btn.left { left: 8px; }
+        .xzd-hscroll .nav-btn.right { right: 8px; }
+        .xzd-hscroll .nav-btn.hidden { opacity: 0 !important; pointer-events: none; }
         .form-group { background: #fff; border-radius: 16px; margin: 12px 16px; padding: 4px 16px; }
         .input-row { display: flex; align-items: center; padding: 14px 0; border-bottom: 1px solid #F3F4F6; last:border-0; }
         .input-row label { width: 80px; font-size: 14px; color: #6B7280; }
@@ -100,27 +125,35 @@
 <div class="px-5 mt-4 mb-3">
 <h3 class="text-sm font-bold text-gray-900">选择日志模板</h3>
 </div>
-<div class="flex overflow-x-auto px-5 gap-3 no-scrollbar pb-2">
-<div class="template-card active" onclick="selectTemplate(this)">
-<iconify-icon class="text-3xl text-blue-600 mb-2" icon="solar:chat-round-dots-bold-duotone"></iconify-icon>
-<span class="text-xs font-bold text-gray-700">谈心谈话</span>
-</div>
-<div class="template-card" onclick="selectTemplate(this)">
-<iconify-icon class="text-3xl text-orange-500 mb-2" icon="solar:home-bold-duotone"></iconify-icon>
-<span class="text-xs font-bold text-gray-700">进宿舍</span>
-</div>
-<div class="template-card" onclick="selectTemplate(this)">
-<iconify-icon class="text-3xl text-cyan-600 mb-2" icon="solar:square-academic-cap-bold-duotone"></iconify-icon>
-<span class="text-xs font-bold text-gray-700">进课堂</span>
-</div>
-<div class="template-card" onclick="selectTemplate(this)">
-<iconify-icon class="text-3xl text-green-600 mb-2" icon="solar:users-group-two-rounded-bold-duotone"></iconify-icon>
-<span class="text-xs font-bold text-gray-700">组织班会</span>
-</div>
-<div class="template-card" onclick="selectTemplate(this)">
-<iconify-icon class="text-3xl text-purple-600 mb-2" icon="solar:user-id-bold-duotone"></iconify-icon>
-<span class="text-xs font-bold text-gray-700">班干会议</span>
-</div>
+<div class="xzd-hscroll" id="tplCarousel">
+  <button class="nav-btn left hidden" id="tplLeft" type="button" aria-label="上一个模板">
+    <iconify-icon icon="solar:alt-arrow-left-linear"></iconify-icon>
+  </button>
+  <div class="hscroll-area flex overflow-x-auto px-5 gap-3 no-scrollbar pb-2" id="tplScroll" tabindex="0">
+    <div class="template-card active" onclick="selectTemplate(this)">
+      <iconify-icon class="text-3xl text-blue-600 mb-2" icon="solar:chat-round-dots-bold-duotone"></iconify-icon>
+      <span class="text-xs font-bold text-gray-700">谈心谈话</span>
+    </div>
+    <div class="template-card" onclick="selectTemplate(this)">
+      <iconify-icon class="text-3xl text-orange-500 mb-2" icon="solar:home-bold-duotone"></iconify-icon>
+      <span class="text-xs font-bold text-gray-700">进宿舍</span>
+    </div>
+    <div class="template-card" onclick="selectTemplate(this)">
+      <iconify-icon class="text-3xl text-cyan-600 mb-2" icon="solar:square-academic-cap-bold-duotone"></iconify-icon>
+      <span class="text-xs font-bold text-gray-700">进课堂</span>
+    </div>
+    <div class="template-card" onclick="selectTemplate(this)">
+      <iconify-icon class="text-3xl text-green-600 mb-2" icon="solar:users-group-two-rounded-bold-duotone"></iconify-icon>
+      <span class="text-xs font-bold text-gray-700">组织班会</span>
+    </div>
+    <div class="template-card" onclick="selectTemplate(this)">
+      <iconify-icon class="text-3xl text-purple-600 mb-2" icon="solar:user-id-bold-duotone"></iconify-icon>
+      <span class="text-xs font-bold text-gray-700">班干会议</span>
+    </div>
+  </div>
+  <button class="nav-btn right" id="tplRight" type="button" aria-label="下一个模板">
+    <iconify-icon icon="solar:alt-arrow-right-linear"></iconify-icon>
+  </button>
 </div>
 <div class="form-group">
 <div class="input-row">
@@ -189,6 +222,63 @@
             document.querySelectorAll('.template-card').forEach(c => c.classList.remove('active'));
             el.classList.add('active');
         }
+
+        // 横向滚动 carousel 通用增强 (nav 箭头 + 滚轮 hijack + 拖拽 + 键盘)
+        function initHScroll(wrapper) {
+            if (!wrapper) return;
+            var scroll = wrapper.querySelector('.hscroll-area');
+            var leftBtn = wrapper.querySelector('.nav-btn.left');
+            var rightBtn = wrapper.querySelector('.nav-btn.right');
+            if (!scroll || !leftBtn || !rightBtn) return;
+
+            // 1. 箭头按钮 + 边界状态
+            function updateBtns() {
+                leftBtn.classList.toggle('hidden', scroll.scrollLeft <= 1);
+                rightBtn.classList.toggle('hidden',
+                    scroll.scrollLeft >= scroll.scrollWidth - scroll.clientWidth - 1);
+            }
+            leftBtn.addEventListener('click', function() {
+                scroll.scrollBy({ left: -120, behavior: 'smooth' });
+            });
+            rightBtn.addEventListener('click', function() {
+                scroll.scrollBy({ left: 120, behavior: 'smooth' });
+            });
+            scroll.addEventListener('scroll', updateBtns, { passive: true });
+            updateBtns();
+
+            // 2. 鼠标滚轮: 纵向 → 横向 hijack
+            scroll.addEventListener('wheel', function(e) {
+                if (e.deltaY === 0) return;
+                e.preventDefault();
+                scroll.scrollLeft += e.deltaY;
+            }, { passive: false });
+
+            // 3. 鼠标拖拽
+            var isDown = false, startX = 0, startScroll = 0;
+            scroll.addEventListener('mousedown', function(e) {
+                isDown = true; startX = e.pageX; startScroll = scroll.scrollLeft;
+                scroll.classList.add('dragging');
+            });
+            ['mouseleave', 'mouseup'].forEach(function(evt) {
+                scroll.addEventListener(evt, function() {
+                    isDown = false; scroll.classList.remove('dragging');
+                });
+            });
+            scroll.addEventListener('mousemove', function(e) {
+                if (!isDown) return;
+                e.preventDefault();
+                scroll.scrollLeft = startScroll - (e.pageX - startX) * 1.5;
+            });
+
+            // 4. 键盘左右箭头 (a11y)
+            scroll.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowLeft')  { e.preventDefault(); scroll.scrollBy({ left: -120, behavior: 'smooth' }); }
+                if (e.key === 'ArrowRight') { e.preventDefault(); scroll.scrollBy({ left:  120, behavior: 'smooth' }); }
+            });
+        }
+
+        // 初始化模板选择 carousel
+        initHScroll(document.getElementById('tplCarousel'));
 
         /*
           API Contract (后端实现时按此对接):
