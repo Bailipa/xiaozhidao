@@ -439,6 +439,16 @@ document.querySelectorAll('.sub-tabs span').forEach(function(t) {
     document.getElementById('sub-' + target).style.display = 'block';
   });
 });
+
+/* PR-G: ?tab=board URL 参数联动 (来自 counselor_anomalies.html 入口) */
+(function() {
+  var p = new URLSearchParams(window.location.search);
+  var tab = p.get('tab');
+  if (tab === 'board' || tab === 'stats') {
+    var target = document.querySelector('.main-tabs span[data-main="' + tab + '"]');
+    if (target) target.click();
+  }
+})();
 </script>
 </body>
 </html>
