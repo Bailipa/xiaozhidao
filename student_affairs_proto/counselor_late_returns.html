@@ -84,6 +84,40 @@ body { background-color: #1a1a1a; display: flex; justify-content: center; align-
 .tag.mid { background: #FFF7E6; color: var(--warning); }
 .tag.low { background: #EFF6FF; color: var(--color-primary); }
 .tag.done { background: #F0FDF4; color: var(--success); }
+.tag.green { background: #F0FDF4; color: var(--success); }
+
+/* 4 色分档统计条 (stats card 下方) */
+.tier-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 0 16px 12px; }
+.tier-card { display: flex; align-items: center; gap: 8px; padding: 10px; border-radius: 10px; background: #fff; cursor: pointer; transition: all 0.15s; }
+.tier-card:hover { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+.tier-card .ic { width: 4px; height: 28px; border-radius: 2px; flex-shrink: 0; }
+.tier-card.red    .ic { background: var(--danger); }
+.tier-card.yellow .ic { background: var(--warning); }
+.tier-card.blue   .ic { background: var(--color-primary); }
+.tier-card.green  .ic { background: var(--success); }
+.tier-card .num { font-size: 18px; font-weight: 700; color: var(--text-primary); line-height: 1.1; }
+.tier-card .label { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
+.tier-card.active { box-shadow: 0 0 0 2px currentColor; }
+.tier-card.red.active    { color: var(--danger); }
+.tier-card.yellow.active { color: var(--warning); }
+.tier-card.blue.active   { color: var(--color-primary); }
+.tier-card.green.active  { color: var(--success); }
+
+/* 二级颜色 tab 行 */
+.tier-tabs { display: flex; background: #fff; padding: 0 16px 10px; gap: 8px; overflow-x: auto; flex-shrink: 0; }
+.tier-tab { padding: 6px 14px; font-size: 12px; color: #6B7280; border-radius: 14px; background: #F5F5F5; white-space: nowrap; cursor: pointer; transition: all 0.15s; flex-shrink: 0; }
+.tier-tab:hover { background: #E5E7EB; }
+.tier-tab.active { color: #fff; font-weight: 600; }
+.tier-tab.active[data-tier="all"]    { background: var(--text-primary); }
+.tier-tab.active[data-tier="red"]    { background: var(--danger); }
+.tier-tab.active[data-tier="yellow"] { background: var(--warning); }
+.tier-tab.active[data-tier="blue"]   { background: var(--color-primary); }
+.tier-tab.active[data-tier="green"]  { background: var(--success); }
+
+/* 卡片内分档原因行 */
+.tier-reason { margin-top: 8px; padding-top: 8px; border-top: 1px dashed #E5E7EB; font-size: 11px; }
+.tier-reason .k { color: #9CA3AF; margin-right: 4px; }
+.tier-reason .v { font-weight: 600; color: var(--text-primary); }
 
 /* 联系家长弹窗 */
 .parent-modal { max-width: 320px; }
@@ -139,6 +173,15 @@ body { background-color: #1a1a1a; display: flex; justify-content: center; align-
   <div class="filter-tab" data-filter="done" style="cursor:pointer;">已结案 (3)</div>
 </div>
 
+<!-- 二级颜色 tab (PR-G+) -->
+<div class="tier-tabs" id="tierTabs">
+  <div class="tier-tab active" data-tier="all" style="cursor:pointer;">全部</div>
+  <div class="tier-tab" data-tier="red" style="cursor:pointer;">红色</div>
+  <div class="tier-tab" data-tier="yellow" style="cursor:pointer;">黄色</div>
+  <div class="tier-tab" data-tier="blue" style="cursor:pointer;">蓝色</div>
+  <div class="tier-tab" data-tier="green" style="cursor:pointer;">正常</div>
+</div>
+
 <div class="content pb-4">
   <!-- 统计卡 -->
   <div class="stats-card">
@@ -160,8 +203,40 @@ body { background-color: #1a1a1a; display: flex; justify-content: center; align-
     </div>
   </div>
 
+  <!-- 4 色分档统计条 (PR-G+) -->
+  <div class="tier-row" id="tierRow">
+    <div class="tier-card red" data-tier-stat="red" onclick="selectTierFromStat('red')">
+      <div class="ic"></div>
+      <div>
+        <div class="num" id="cntRed">0</div>
+        <div class="label">红色</div>
+      </div>
+    </div>
+    <div class="tier-card yellow" data-tier-stat="yellow" onclick="selectTierFromStat('yellow')">
+      <div class="ic"></div>
+      <div>
+        <div class="num" id="cntYellow">0</div>
+        <div class="label">黄色</div>
+      </div>
+    </div>
+    <div class="tier-card blue" data-tier-stat="blue" onclick="selectTierFromStat('blue')">
+      <div class="ic"></div>
+      <div>
+        <div class="num" id="cntBlue">0</div>
+        <div class="label">蓝色</div>
+      </div>
+    </div>
+    <div class="tier-card green" data-tier-stat="green" onclick="selectTierFromStat('green')">
+      <div class="ic"></div>
+      <div>
+        <div class="num" id="cntGreen">0</div>
+        <div class="label">正常</div>
+      </div>
+    </div>
+  </div>
+
   <!-- 事件列表 -->
-  <div class="event-card" data-filter-key="today,pending" data-search="张三 2024001 计科1班 北门闸机 23:15 人脸认证成功 红档 5分钟前">
+  <div class="event-card" data-filter-key="today,pending" data-tier="red" data-tier-priority="1" data-search="张三 2024001 计科1班 北门闸机 23:15 人脸认证成功 红档 5分钟前">
     <div class="head">
       <div class="avatar">张</div>
       <div class="info">
@@ -174,6 +249,7 @@ body { background-color: #1a1a1a; display: flex; justify-content: center; align-
       <div class="row"><span class="k">入校点位</span><span class="v">北门闸机</span></div>
       <div class="row"><span class="k">入校时间</span><span class="v">23:15(晚于 22:30)</span></div>
       <div class="row"><span class="k">事件类型</span><span class="v">人脸认证成功</span></div>
+      <div class="tier-reason"><span class="k">分档原因:</span><span class="v">本月晚归 8 次(≥7 红档标准)</span></div>
     </div>
     <div class="foot">
       <span class="time">5 分钟前</span>
@@ -184,19 +260,20 @@ body { background-color: #1a1a1a; display: flex; justify-content: center; align-
     </div>
   </div>
 
-  <div class="event-card" data-filter-key="today,pending" data-search="王五 2024003 计科2班 北门闸机 00:12 人脸认证成功 红档 2小时前 凌晨">
+  <div class="event-card" data-filter-key="today,pending" data-tier="yellow" data-tier-priority="2" data-search="王五 2024003 计科2班 北门闸机 00:12 人脸认证成功 红档 2小时前 凌晨">
     <div class="head">
       <div class="avatar">王</div>
       <div class="info">
         <div class="name">王五 <span class="text-xs font-normal text-gray-500 ml-1">2024级 计科2班</span></div>
         <div class="sub">2024003 · 学号 · 2026-05-11</div>
       </div>
-      <span class="tag high">红档</span>
+      <span class="tag mid">黄档</span>
     </div>
     <div class="body">
       <div class="row"><span class="k">入校点位</span><span class="v">北门闸机</span></div>
       <div class="row"><span class="k">入校时间</span><span class="v">00:12(凌晨归校)</span></div>
       <div class="row"><span class="k">事件类型</span><span class="v">人脸认证成功</span></div>
+      <div class="tier-reason"><span class="k">分档原因:</span><span class="v">本周晚归 2 次(月度未达红档标准)</span></div>
     </div>
     <div class="foot">
       <span class="time">2 小时前</span>
@@ -207,7 +284,7 @@ body { background-color: #1a1a1a; display: flex; justify-content: center; align-
     </div>
   </div>
 
-  <div class="event-card" data-filter-key="week,done" data-search="李四 2024002 计科1班 西门闸机 22:48 人脸认证成功 黄档 昨天22:48 已结案">
+  <div class="event-card" data-filter-key="week,done" data-tier="yellow" data-tier-priority="2" data-search="李四 2024002 计科1班 西门闸机 22:48 人脸认证成功 黄档 昨天22:48 已结案">
     <div class="head">
       <div class="avatar">李</div>
       <div class="info">
@@ -220,6 +297,7 @@ body { background-color: #1a1a1a; display: flex; justify-content: center; align-
       <div class="row"><span class="k">入校点位</span><span class="v">西门闸机</span></div>
       <div class="row"><span class="k">入校时间</span><span class="v">22:48</span></div>
       <div class="row"><span class="k">事件类型</span><span class="v">人脸认证成功</span></div>
+      <div class="tier-reason"><span class="k">分档原因:</span><span class="v">本月晚归 3 次(未达红档标准)</span></div>
     </div>
     <div class="foot">
       <span class="time">昨天 22:48</span>
@@ -229,7 +307,7 @@ body { background-color: #1a1a1a; display: flex; justify-content: center; align-
     </div>
   </div>
 
-  <div class="event-card" data-filter-key="week,done" data-search="钱七 2024005 计科2班 北门闸机 22:15 人证比对通过 蓝档 2天前 已结案">
+  <div class="event-card" data-filter-key="week,done" data-tier="blue" data-tier-priority="3" data-search="钱七 2024005 计科2班 北门闸机 22:15 人证比对通过 蓝档 2天前 已结案">
     <div class="head">
       <div class="avatar">钱</div>
       <div class="info">
@@ -240,8 +318,9 @@ body { background-color: #1a1a1a; display: flex; justify-content: center; align-
     </div>
     <div class="body">
       <div class="row"><span class="k">入校点位</span><span class="v">北门闸机</span></div>
-      <div class="row"><span class="k">入校时间</span><span class="v">22:15(蓝档)</span></div>
+      <div class="row"><span class="k">入校时间</span><span class="v">22:15(轻微)</span></div>
       <div class="row"><span class="k">事件类型</span><span class="v">人证比对通过</span></div>
+      <div class="tier-reason"><span class="k">分档原因:</span><span class="v">首次晚归(单次轻微,提醒观察)</span></div>
     </div>
     <div class="foot">
       <span class="time">2 天前</span>
@@ -251,25 +330,61 @@ body { background-color: #1a1a1a; display: flex; justify-content: center; align-
     </div>
   </div>
 
-  <div class="event-card" data-filter-key="week,done" data-search="赵六 2024004 计科2班 东门闸机 23:42 合法卡认证成功 黄档 3天前 已结案">
+  <div class="event-card" data-filter-key="week,done" data-tier="blue" data-tier-priority="3" data-search="赵六 2024004 计科2班 东门闸机 23:42 合法卡认证成功 黄档 3天前 已结案">
     <div class="head">
       <div class="avatar">赵</div>
       <div class="info">
         <div class="name">赵六 <span class="text-xs font-normal text-gray-500 ml-1">2024级 计科2班</span></div>
         <div class="sub">2024004 · 学号 · 2026-05-09</div>
       </div>
-      <span class="tag mid">黄档</span>
+      <span class="tag low">蓝档</span>
     </div>
     <div class="body">
       <div class="row"><span class="k">入校点位</span><span class="v">东门闸机</span></div>
       <div class="row"><span class="k">入校时间</span><span class="v">23:42</span></div>
       <div class="row"><span class="k">事件类型</span><span class="v">合法卡认证成功</span></div>
+      <div class="tier-reason"><span class="k">分档原因:</span><span class="v">偶发晚归(月度 2 次,未达黄档)</span></div>
     </div>
     <div class="foot">
       <span class="time">3 天前</span>
       <div class="actions">
         <span class="tag done">已结案</span>
       </div>
+    </div>
+  </div>
+
+  <!-- 正常学生 (PR-G+) -->
+  <div class="event-card" data-filter-key="" data-tier="green" data-tier-priority="4" data-search="周九 2024008 大数据2班 正常 近期无异常 在册">
+    <div class="head">
+      <div class="avatar">周</div>
+      <div class="info">
+        <div class="name">周九 <span class="text-xs font-normal text-gray-500 ml-1">2024级 大数据2班</span></div>
+        <div class="sub">2024008 · 在册正常学生</div>
+      </div>
+      <span class="tag green">正常</span>
+    </div>
+    <div class="body">
+      <div class="tier-reason"><span class="k">分档原因:</span><span class="v">近期无异常(本月 0 次,本周 0 次)</span></div>
+    </div>
+    <div class="foot">
+      <span class="time">在册</span>
+    </div>
+  </div>
+
+  <div class="event-card" data-filter-key="" data-tier="green" data-tier-priority="4" data-search="吴十 2024010 软工2班 正常 近期无异常 在册">
+    <div class="head">
+      <div class="avatar">吴</div>
+      <div class="info">
+        <div class="name">吴十 <span class="text-xs font-normal text-gray-500 ml-1">2024级 软工2班</span></div>
+        <div class="sub">2024010 · 在册正常学生</div>
+      </div>
+      <span class="tag green">正常</span>
+    </div>
+    <div class="body">
+      <div class="tier-reason"><span class="k">分档原因:</span><span class="v">近期无异常(本月 0 次,本周 0 次)</span></div>
+    </div>
+    <div class="foot">
+      <span class="time">在册</span>
     </div>
   </div>
 
@@ -341,28 +456,89 @@ function hideParentContact() {
 </script>
 
 <script>
-/* PR-G+: tab 筛选 + 搜索输入 叠加过滤 */
+/* PR-G+: tab 筛选 + 颜色分档 + 搜索输入 三级叠加过滤 */
 let currentTab = 'all';
+let currentTier = 'all';
 let currentSearch = '';
+const TIER_ORDER = { red:1, yellow:2, blue:3, green:4 };
+
 function applyAllFilters() {
-  var visible = 0;
+  let visible = 0;
   document.querySelectorAll('.event-card').forEach(function(item) {
     var itemKey = item.dataset.filterKey || '';
+    var itemTier = item.dataset.tier || '';
     var itemSearch = (item.dataset.search || '').toLowerCase();
     var tabOk = currentTab === 'all' || itemKey === currentTab || itemKey.indexOf(currentTab) >= 0;
+    var tierOk = currentTier === 'all' || itemTier === currentTier;
     var searchOk = !currentSearch || itemSearch.indexOf(currentSearch) >= 0;
-    var show = tabOk && searchOk;
+    var show = tabOk && tierOk && searchOk;
     item.style.display = show ? '' : 'none';
     if (show) visible++;
   });
+  sortCardsByTier();
   var empty = document.getElementById('emptyState');
   if (empty) empty.style.display = visible === 0 ? '' : 'none';
+  syncTierCardActive();
 }
+
+function sortCardsByTier() {
+  var container = document.querySelector('.content');
+  if (!container) return;
+  var cards = Array.from(document.querySelectorAll('.event-card'));
+  cards.sort(function(a, b) {
+    var pa = parseInt(a.dataset.tierPriority || '99');
+    var pb = parseInt(b.dataset.tierPriority || '99');
+    return pa - pb;
+  });
+  cards.forEach(function(c) { container.appendChild(c); });
+}
+
+function refreshTierCounts() {
+  var counts = { red:0, yellow:0, blue:0, green:0 };
+  document.querySelectorAll('.event-card').forEach(function(c) {
+    var t = c.dataset.tier;
+    if (counts[t] !== undefined) counts[t]++;
+  });
+  var ids = { red:'cntRed', yellow:'cntYellow', blue:'cntBlue', green:'cntGreen' };
+  for (var k in ids) {
+    var el = document.getElementById(ids[k]);
+    if (el) el.textContent = counts[k];
+  }
+  var labels = { red:'红色', yellow:'黄色', blue:'蓝色', green:'正常' };
+  document.querySelectorAll('.tier-tab').forEach(function(tab) {
+    var t = tab.dataset.tier;
+    if (t === 'all') tab.textContent = '全部';
+    else if (counts[t] !== undefined) tab.textContent = labels[t] + ' (' + counts[t] + ')';
+  });
+}
+
+function syncTierCardActive() {
+  document.querySelectorAll('.tier-card').forEach(function(c) {
+    c.classList.toggle('active', c.dataset.tierStat === currentTier);
+  });
+}
+
+function selectTierFromStat(tier) {
+  currentTier = (currentTier === tier) ? 'all' : tier;
+  document.querySelectorAll('.tier-tab').forEach(function(t) {
+    t.classList.toggle('active', t.dataset.tier === currentTier);
+  });
+  applyAllFilters();
+}
+
 document.querySelectorAll('.filter-tab').forEach(tab => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
     tab.classList.add('active');
     currentTab = tab.dataset.filter;
+    applyAllFilters();
+  });
+});
+document.querySelectorAll('.tier-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tier-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentTier = tab.dataset.tier;
     applyAllFilters();
   });
 });
@@ -380,6 +556,13 @@ document.getElementById('clearSearch').addEventListener('click', function() {
   applyAllFilters();
   inp.focus();
 });
+
+/* 初始化: 刷新统计 + 排序 + 应用默认筛选 */
+(function() {
+  refreshTierCounts();
+  sortCardsByTier();
+  applyAllFilters();
+})();
 
 /* PR-F: xzd-hscroll 鼠标/键盘增强(对 .filter-tabs 容器) */
 (function(){
