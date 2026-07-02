@@ -11,7 +11,14 @@
         :root { --color-primary: #1E5AE6; --color-bg-page: #F5F6F8; }
         body { background-color: #1a1a1a; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
         .phone-shell { width: 375px; height: 812px; background: var(--color-bg-page); border-radius: 40px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
-        .status-bar { height: 44px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #000; flex-shrink: 0; }
+        .status-bar { height: 44px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #000; flex-shrink: 0; line-height: 1; }
+        .status-bar iconify-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            font-size: 16px;
+        }
         .nav-bar { height: 44px; display: flex; align-items: center; padding: 0 16px; background: #fff; border-bottom: 1px solid #F3F4F6; flex-shrink: 0; }
         .content { flex: 1; overflow-y: auto; }
         .tab-bar { height: 84px; background: #fff; border-top: 1px solid #E5E7EB; display: flex; justify-content: space-around; align-items: center; padding-bottom: 20px; position: relative; flex-shrink: 0; }
@@ -43,13 +50,13 @@
 <h1 class="text-base font-bold text-gray-900 mx-auto">异常跟进</h1>
 </div>
 <div class="filter-tabs no-scrollbar">
-<div class="filter-tab active">全部</div>
-<div class="filter-tab">红档</div>
-<div class="filter-tab">黄档</div>
-<div class="filter-tab">蓝档</div>
-<div class="filter-tab">已关注</div>
-<div class="filter-tab">已约谈</div>
-<div class="filter-tab">已结案</div>
+<div class="filter-tab active" data-filter="all" style="cursor:pointer;">全部</div>
+<div class="filter-tab" data-filter="red" style="cursor:pointer;">红档</div>
+<div class="filter-tab" data-filter="yellow" style="cursor:pointer;">黄档</div>
+<div class="filter-tab" data-filter="blue" style="cursor:pointer;">蓝档</div>
+<div class="filter-tab" data-filter="关注" style="cursor:pointer;">已关注</div>
+<div class="filter-tab" data-filter="已约谈" style="cursor:pointer;">已约谈</div>
+<div class="filter-tab" data-filter="已结案" style="cursor:pointer;">已结案</div>
 </div>
 <!-- 晚归专项入口 -->
 <a class="mx-4 mt-3 mb-1 flex items-center gap-3 p-3 bg-gradient-to-r from-blue-500 to-blue-500 text-white rounded-xl shadow-sm" href="counselor_late_returns.html">
@@ -75,7 +82,7 @@
 </a>
 <div class="content pt-2 pb-20">
 <!-- 异常项 -->
-<a class="anomaly-card block" href="counselor_anomaly_detail.html">
+<a class="anomaly-card block" data-filter-key="red,未跟进" href="counselor_anomaly_detail.html">
 <div class="flex justify-between items-start mb-3">
 <div class="flex items-center gap-1.5">
 <div class="w-2 h-2 rounded-full bg-red-500"></div>
@@ -100,7 +107,7 @@
 <span class="px-4 py-1.5 bg-blue-600 text-white text-xs rounded-lg font-bold">去跟进</span>
 </div>
 </a>
-<a class="anomaly-card block" href="counselor_anomaly_detail.html">
+<a class="anomaly-card block" data-filter-key="yellow,已约谈" href="counselor_anomaly_detail.html">
 <div class="flex justify-between items-start mb-3">
 <div class="flex items-center gap-1.5">
 <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
@@ -158,5 +165,25 @@
 </div>
 <div class="home-indicator"><div class="bar"></div></div>
 </div>
+
+<script>
+document.querySelectorAll('.filter-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const key = tab.dataset.filter;
+    let visible = 0;
+    document.querySelectorAll('[data-filter-key]').forEach(item => {
+      const itemKey = item.dataset.filterKey || '';
+      const show = (key === 'all' || itemKey === key || itemKey.indexOf(key) >= 0);
+      item.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    const empty = document.getElementById('emptyAnomalies');
+    if (empty) empty.style.display = visible === 0 ? '' : 'none';
+  });
+});
+</script>
+
 </body>
 </html>

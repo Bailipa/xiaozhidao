@@ -15,7 +15,14 @@
         }
         body { background-color: #1a1a1a; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
         .phone-shell { width: 375px; height: 812px; background: var(--color-bg-page); border-radius: 40px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
-        .status-bar { height: 44px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #000; flex-shrink: 0; }
+        .status-bar { height: 44px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #000; flex-shrink: 0; line-height: 1; }
+        .status-bar iconify-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            font-size: 16px;
+        }
         .content { flex: 1; overflow-y: auto; padding-bottom: 20px; }
         .tab-bar { height: 84px; background: #fff; border-top: 1px solid #E5E7EB; display: flex; justify-content: space-around; align-items: center; padding-bottom: 20px; position: relative; flex-shrink: 0; }
         .tab-item { display: flex; flex-direction: column; align-items: center; text-align: center; color: #9CA3AF; text-decoration: none; }
@@ -146,7 +153,7 @@
 </div>
 <span class="text-xs font-medium text-gray-700">数据看板</span>
 </a>
-<a class="flex flex-col items-center gap-2" href="counselor_profile.html">
+<a class="flex flex-col items-center gap-2" href="counselor_settings.html">
 <div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-slate-600 shadow-sm border border-gray-50">
 <iconify-icon class="text-2xl" icon="solar:settings-bold-duotone"></iconify-icon>
 </div>

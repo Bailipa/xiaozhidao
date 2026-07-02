@@ -21,7 +21,7 @@
 }
 body { background-color: #1a1a1a; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
 .phone-shell { width: 375px; height: 812px; background: var(--bg-page); border-radius: 40px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
-.status-bar { height: 44px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #000; flex-shrink: 0; }
+.status-bar { height: 44px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #000; flex-shrink: 0; line-height: 1; }
 .nav-bar { height: 44px; display: flex; align-items: center; padding: 0 16px; background: #fff; flex-shrink: 0; }
 .content { flex: 1; overflow-y: auto; }
 .tab-bar { height: 84px; background: #fff; border-top: 1px solid #E5E7EB; display: flex; justify-content: space-around; align-items: center; padding-bottom: 20px; flex-shrink: 0; }
@@ -97,11 +97,11 @@ body { background-color: #1a1a1a; display: flex; justify-content: center; align-
 
 <!-- Tab 筛选 -->
 <div class="filter-tabs no-scrollbar">
-  <div class="filter-tab active">全部 (5)</div>
-  <div class="filter-tab">今日 (3)</div>
-  <div class="filter-tab">本周 (5)</div>
-  <div class="filter-tab">待处理 (2)</div>
-  <div class="filter-tab">已结案 (3)</div>
+  <div class="filter-tab active" data-filter="all" style="cursor:pointer;">全部 (5)</div>
+  <div class="filter-tab" data-filter="today" style="cursor:pointer;">今日 (3)</div>
+  <div class="filter-tab" data-filter="week" style="cursor:pointer;">本周 (5)</div>
+  <div class="filter-tab" data-filter="pending" style="cursor:pointer;">待处理 (2)</div>
+  <div class="filter-tab" data-filter="done" style="cursor:pointer;">已结案 (3)</div>
 </div>
 
 <div class="content pb-4">
@@ -298,5 +298,20 @@ function hideParentContact() {
   document.getElementById("parentModal").classList.add("hidden");
 }
 </script>
+
+<script>
+document.querySelectorAll('.filter-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const key = tab.dataset.filter;
+    document.querySelectorAll('[data-filter-key]').forEach(item => {
+      const itemKey = item.dataset.filterKey || '';
+      item.style.display = (key === 'all' || itemKey === key || itemKey.indexOf(key) >= 0) ? '' : 'none';
+    });
+  });
+});
+</script>
+
 </body>
 </html>
