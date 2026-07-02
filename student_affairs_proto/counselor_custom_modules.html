@@ -11,8 +11,7 @@
   }
   POST /api/me/custom-modules
   Request: { "name":"string", "purpose":"string", "visibility":"private|shared" }
-  Response 201: { "module_id":"string", "name":"string", "purpose":"string",
-    "record_count":0, "visibility":"string", "created_at":"ISO-8601" }
+  Response 201: { ... }
   DELETE /api/me/custom-modules/{id}
   Response 200: { "message":"string" }
   PUT /api/me/custom-modules/{id}/visibility
@@ -27,10 +26,24 @@
 <script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
 <script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
 <style>
-:root { --color-primary:#1E5AE6; --success:#07C160; --warning:#FA9D3B; --danger:#FA5151; --bg-page:#F7F7F7; --bg-card:#FFFFFF; --divider:#F0F0F0; --text-primary:#191919; --text-secondary:#888; }
-body { background-color:#1a1a1a; display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0; font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; }
-.phone-shell { width:375px; height:812px; background:var(--bg-page); border-radius:40px; overflow:hidden; position:relative; display:flex; flex-direction:column; }
-.status-bar { height:44px; padding:0 20px; display:flex; justify-content:space-between; align-items:center; font-size:14px; color:#000; flex-shrink:0; line-height: 1; }
+:root {
+    --color-primary: #1E5AE6;
+    --success: #07C160;
+    --warning: #FA9D3B;
+    --danger: #FA5151;
+    --bg-page: #F7F7F7;
+    --bg-card: #FFFFFF;
+    --divider: #F0F0F0;
+    --text-primary: #191919;
+    --text-secondary: #888;
+    --mod-icon-1: linear-gradient(135deg, #818CF8, #6366F1);
+    --mod-icon-2: linear-gradient(135deg, #34D399, #10B981);
+    --mod-icon-3: linear-gradient(135deg, #F472B6, #EC4899);
+    --mod-icon-4: linear-gradient(135deg, #FBBF24, #F59E0B);
+}
+body { background-color: #1a1a1a; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+.phone-shell { width: 375px; height: 812px; background: var(--bg-page); border-radius: 40px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+.status-bar { height: 44px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #000; flex-shrink: 0; line-height: 1; }
 .status-bar iconify-icon {
     display: inline-flex;
     align-items: center;
@@ -38,61 +51,63 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
     line-height: 1;
     font-size: 16px;
 }
-.nav-bar { height:44px; display:flex; align-items:center; padding:0 16px; background:#fff; flex-shrink:0; }
-.content { flex:1; overflow-y:auto; }
-.tab-bar { height:84px; background:#fff; border-top:1px solid #E5E7EB; display:flex; justify-content:space-around; align-items:center; padding-bottom:20px; flex-shrink:0; }
-.tab-item { display:flex; flex-direction:center; align-items:center; flex-direction:column; color:#9CA3AF; text-decoration:none; }
-.tab-item.active { color:var(--color-primary); }
-.tab-item iconify-icon { font-size:24px; margin-bottom:4px; }
-.tab-item span { font-size:11px; }
-.plus-tab { width:52px; height:52px; background:var(--color-primary); border-radius:16px; display:flex; align-items:center; justify-content:center; color:#fff; position:absolute; top:-16px; left:50%; transform:translateX(-50%); box-shadow:0 4px 12px rgba(30,90,230,0.4); border:2px solid #fff; }
-.intro { margin:16px; padding:14px; background:linear-gradient(135deg,#EEF2FF 0%,#F5F3FF 100%); border-radius:12px; }
-.intro .h { font-size:13px; font-weight:600; color:#4338CA; display:flex; align-items:center; gap:6px; }
-.intro .p { font-size:12px; color:#6B7280; margin-top:6px; line-height:1.6; }
-.module-card { background:#fff; margin:8px 16px; padding:14px; border-radius:12px; box-shadow:0 1px 2px rgba(0,0,0,0.02); }
-.module-card .head { display:flex; align-items:flex-start; gap:12px; }
-.module-card .icon { width:40px; height:40px; border-radius:10px; background:linear-gradient(135deg,#818CF8,#6366F1); color:#fff; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
-.module-card .icon.b2 { background:linear-gradient(135deg,#34D399,#10B981); }
-.module-card .icon.b3 { background:linear-gradient(135deg,#F472B6,#EC4899); }
-.module-card .icon.b4 { background:linear-gradient(135deg,#FBBF24,#F59E0B); }
-.module-card .info { flex:1; min-width:0; }
-.module-card .name { font-size:15px; font-weight:600; color:var(--text-primary); }
-.module-card .purpose { font-size:11px; color:var(--text-secondary); margin-top:4px; line-height:1.5; }
-.module-card .meta { display:flex; gap:12px; margin-top:8px; font-size:11px; color:var(--text-secondary); }
-.module-card .meta .v { color:var(--text-primary); font-weight:600; }
-.module-card .footer { display:flex; align-items:center; justify-content:space-between; margin-top:10px; padding-top:10px; border-top:1px solid #F5F5F5; }
-.module-card .visibility { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--text-secondary); }
-.module-card .visibility .v { padding:2px 8px; border-radius:10px; font-size:10px; }
-.module-card .visibility .v.private { background:#F5F5F5; color:#888; }
-.module-card .visibility .v.shared { background:#ECFDF5; color:#07C160; }
-.module-card .actions { display:flex; gap:8px; }
-.module-card .actions a { font-size:11px; padding:4px 10px; border-radius:12px; }
-.module-card .actions .enter { background:var(--color-primary); color:#fff; }
-.module-card .actions .toggle-btn { background:#F5F5F5; color:#444; }
-.section-h { padding:14px 20px 4px; font-size:12px; color:var(--text-secondary); font-weight:600; display:flex; justify-content:space-between; align-items:center; }
-.add-btn { background:var(--color-primary); color:#fff; font-size:11px; padding:4px 10px; border-radius:12px; display:flex; align-items:center; gap:4px; }
-.empty { text-align:center; padding:40px 20px; color:var(--text-secondary); font-size:13px; }
-.empty .icon { font-size:48px; color:#C0C4CC; margin-bottom:12px; }
-.home-indicator { height:34px; background:#fff; display:flex; justify-content:center; align-items:flex-end; padding-bottom:8px; flex-shrink:0; }
-.home-indicator .bar { width:134px; height:5px; border-radius:3px; background:#000; opacity:0.85; }
+.nav-bar { height: 44px; display: flex; align-items: center; padding: 0 16px; background: #fff; flex-shrink: 0; }
+.content { flex: 1; overflow-y: auto; }
+.tab-bar { height: 84px; background: #fff; border-top: 1px solid #E5E7EB; display: flex; justify-content: space-around; align-items: center; padding-bottom: 20px; position: relative; flex-shrink: 0; }
+.tab-item { display: flex; flex-direction: column; align-items: center; text-align: center; color: #9CA3AF; text-decoration: none; }
+.tab-item.active { color: var(--color-primary); }
+.tab-item iconify-icon { font-size: 24px; margin-bottom: 4px; }
+.tab-item span { font-size: 11px; }
+.plus-tab { width: 52px; height: 52px; background: var(--color-primary); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #fff; position: absolute; top: -16px; left: 50%; transform: translateX(-50%); box-shadow: 0 4px 12px rgba(30, 90, 230, 0.4); border: 2px solid #fff; }
+.intro { margin: 16px; padding: 14px; background: linear-gradient(135deg, #EEF2FF 0%, #F5F3FF 100%); border-radius: 12px; }
+.intro .h { font-size: 13px; font-weight: 600; color: #4338CA; display: flex; align-items: center; gap: 6px; }
+.intro .p { font-size: 12px; color: #6B7280; margin-top: 6px; line-height: 1.6; }
+.module-card { background: #fff; margin: 8px 16px; padding: 14px; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
+.module-card .head { display: flex; align-items: flex-start; gap: 12px; }
+.module-card .icon { width: 40px; height: 40px; border-radius: 10px; background: var(--mod-icon-1); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.module-card .icon.b2 { background: var(--mod-icon-2); }
+.module-card .icon.b3 { background: var(--mod-icon-3); }
+.module-card .icon.b4 { background: var(--mod-icon-4); }
+.module-card .info { flex: 1; min-width: 0; }
+.module-card .name { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+.module-card .purpose { font-size: 11px; color: var(--text-secondary); margin-top: 4px; line-height: 1.5; }
+.module-card .meta { display: flex; gap: 12px; margin-top: 8px; font-size: 11px; color: var(--text-secondary); }
+.module-card .meta .v { color: var(--text-primary); font-weight: 600; }
+.module-card .footer { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px solid #F5F5F5; }
+.module-card .visibility { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-secondary); }
+.module-card .visibility .v { padding: 2px 8px; border-radius: 10px; font-size: 10px; }
+.module-card .visibility .v.private { background: #F5F5F5; color: #888; }
+.module-card .visibility .v.shared { background: #ECFDF5; color: #07C160; }
+.module-card .actions { display: flex; gap: 8px; }
+.module-card .actions a { font-size: 11px; padding: 4px 10px; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px; }
+.module-card .actions .enter { background: var(--color-primary); color: #fff; }
+.module-card .actions .toggle-btn { background: #F5F5F5; color: #444; }
+.module-card .actions .toggle-btn iconify-icon { font-size: 14px; }
+.module-card .actions .toggle-btn:hover { background: #E5E7EB; }
+.section-h { padding: 14px 20px 4px; font-size: 12px; color: var(--text-secondary); font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+.add-btn { background: var(--color-primary); color: #fff; font-size: 11px; padding: 4px 10px; border-radius: 12px; display: flex; align-items: center; gap: 4px; }
+.empty { text-align: center; padding: 40px 20px; color: var(--text-secondary); font-size: 13px; }
+.empty .icon { font-size: 48px; color: #C0C4CC; margin-bottom: 12px; }
+.home-indicator { height: 34px; background: #fff; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 8px; flex-shrink: 0; }
+.home-indicator .bar { width: 134px; height: 5px; border-radius: 3px; background: #000; opacity: 0.85; }
 
 /* 新建模块弹层 */
-.modal-mask { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:60; display:none; align-items:flex-end; }
-.modal-mask.show { display:flex; }
-.modal-sheet { width:100%; background:#fff; border-radius:16px 16px 0 0; padding:16px 20px 24px; animation:slideUp .25s; }
-@keyframes slideUp { from {transform:translateY(100%);} to {transform:translateY(0);} }
-.modal-title { font-size:16px; font-weight:600; padding:6px 0 14px; border-bottom:1px solid var(--divider); }
-.field { margin-top:14px; }
-.field label { font-size:12px; color:var(--text-secondary); }
-.field input, .field textarea, .field select { width:100%; padding:10px 12px; background:#F5F5F5; border:0; border-radius:8px; font-size:14px; outline:none; box-sizing:border-box; margin-top:4px; font-family:inherit; }
-.field textarea { min-height:60px; resize:none; }
-.field .opt { display:flex; gap:8px; margin-top:6px; }
-.field .opt span { flex:1; padding:8px 0; text-align:center; border:1.5px solid #E5E7EB; border-radius:8px; font-size:13px; }
-.field .opt span.on { border-color:var(--color-primary); color:var(--color-primary); background:#EFF6FF; font-weight:600; }
-.modal-foot { display:flex; gap:10px; margin-top:20px; }
-.modal-foot button { flex:1; height:44px; border-radius:22px; font-size:15px; font-weight:600; border:0; cursor:pointer; }
-.modal-foot .cancel { background:#F2F3F5; color:#444; }
-.modal-foot .confirm { background:var(--color-primary); color:#fff; }
+.modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 60; display: none; align-items: flex-end; }
+.modal-mask.show { display: flex; }
+.modal-sheet { width: 100%; background: #fff; border-radius: 16px 16px 0 0; padding: 16px 20px 24px; animation: slideUp .25s; }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-title { font-size: 16px; font-weight: 600; padding: 6px 0 14px; border-bottom: 1px solid var(--divider); }
+.field { margin-top: 14px; }
+.field label { font-size: 12px; color: var(--text-secondary); }
+.field input, .field textarea, .field select { width: 100%; padding: 10px 12px; background: #F5F5F5; border: 0; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box; margin-top: 4px; font-family: inherit; }
+.field textarea { min-height: 60px; resize: none; }
+.field .opt { display: flex; gap: 8px; margin-top: 6px; }
+.field .opt span { flex: 1; padding: 8px 0; text-align: center; border: 1.5px solid #E5E7EB; border-radius: 8px; font-size: 13px; }
+.field .opt span.on { border-color: var(--color-primary); color: var(--color-primary); background: #EFF6FF; font-weight: 600; }
+.modal-foot { display: flex; gap: 10px; margin-top: 20px; }
+.modal-foot button { flex: 1; height: 44px; border-radius: 22px; font-size: 15px; font-weight: 600; border: 0; cursor: pointer; }
+.modal-foot .cancel { background: #F2F3F5; color: #444; }
+.modal-foot .confirm { background: var(--color-primary); color: #fff; }
 </style>
 </head>
 <body>
@@ -100,9 +115,9 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 <script type="application/json" id="page-data">
 {
   "modules": [
-    { "module_id":"M001", "name":"我今天的工作心得", "purpose":"每天下班前记录当天的反思、感悟和学生工作的得失", "record_count":12, "visibility":"shared", "created_at":"2025-09-05T10:30:00+08:00", "updated_at":"2026-06-30T18:00:00+08:00", "icon_bg":"b1" },
-    { "module_id":"M002", "name":"班会反思", "purpose":"每次班会结束后记录班会效果与待改进点", "record_count":4, "visibility":"private", "created_at":"2025-10-15T14:00:00+08:00", "updated_at":"2026-05-22T16:30:00+08:00", "icon_bg":"b2" },
-    { "module_id":"M003", "name":"重点学生观察", "purpose":"持续跟踪重点关注学生的行为变化和心理动态", "record_count":6, "visibility":"shared", "created_at":"2025-11-01T09:00:00+08:00", "updated_at":"2026-06-28T11:20:00+08:00", "icon_bg":"b3" }
+    { "module_id":"M001", "name":"我今天的工作心得", "icon":"solar:diploma-bold", "icon_bg":"b1", "purpose":"每天下班前记录当天的反思、感悟和学生工作的得失", "record_count":12, "visibility":"shared", "created_at":"2025-09-05T10:30:00+08:00", "updated_at":"2026-06-30T18:00:00+08:00" },
+    { "module_id":"M002", "name":"班会反思", "icon":"solar:users-group-rounded-bold", "icon_bg":"b2", "purpose":"每次班会结束后记录班会效果与待改进点", "record_count":4, "visibility":"private", "created_at":"2025-10-15T14:00:00+08:00", "updated_at":"2026-05-22T16:30:00+08:00" },
+    { "module_id":"M003", "name":"重点学生观察", "icon":"solar:eye-bold", "icon_bg":"b3", "purpose":"持续跟踪重点关注学生的行为变化和心理动态", "record_count":6, "visibility":"shared", "created_at":"2025-11-01T09:00:00+08:00", "updated_at":"2026-06-28T11:20:00+08:00" }
   ]
 }
 </script>
@@ -117,91 +132,26 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 <div class="nav-bar">
   <a class="p-2 -ml-2" href="counselor_profile.html" aria-label="我的"><iconify-icon class="text-xl" icon="solar:alt-arrow-left-linear"></iconify-icon></a>
   <h1 class="flex-1 text-center text-base font-bold text-gray-900">自定义模块</h1>
-  <a class="p-2 -mr-2" href="#" onclick="openNewModuleModal(); return false;"><iconify-icon class="text-xl text-blue-600" icon="solar:add-square-bold"></iconify-icon></a>
+  <a class="p-2 -mr-2" href="#" onclick="openNewModuleModal(); return false;" aria-label="新建模块"><iconify-icon class="text-xl text-blue-600" icon="solar:add-square-bold"></iconify-icon></a>
 </div>
 
 <div class="content">
 <form id="xzdForm" onsubmit="event.preventDefault();" novalidate autocomplete="on">
-  <!-- 顶部说明 -->
   <div class="intro">
     <div class="h"><iconify-icon icon="solar:lightbulb-bolt-bold"></iconify-icon> 什么是自定义模块?</div>
     <div class="p">除系统预设的工作日志外,你可以创建个性化记录模块(如"工作心得""班会反思""重点学生观察"),满足弹性工作需求。模块默认仅自己可见,可授权学工书记查看。</div>
   </div>
 
-  <!-- 我的模块 -->
   <div class="section-h">
-    <span>我的模块 (3)</span>
+    <span>我的模块 (<span id="moduleCount">0</span>)</span>
     <a class="add-btn" href="#" onclick="openNewModuleModal(); return false;">
       <iconify-icon icon="solar:add-circle-bold"></iconify-icon>
       新建
     </a>
   </div>
 
-  <a class="module-card block" href="counselor_custom_module_records.html?mid=M001">
-    <div class="head">
-      <div class="icon"><iconify-icon icon="solar:diploma-bold"></iconify-icon></div>
-      <div class="info">
-        <div class="name">我今天的工作心得</div>
-        <div class="purpose">每天下班前记录当天的反思、感悟和学生工作的得失</div>
-        <div class="meta">
-          <span><span class="v">12</span> 条记录</span>
-          <span>更新于 06-30 18:00</span>
-        </div>
-      </div>
-    </div>
-    <div class="footer">
-      <div class="visibility">
-        <span class="v shared">已授权书记查看</span>
-      </div>
-      <div class="actions">
-        <a class="enter" href="counselor_custom_module_records.html?mid=M001">进入</a>
-      </div>
-    </div>
-  </a>
-
-  <a class="module-card block" href="counselor_custom_module_records.html?mid=M002">
-    <div class="head">
-      <div class="icon b2"><iconify-icon icon="solar:users-group-rounded-bold"></iconify-icon></div>
-      <div class="info">
-        <div class="name">班会反思</div>
-        <div class="purpose">每次班会结束后记录班会效果与待改进点</div>
-        <div class="meta">
-          <span><span class="v">4</span> 条记录</span>
-          <span>更新于 05-22 16:30</span>
-        </div>
-      </div>
-    </div>
-    <div class="footer">
-      <div class="visibility">
-        <span class="v private">仅自己</span>
-      </div>
-      <div class="actions">
-        <a class="enter" href="counselor_custom_module_records.html?mid=M002">进入</a>
-      </div>
-    </div>
-  </a>
-
-  <a class="module-card block" href="counselor_custom_module_records.html?mid=M003">
-    <div class="head">
-      <div class="icon b3"><iconify-icon icon="solar:eye-bold"></iconify-icon></div>
-      <div class="info">
-        <div class="name">重点学生观察</div>
-        <div class="purpose">持续跟踪重点关注学生的行为变化和心理动态</div>
-        <div class="meta">
-          <span><span class="v">6</span> 条记录</span>
-          <span>更新于 06-28 11:20</span>
-        </div>
-      </div>
-    </div>
-    <div class="footer">
-      <div class="visibility">
-        <span class="v shared">已授权书记查看</span>
-      </div>
-      <div class="actions">
-        <a class="enter" href="counselor_custom_module_records.html?mid=M003">进入</a>
-      </div>
-    </div>
-  </a>
+  <div id="moduleList"></div>
+</form>
 </div>
 
 <div class="tab-bar">
@@ -225,10 +175,35 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
     <iconify-icon icon="solar:user-circle-bold"></iconify-icon>
     <span>我的</span>
   </a>
-</div></form>
-
+</div>
 <div class="home-indicator"><div class="bar"></div></div>
 </div>
+
+<!-- 模块卡片 template (JS 渲染用) -->
+<template id="moduleCardTpl">
+  <div class="module-card" data-mid="" data-visibility="">
+    <div class="head">
+      <div class="icon"><iconify-icon icon=""></iconify-icon></div>
+      <div class="info">
+        <div class="name"></div>
+        <div class="purpose"></div>
+        <div class="meta">
+          <span><span class="v record-count">0</span> 条记录</span>
+          <span class="updated-at"></span>
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+      <div class="visibility"><span class="v"></span></div>
+      <div class="actions">
+        <a class="enter" href="">进入</a>
+        <a class="toggle-btn" href="#" onclick="toggleVisibility(event); return false;" aria-label="切换可见性">
+          <iconify-icon icon="solar:lock-keyhole-bold"></iconify-icon>
+        </a>
+      </div>
+    </div>
+  </div>
+</template>
 
 <!-- 新建模块弹层 -->
 <div class="modal-mask" id="newModuleModal">
@@ -255,7 +230,76 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
     </div>
   </div>
 </div>
+
 <script>
+// 渲染模块卡片列表
+function renderModules() {
+  var data;
+  try {
+    data = JSON.parse(document.getElementById('page-data').textContent);
+  } catch (e) { return; }
+  var list = document.getElementById('moduleList');
+  var tpl = document.getElementById('moduleCardTpl');
+  document.getElementById('moduleCount').textContent = data.modules.length;
+  list.innerHTML = '';
+
+  data.modules.forEach(function(m) {
+    var card = tpl.content.cloneNode(true);
+    var root = card.querySelector('.module-card');
+    root.dataset.mid = m.module_id;
+    root.dataset.visibility = m.visibility;
+
+    var iconDiv = card.querySelector('.icon');
+    if (m.icon_bg) iconDiv.classList.add(m.icon_bg);
+    card.querySelector('.icon iconify-icon').setAttribute('icon', m.icon || 'solar:diploma-bold');
+
+    card.querySelector('.name').textContent = m.name;
+    card.querySelector('.purpose').textContent = m.purpose;
+    card.querySelector('.record-count').textContent = m.record_count;
+
+    // ISO 时间 → MM-DD HH:mm
+    var dt = new Date(m.updated_at);
+    var pad = function(n) { return String(n).padStart(2, '0'); };
+    card.querySelector('.updated-at').textContent =
+      '更新于 ' + pad(dt.getMonth() + 1) + '-' + pad(dt.getDate()) +
+      ' ' + pad(dt.getHours()) + ':' + pad(dt.getMinutes());
+
+    var visEl = card.querySelector('.visibility .v');
+    if (m.visibility === 'shared') {
+      visEl.className = 'v shared';
+      visEl.textContent = '已授权书记查看';
+    } else {
+      visEl.className = 'v private';
+      visEl.textContent = '仅自己';
+    }
+
+    card.querySelector('.enter').href =
+      'counselor_custom_module_records.html?mid=' + m.module_id;
+
+    list.appendChild(card);
+  });
+}
+
+// 切换可见性
+function toggleVisibility(event) {
+  event.preventDefault();
+  var card = event.currentTarget.closest('.module-card');
+  var mid = card.dataset.mid;
+  var current = card.dataset.visibility;
+  var next = current === 'shared' ? 'private' : 'shared';
+  var nextLabel = next === 'shared' ? '已授权书记查看' : '仅自己';
+  var name = card.querySelector('.name').textContent;
+
+  if (!confirm('将「' + name + '」改为「' + nextLabel + '」？\n\n(原型演示,实际将 PUT /api/me/custom-modules/' + mid + '/visibility)')) return;
+
+  card.dataset.visibility = next;
+  var visEl = card.querySelector('.visibility .v');
+  visEl.className = 'v ' + next;
+  visEl.textContent = nextLabel;
+  alert('已更新可见性(演示)');
+}
+
+// 新建模块弹层
 function openNewModuleModal() {
   document.getElementById('newModuleName').value = '';
   document.getElementById('newModulePurpose').value = '';
@@ -266,7 +310,7 @@ function closeNewModuleModal() {
   document.getElementById('newModuleModal').classList.remove('show');
 }
 function setNewModuleVis(v) {
-  document.querySelectorAll('#newModuleModal .opt span').forEach(el => {
+  document.querySelectorAll('#newModuleModal .opt span').forEach(function(el) {
     el.classList.toggle('on', el.dataset.vis === v);
   });
 }
@@ -279,6 +323,9 @@ function confirmNewModule() {
 document.getElementById('newModuleModal').addEventListener('click', function(e) {
   if (e.target.id === 'newModuleModal') closeNewModuleModal();
 });
+
+// 初始化
+renderModules();
 </script>
 </body>
 </html>
