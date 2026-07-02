@@ -31,6 +31,15 @@
         .filter-tab { padding: 12px 0; font-size: 13px; color: #6B7280; white-space: nowrap; position: relative; }
         .filter-tab.active { color: var(--color-primary); font-weight: bold; }
         .filter-tab.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: var(--color-primary); }
+        /* PR-F: xzd-hscroll 桌面鼠标/键盘增强 */
+        .xzd-hscroll { position: relative; }
+        .xzd-hscroll .hscroll-area { scroll-behavior: smooth; -webkit-overflow-scrolling: touch; cursor: grab; }
+        .xzd-hscroll .hscroll-area.dragging { cursor: grabbing; scroll-behavior: auto; }
+        .xzd-hscroll .nav-btn { position: absolute; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; background: rgba(255,255,255,0.95); border: 1px solid #E5E7EB; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 11; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.1); opacity: 0; transition: opacity 0.2s; color: #6B7280; font-size: 14px; }
+        .xzd-hscroll:hover .nav-btn, .xzd-hscroll .nav-btn:focus { opacity: 1; }
+        .xzd-hscroll .nav-btn.left { left: 4px; }
+        .xzd-hscroll .nav-btn.right { right: 4px; }
+        .xzd-hscroll .nav-btn.hidden { opacity: 0 !important; pointer-events: none; }
         .anomaly-card { background: #fff; border-radius: 16px; margin: 12px 16px; padding: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .home-indicator { height:34px; background:#fff; display:flex; justify-content:center; align-items:flex-end; padding-bottom:8px; flex-shrink:0; }
         .home-indicator .bar { width:134px; height:5px; border-radius:3px; background:#000; opacity:0.85; }
@@ -49,7 +58,9 @@
 <div class="nav-bar">
 <h1 class="text-base font-bold text-gray-900 mx-auto">异常跟进</h1>
 </div>
-<div class="filter-tabs no-scrollbar">
+<div class="xzd-hscroll" id="anomFilterCarousel">
+  <button class="nav-btn left hidden" id="anomFilterLeft" type="button" aria-label="向左滚动"><iconify-icon icon="solar:alt-arrow-left-linear"></iconify-icon></button>
+  <div class="filter-tabs hscroll-area no-scrollbar" id="anomFilterScroll" tabindex="0">
 <div class="filter-tab active" data-filter="all" style="cursor:pointer;">全部</div>
 <div class="filter-tab" data-filter="red" style="cursor:pointer;">红档</div>
 <div class="filter-tab" data-filter="yellow" style="cursor:pointer;">黄档</div>
@@ -59,6 +70,8 @@
 <div class="filter-tab" data-filter="已约谈" style="cursor:pointer;">已约谈</div>
 <div class="filter-tab" data-filter="已结案" style="cursor:pointer;">已结案</div>
 <div class="filter-tab" data-filter="未结案" style="cursor:pointer;">未结案</div>
+  </div>
+  <button class="nav-btn right" id="anomFilterRight" type="button" aria-label="向右滚动"><iconify-icon icon="solar:alt-arrow-right-linear"></iconify-icon></button>
 </div>
 <!-- 晚归专项入口 -->
 <a class="mx-4 mt-3 mb-1 flex items-center gap-3 p-3 bg-gradient-to-r from-blue-500 to-blue-500 text-white rounded-xl shadow-sm" href="counselor_late_returns.html">
@@ -71,14 +84,14 @@
 </div>
 <iconify-icon class="text-xl" icon="solar:alt-arrow-right-linear"></iconify-icon>
 </a>
-<!-- 班级异常看板入口 -->
-<a class="mx-4 mt-2 mb-1 flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100" href="counselor_class_anomaly_board.html">
+<!-- 班级异常看板入口 (PR-F: 合并到 data_analytics) -->
+<a class="mx-4 mt-2 mb-1 flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100" href="counselor_data_analytics.html?tab=board">
 <div class="w-10 h-10 rounded-xl bg-pink-50 flex items-center justify-center flex-shrink-0 text-pink-500">
   <iconify-icon class="text-xl" icon="solar:graph-new-up-bold-duotone"></iconify-icon>
 </div>
 <div class="flex-1 min-w-0">
   <div class="text-sm font-bold text-gray-900">班级异常看板</div>
-  <div class="text-[10px] text-gray-400 mt-0.5">按班级/年级/风险等级聚合查看</div>
+  <div class="text-[10px] text-gray-400 mt-0.5">按班级/年级/风险等级聚合查看(已合并到数据分析)</div>
 </div>
 <iconify-icon class="text-xl text-gray-300" icon="solar:alt-arrow-right-linear"></iconify-icon>
 </a>
@@ -239,6 +252,28 @@ document.querySelectorAll('.filter-tab').forEach(function(tab) {
   });
 });
 </script>
-
+<script>
+(function(){
+  var wrap = document.getElementById('anomFilterCarousel');
+  if (!wrap) return;
+  var scroll = wrap.querySelector('.hscroll-area');
+  var leftBtn = wrap.querySelector('.nav-btn.left');
+  var rightBtn = wrap.querySelector('.nav-btn.right');
+  if (!scroll || !leftBtn || !rightBtn) return;
+  function updateBtns(){
+    leftBtn.classList.toggle('hidden', scroll.scrollLeft <= 1);
+    rightBtn.classList.toggle('hidden', scroll.scrollLeft >= scroll.scrollWidth - scroll.clientWidth - 1);
+  }
+  leftBtn.addEventListener('click', function(){ scroll.scrollBy({left:-120, behavior:'smooth'}); });
+  rightBtn.addEventListener('click', function(){ scroll.scrollBy({left:120, behavior:'smooth'}); });
+  scroll.addEventListener('scroll', updateBtns, {passive:true}); updateBtns();
+  scroll.addEventListener('wheel', function(e){ if (e.deltaY === 0) return; e.preventDefault(); scroll.scrollLeft += e.deltaY; }, {passive:false});
+  var isDown=false, startX=0, startScroll=0;
+  scroll.addEventListener('mousedown', function(e){ isDown=true; startX=e.pageX; startScroll=scroll.scrollLeft; scroll.classList.add('dragging'); });
+  ['mouseleave','mouseup'].forEach(function(evt){ scroll.addEventListener(evt, function(){ isDown=false; scroll.classList.remove('dragging'); }); });
+  scroll.addEventListener('mousemove', function(e){ if (!isDown) return; e.preventDefault(); scroll.scrollLeft = startScroll - (e.pageX - startX) * 1.5; });
+  scroll.addEventListener('keydown', function(e){ if (e.key==='ArrowLeft'){e.preventDefault();scroll.scrollBy({left:-120,behavior:'smooth'});} if (e.key==='ArrowRight'){e.preventDefault();scroll.scrollBy({left:120,behavior:'smooth'});} });
+})();
+</script>
 </body>
 </html>

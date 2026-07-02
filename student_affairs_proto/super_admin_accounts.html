@@ -49,7 +49,8 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 .search-box { background:#fff; padding:10px 16px; border-bottom:1px solid var(--divider); }
 .search-box .row { display:flex; gap:8px; align-items:center; }
 .search-box input { flex:1; padding:9px 14px; background:#F5F5F5; border:0; border-radius:18px; font-size:13px; outline:none; }
-.chip-row { display:flex; gap:6px; padding:10px 16px; overflow-x:auto; background:#fff; border-bottom:1px solid var(--divider); }
+.chip-row { display:flex; gap:6px; padding:10px 16px; overflow-x:auto; background:#fff; border-bottom:1px solid var(--divider); cursor: grab; }
+.chip-row.dragging { cursor: grabbing; scroll-behavior: auto; }
 .chip { padding:4px 12px; background:#F5F5F5; color:var(--text-regular); border-radius:14px; font-size:12px; white-space:nowrap; }
 .chip.on { background:#EFF6FF; color:var(--color-primary); font-weight:600; }
 
@@ -87,35 +88,35 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 </div>
 
 <div class="nav-bar">
-<h1 class="flex-1 text-center text-base font-bold text-gray-900">账号管理</h1>
-<a class="text-xs text-blue-600 font-bold flex items-center gap-1" href="#" onclick="alert('导出名单(演示)'); return false;">
-<iconify-icon icon="solar:export-bold-duotone"></iconify-icon> 导出
-</a>
+  <h1 class="flex-1 text-center text-base font-bold text-gray-900">账号管理</h1>
+  <a class="text-xs text-blue-600 font-bold flex items-center gap-1" href="javascript:void(0);" onclick="onExport()">
+  <iconify-icon icon="solar:export-bold-duotone"></iconify-icon> 导出
+  </a>
 </div>
 
 <div class="content">
 <form id="xzdForm" onsubmit="event.preventDefault();" novalidate autocomplete="on">
 <div class="search-box">
 <div class="row">
-<input placeholder="🔍 搜索姓名 / 工号 / 学部"/>
-<a class="text-[11px] text-blue-600 font-bold" href="#" onclick="alert('高级筛选(演示)'); return false;">筛选</a>
+<input id="acctSearch" placeholder="🔍 搜索姓名 / 工号 / 学部" oninput="applyAcctFilters()"/>
+<a class="text-[11px] text-blue-600 font-bold" href="javascript:void(0);" onclick="onAdvanced()">筛选</a>
 </div>
 </div>
 
-<div class="chip-row">
-<span class="chip on">全部 86</span>
-<span class="chip">智能技术学部 42</span>
-<span class="chip">计算机学院 28</span>
-<span class="chip">电气学院 16</span>
-<span class="chip">已停用 5</span>
-<span class="chip">已锁定 2</span>
+<div class="chip-row" id="chipRow">
+<span class="chip on" data-filter="all" onclick="pickAcctChip(this)">全部 86</span>
+<span class="chip" data-filter="智能技术学部" onclick="pickAcctChip(this)">智能技术学部 42</span>
+<span class="chip" data-filter="计算机学院" onclick="pickAcctChip(this)">计算机学院 28</span>
+<span class="chip" data-filter="电气学院" onclick="pickAcctChip(this)">电气学院 16</span>
+<span class="chip" data-filter="停用" onclick="pickAcctChip(this)">已停用 5</span>
+<span class="chip" data-filter="锁定" onclick="pickAcctChip(this)">已锁定 2</span>
 </div>
 
 <div class="toolbar">
-<span class="h">共 <b>86</b> 个账号 · 按最近活跃排序</span>
+<span class="h">共 <b id="visibleCount">86</b> 个账号 · 按最近活跃排序</span>
 </div>
 
-<div class="acct-card">
+<div class="acct-card" data-dept="智能技术学部" data-status="正常" data-search="王辅导员 智能技术学部 wangjy@sit.edu.cn 12:20 辅导员">
 <div class="av"><img alt="" src="https://ui-avatars.com/api/?name=王&background=1E5AE6&color=fff&size=64&bold=true&font-size=0.5"/></div>
 <div class="info">
 <div class="name">王辅导员 <span class="role">辅导员</span></div>
@@ -124,7 +125,7 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 <span class="status on">正常</span>
 </div>
 
-<div class="acct-card">
+<div class="acct-card" data-dept="智能技术学部" data-status="正常" data-search="刘书记 智能技术学部 liusj@sit.edu.cn 11:58 学工书记">
 <div class="av"><img alt="" src="https://ui-avatars.com/api/?name=刘&background=1E5AE6&color=fff&size=64&bold=true&font-size=0.5"/></div>
 <div class="info">
 <div class="name">刘书记 <span class="role sec">学工书记</span></div>
@@ -133,7 +134,7 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 <span class="status on">正常</span>
 </div>
 
-<div class="acct-card">
+<div class="acct-card" data-dept="平台级" data-status="正常" data-search="李工 lig@sit.edu.cn 技术人员 平台级 仅运维">
 <div class="av" style="background:#1a1a1a;color:#fff;display:flex;align-items:center;justify-content:center;">
 <iconify-icon icon="solar:settings-bold"></iconify-icon>
 </div>
@@ -144,7 +145,7 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 <span class="status on">正常</span>
 </div>
 
-<div class="acct-card">
+<div class="acct-card" data-dept="计算机学院" data-status="正常" data-search="陈辅导员 计算机学院 chenxj@sit.edu.cn 辅导员 昨日">
 <div class="av"><img alt="" src="https://ui-avatars.com/api/?name=陈&background=1E5AE6&color=fff&size=64&bold=true&font-size=0.5"/></div>
 <div class="info">
 <div class="name">陈辅导员 <span class="role">辅导员</span></div>
@@ -153,7 +154,7 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 <span class="status on">正常</span>
 </div>
 
-<div class="acct-card">
+<div class="acct-card" data-dept="电气学院" data-status="正常" data-search="赵书记 电气学院 zhaosw@sit.edu.cn 学工书记">
 <div class="av"><img alt="" src="https://ui-avatars.com/api/?name=赵&background=1E5AE6&color=fff&size=64&bold=true&font-size=0.5"/></div>
 <div class="info">
 <div class="name">赵书记 <span class="role sec">学工书记</span></div>
@@ -162,7 +163,7 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 <span class="status on">正常</span>
 </div>
 
-<div class="acct-card">
+<div class="acct-card" data-dept="智能技术学部" data-status="锁定" data-search="孙辅导员 智能技术学部 连续 5 次登录失败 已锁定">
 <div class="av"><img alt="" src="https://ui-avatars.com/api/?name=孙&background=1E5AE6&color=fff&size=64&bold=true&font-size=0.5"/></div>
 <div class="info">
 <div class="name">孙辅导员 <span class="role">辅导员</span></div>
@@ -171,7 +172,7 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 <span class="status lock">锁定</span>
 </div>
 
-<div class="acct-card">
+<div class="acct-card" data-dept="智能技术学部" data-status="停用" data-search="李辅导员 智能技术学部 申请停用 2024-12-01">
 <div class="av"><img alt="" src="https://ui-avatars.com/api/?name=李&background=1E5AE6&color=fff&size=64&bold=true&font-size=0.5"/></div>
 <div class="info">
 <div class="name">李辅导员 <span class="role">辅导员</span></div>
@@ -180,7 +181,7 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 <span class="status off">停用</span>
 </div>
 
-<div class="acct-card">
+<div class="acct-card" data-dept="计算机学院" data-status="正常" data-search="周辅导员 计算机学院 zhouyq@sit.edu.cn 09:15">
 <div class="av"><img alt="" src="https://ui-avatars.com/api/?name=周&background=1E5AE6&color=fff&size=64&bold=true&font-size=0.5"/></div>
 <div class="info">
 <div class="name">周辅导员 <span class="role">辅导员</span></div>
@@ -190,7 +191,7 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 </div>
 </div>
 
-<a class="fab" href="#" onclick="alert('新建账号(演示)。完整流程见 secretary_counselor_new.html'); return false;">
+<a class="fab" href="javascript:void(0);" onclick="onCreate()">
 <iconify-icon class="text-2xl" icon="solar:add-circle-bold"></iconify-icon>
 </a>
 
@@ -219,5 +220,64 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 
 <div class="home-indicator"><div class="bar"></div></div>
 </div>
+<script>
+function showToast(msg) {
+  var t = document.createElement('div');
+  t.style.cssText = 'position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;z-index:99;';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function(){ t.remove(); }, 1500);
+}
+function pickAcctChip(chip) {
+  document.querySelectorAll('#chipRow .chip').forEach(function(c){ c.classList.remove('on'); });
+  chip.classList.add('on');
+  applyAcctFilters();
+}
+function applyAcctFilters() {
+  var f = (document.querySelector('#chipRow .chip.on') || {}).dataset || {};
+  var key = f.filter || 'all';
+  var q = (document.getElementById('acctSearch').value || '').trim().toLowerCase();
+  var cards = document.querySelectorAll('.acct-card');
+  var visible = 0;
+  cards.forEach(function(c){
+    var ok = true;
+    if (key === '停用' || key === '锁定') {
+      if (c.dataset.status !== key) ok = false;
+    } else if (key !== 'all') {
+      if (c.dataset.dept !== key) ok = false;
+    }
+    if (ok && q) {
+      var hay = (c.dataset.search || c.innerText).toLowerCase();
+      if (hay.indexOf(q) < 0) ok = false;
+    }
+    c.style.display = ok ? '' : 'none';
+    if (ok) visible++;
+  });
+  var vc = document.getElementById('visibleCount');
+  if (vc) vc.textContent = visible;
+}
+function onExport() { showToast('已导出当前筛选账号(演示)'); }
+function onAdvanced() { showToast('高级筛选(演示)'); }
+function onCreate() { showToast('新建账号(演示)。完整流程见 secretary_counselor_new.html'); }
+(function(){
+  var p = new URLSearchParams(window.location.search);
+  var f = p.get('filter') || p.get('dept');
+  if (f) {
+    var chip = document.querySelector('#chipRow .chip[data-filter="' + f + '"]');
+    if (chip) pickAcctChip(chip);
+  }
+})();
+
+/* PR-F: xzd-hscroll 增强(对 .chip-row) */
+(function(){
+  var row = document.querySelector('.chip-row');
+  if (!row) return;
+  var isDown = false, startX = 0, startScroll = 0;
+  row.addEventListener('mousedown', function(e){ isDown = true; startX = e.pageX; startScroll = row.scrollLeft; row.classList.add('dragging'); });
+  ['mouseleave','mouseup'].forEach(function(evt){ row.addEventListener(evt, function(){ isDown = false; row.classList.remove('dragging'); }); });
+  row.addEventListener('mousemove', function(e){ if (!isDown) return; e.preventDefault(); row.scrollLeft = startScroll - (e.pageX - startX) * 1.5; });
+  row.addEventListener('wheel', function(e){ if (e.deltaY === 0) return; e.preventDefault(); row.scrollLeft += e.deltaY; }, {passive:false});
+})();
+</script>
 </body>
 </html>

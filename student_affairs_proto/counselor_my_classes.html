@@ -92,62 +92,30 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
     <div class="cell"><div class="num">4</div><div class="label">重点关注</div></div>
   </div>
 
-  <a class="class-card" href="counselor_students.html">
-    <div class="icon"><iconify-icon icon="solar:users-group-rounded-bold-duotone"></iconify-icon></div>
-    <div class="info">
-      <div class="name">计科1班 <span class="text-xs font-normal text-gray-400 ml-1">2024级(1)班</span></div>
-      <div class="sub">辅导员:王辅导员</div>
-      <div class="stats">
-        <span class="s"><span class="v">32</span>人</span>
-        <span class="s"><span class="v" style="color:var(--danger);">2</span>重点</span>
-        <span class="s">近 30 天 <span class="v">3</span> 次异常</span>
-      </div>
-    </div>
-    <iconify-icon class="arrow" icon="solar:alt-arrow-right-linear"></iconify-icon>
-  </a>
-
-  <a class="class-card" href="counselor_students.html">
-    <div class="icon"><iconify-icon icon="solar:users-group-rounded-bold-duotone"></iconify-icon></div>
-    <div class="info">
-      <div class="name">计科2班 <span class="text-xs font-normal text-gray-400 ml-1">2024级(2)班</span></div>
-      <div class="sub">辅导员:王辅导员</div>
-      <div class="stats">
-        <span class="s"><span class="v">34</span>人</span>
-        <span class="s"><span class="v" style="color:var(--danger);">1</span>重点</span>
-        <span class="s">近 30 天 <span class="v">5</span> 次异常</span>
-      </div>
-    </div>
-    <iconify-icon class="arrow" icon="solar:alt-arrow-right-linear"></iconify-icon>
-  </a>
-
-  <a class="class-card" href="counselor_students.html">
-    <div class="icon"><iconify-icon icon="solar:users-group-rounded-bold-duotone"></iconify-icon></div>
-    <div class="info">
-      <div class="name">软工1班 <span class="text-xs font-normal text-gray-400 ml-1">2024级(3)班</span></div>
-      <div class="sub">辅导员:王辅导员</div>
-      <div class="stats">
-        <span class="s"><span class="v">30</span>人</span>
-        <span class="s">近 30 天 <span class="v">1</span> 次异常</span>
-      </div>
-    </div>
-    <iconify-icon class="arrow" icon="solar:alt-arrow-right-linear"></iconify-icon>
-  </a>
-
-  <a class="class-card" href="counselor_students.html">
-    <div class="icon"><iconify-icon icon="solar:users-group-rounded-bold-duotone"></iconify-icon></div>
-    <div class="info">
-      <div class="name">大数据1班 <span class="text-xs font-normal text-gray-400 ml-1">2024级(4)班</span></div>
-      <div class="sub">辅导员:王辅导员</div>
-      <div class="stats">
-        <span class="s"><span class="v">32</span>人</span>
-        <span class="s"><span class="v" style="color:var(--danger);">1</span>重点</span>
-        <span class="s">近 30 天 <span class="v">2</span> 次异常</span>
-      </div>
-    </div>
-    <iconify-icon class="arrow" icon="solar:alt-arrow-right-linear"></iconify-icon>
-  </a>
+  <div id="classList"></div>
 </div>
 <div class="home-indicator"><div class="bar"></div></div>
 </div>
+<script>
+(function(){
+  var data = JSON.parse(document.getElementById('page-data').textContent);
+  var list = document.getElementById('classList');
+  list.innerHTML = data.classes.map(function(c){
+    var stats = '<span class="s"><span class="v">' + c.student_count + '</span>人</span>';
+    if (c.focus_count > 0) stats += '<span class="s"><span class="v" style="color:var(--danger);">' + c.focus_count + '</span>重点</span>';
+    stats += '<span class="s">近 30 天 <span class="v">' + c.anomaly_count_30d + '</span> 次异常</span>';
+    var gradeN = (parseInt(c.grade,10) - 2023);
+    return '<a class="class-card" href="counselor_students.html?class=' + encodeURIComponent(c.class_name) + '" data-class-id="' + c.class_id + '" data-class-name="' + c.class_name + '">' +
+      '<div class="icon"><iconify-icon icon="solar:users-group-rounded-bold-duotone"></iconify-icon></div>' +
+      '<div class="info">' +
+        '<div class="name">' + c.class_name + ' <span class="text-xs font-normal text-gray-400 ml-1">' + c.grade + '级(' + gradeN + ')班</span></div>' +
+        '<div class="sub">辅导员:' + c.counselor_name + '</div>' +
+        '<div class="stats">' + stats + '</div>' +
+      '</div>' +
+      '<iconify-icon class="arrow" icon="solar:alt-arrow-right-linear"></iconify-icon>' +
+    '</a>';
+  }).join('');
+})();
+</script>
 </body>
 </html>

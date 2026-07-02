@@ -38,7 +38,16 @@ body { background-color: #1a1a1a; display: flex; justify-content: center; align-
 .tab-item span { font-size: 11px; }
 .plus-tab { width: 52px; height: 52px; background: var(--color-primary); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #fff; position: absolute; top: -16px; left: 50%; transform: translateX(-50%); box-shadow: 0 4px 12px rgba(30, 90, 230, 0.4); border: 2px solid #fff; }
 
-.filter-tabs { display: flex; background: #fff; padding: 0 16px; gap: 20px; border-bottom: 1px solid var(--divider); overflow-x: auto; flex-shrink: 0; }
+.filter-tabs { display: flex; background: #fff; padding: 0 16px; gap: 20px; border-bottom: 1px solid var(--divider); overflow-x: auto; flex-shrink: 0; cursor: grab; }
+.filter-tabs.dragging { cursor: grabbing; scroll-behavior: auto; }
+.xzd-hscroll { position: relative; }
+.xzd-hscroll .hscroll-area { scroll-behavior: smooth; -webkit-overflow-scrolling: touch; cursor: grab; }
+.xzd-hscroll .hscroll-area.dragging { cursor: grabbing; scroll-behavior: auto; }
+.xzd-hscroll .nav-btn { position: absolute; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; background: rgba(255,255,255,0.95); border: 1px solid #E5E7EB; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 11; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.1); opacity: 0; transition: opacity 0.2s; color: #6B7280; font-size: 14px; }
+.xzd-hscroll:hover .nav-btn, .xzd-hscroll .nav-btn:focus { opacity: 1; }
+.xzd-hscroll .nav-btn.left { left: 4px; }
+.xzd-hscroll .nav-btn.right { right: 4px; }
+.xzd-hscroll .nav-btn.hidden { opacity: 0 !important; pointer-events: none; }
 .filter-tab { padding: 12px 0; font-size: 13px; color: #6B7280; white-space: nowrap; position: relative; }
 .filter-tab.active { color: var(--color-primary); font-weight: 600; }
 .filter-tab.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: var(--color-primary); }
@@ -318,6 +327,17 @@ document.querySelectorAll('.filter-tab').forEach(tab => {
     });
   });
 });
+
+/* PR-F: xzd-hscroll 鼠标/键盘增强(对 .filter-tabs 容器) */
+(function(){
+  var tabs = document.querySelector('.filter-tabs');
+  if (!tabs) return;
+  var isDown = false, startX = 0, startScroll = 0;
+  tabs.addEventListener('mousedown', function(e){ isDown = true; startX = e.pageX; startScroll = tabs.scrollLeft; tabs.classList.add('dragging'); });
+  ['mouseleave','mouseup'].forEach(function(evt){ tabs.addEventListener(evt, function(){ isDown = false; tabs.classList.remove('dragging'); }); });
+  tabs.addEventListener('mousemove', function(e){ if (!isDown) return; e.preventDefault(); tabs.scrollLeft = startScroll - (e.pageX - startX) * 1.5; });
+  tabs.addEventListener('wheel', function(e){ if (e.deltaY === 0) return; e.preventDefault(); tabs.scrollLeft += e.deltaY; }, {passive:false});
+})();
 </script>
 
 </body>

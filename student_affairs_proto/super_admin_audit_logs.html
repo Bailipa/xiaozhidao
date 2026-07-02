@@ -49,7 +49,8 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 .search-box { background:#fff; padding:10px 16px; border-bottom:1px solid var(--divider); }
 .search-box .row { display:flex; gap:8px; align-items:center; }
 .search-box input { flex:1; padding:9px 14px; background:#F5F5F5; border:0; border-radius:18px; font-size:13px; outline:none; }
-.chip-row { display:flex; gap:6px; padding:10px 16px; overflow-x:auto; background:#fff; border-bottom:1px solid var(--divider); }
+.chip-row { display:flex; gap:6px; padding:10px 16px; overflow-x:auto; background:#fff; border-bottom:1px solid var(--divider); cursor: grab; }
+.chip-row.dragging { cursor: grabbing; scroll-behavior: auto; }
 .chip { padding:4px 12px; background:#F5F5F5; color:var(--text-regular); border-radius:14px; font-size:12px; white-space:nowrap; }
 .chip.on { background:#EFF6FF; color:var(--color-primary); font-weight:600; }
 
@@ -96,28 +97,28 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 </div>
 
 <div class="nav-bar">
-<h1 class="flex-1 text-center text-base font-bold text-gray-900">审计日志</h1>
-<a class="text-xs text-blue-600 font-bold flex items-center gap-1" href="#" onclick="alert('导出 CSV(演示)'); return false;">
-<iconify-icon icon="solar:export-bold-duotone"></iconify-icon> 导出
-</a>
+  <h1 class="flex-1 text-center text-base font-bold text-gray-900">审计日志</h1>
+  <a class="text-xs text-blue-600 font-bold flex items-center gap-1" href="javascript:void(0);" onclick="onExport()">
+  <iconify-icon icon="solar:export-bold-duotone"></iconify-icon> 导出
+  </a>
 </div>
 
 <div class="content">
 <form id="xzdForm" onsubmit="event.preventDefault();" novalidate autocomplete="on">
 <div class="search-box">
 <div class="row">
-<input id="auditSearch" name="auditSearch" placeholder="🔍 操作人 / 操作对象 / IP" value=""/>
-<a class="text-[11px] text-blue-600 font-bold" href="#" onclick="alert('高级筛选(演示)'); return false;">筛选</a>
+<input id="auditSearch" name="auditSearch" placeholder="🔍 操作人 / 操作对象 / IP" value="" oninput="applyFilters()"/>
+<a class="text-[11px] text-blue-600 font-bold" href="javascript:void(0);" onclick="onAdvanced()">筛选</a>
 </div>
 </div>
 
-<div class="chip-row">
-<span class="chip on">全部</span>
-<span class="chip">账号操作</span>
-<span class="chip">数据写操作</span>
-<span class="chip">敏感数据访问</span>
-<span class="chip">登录/登出</span>
-<span class="chip">异常告警</span>
+<div class="chip-row" id="chipRow">
+<span class="chip on" data-filter="all" onclick="pickChip(this)">全部</span>
+<span class="chip" data-filter="account" onclick="pickChip(this)">账号操作</span>
+<span class="chip" data-filter="data" onclick="pickChip(this)">数据写操作</span>
+<span class="chip" data-filter="sensitive" onclick="pickChip(this)">敏感数据访问</span>
+<span class="chip" data-filter="login" onclick="pickChip(this)">登录/登出</span>
+<span class="chip" data-filter="alert" onclick="pickChip(this)">异常告警</span>
 </div>
 
 <div class="banner">
@@ -133,7 +134,7 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 
 <div class="day-h">今天 · 6月30日 <span class="meta">12 条</span></div>
 
-<div class="log-row security high">
+<div class="log-row security high" data-cat="alert,account" data-search="刘书记 liusj 系统自动 203.0.113.42 锁定">
 <div class="head">
 <span class="time">12:20:45</span>
 <span class="op security">账号异常</span>
@@ -149,7 +150,7 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 </div>
 </div>
 
-<div class="log-row info">
+<div class="log-row info" data-cat="account" data-search="刘书记 王辅导员 数据看板 10.0.1.42">
 <div class="head">
 <span class="time">12:21:08</span>
 <span class="op update">权限调整</span>
@@ -165,7 +166,7 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 </div>
 </div>
 
-<div class="log-row info">
+<div class="log-row info" data-cat="data" data-search="王辅导员 AN2026063001 张晓明 异常 已约谈">
 <div class="head">
 <span class="time">11:40:22</span>
 <span class="op update">异常处理</span>
@@ -181,7 +182,7 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 </div>
 </div>
 
-<div class="log-row info">
+<div class="log-row info" data-cat="data" data-search="王辅导员 门禁流水 导入 125 118 7">
 <div class="head">
 <span class="time">10:32:15</span>
 <span class="op create">数据导入</span>
@@ -198,7 +199,7 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 
 <div class="day-h">昨天 · 6月29日 <span class="meta">38 条</span></div>
 
-<div class="log-row info">
+<div class="log-row info" data-cat="data" data-search="王辅导员 L012 张晓明 谈心谈话 286">
 <div class="head">
 <span class="time">16:48:30</span>
 <span class="op create">日志创建</span>
@@ -213,7 +214,7 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 </div>
 </div>
 
-<div class="log-row security">
+<div class="log-row security" data-cat="account,sensitive" data-search="刘书记 周辅导员 重置 密码 OP2026062901">
 <div class="head">
 <span class="time">14:22:18</span>
 <span class="op security">密码重置</span>
@@ -229,7 +230,7 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 </div>
 </div>
 
-<div class="log-row info">
+<div class="log-row info" data-cat="login" data-search="李工 lig 10.0.0.5 后台 super_admin">
 <div class="head">
 <span class="time">09:15:42</span>
 <span class="op login">登录</span>
@@ -246,7 +247,7 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 
 <div class="day-h">6月28日 <span class="meta">查看更多 →</span></div>
 
-<div class="log-row info">
+<div class="log-row info" data-cat="account" data-search="刘书记 谢辅导员 xiet 创建 初始化">
 <div class="head">
 <span class="time">17:08:55</span>
 <span class="op create">账号创建</span>
@@ -287,5 +288,58 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 
 <div class="home-indicator"><div class="bar"></div></div>
 </div>
+<script>
+function showToast(msg) {
+  var t = document.createElement('div');
+  t.style.cssText = 'position:fixed;left:50%;bottom:80px;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;z-index:99;';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function(){ t.remove(); }, 1600);
+}
+function pickChip(chip) {
+  document.querySelectorAll('#chipRow .chip').forEach(function(c){ c.classList.remove('on'); });
+  chip.classList.add('on');
+  applyFilters();
+}
+function applyFilters() {
+  var cat = (document.querySelector('#chipRow .chip.on') || {}).dataset || {};
+  var catKey = cat.filter || 'all';
+  var q = (document.getElementById('auditSearch').value || '').trim().toLowerCase();
+  var rows = document.querySelectorAll('.log-row');
+  rows.forEach(function(r){
+    var show = true;
+    if (catKey !== 'all') {
+      var cats = (r.dataset.cat || '').split(',');
+      if (cats.indexOf(catKey) < 0) show = false;
+    }
+    if (show && q) {
+      var hay = (r.dataset.search || r.innerText).toLowerCase();
+      if (hay.indexOf(q) < 0) show = false;
+    }
+    r.style.display = show ? '' : 'none';
+  });
+}
+function onExport() { showToast('已导出当前筛选结果(演示)'); }
+function onAdvanced() { showToast('高级筛选(演示):已弹出时间范围'); }
+/* PR-F: ?filter= 预选 chip */
+(function(){
+  var f = new URLSearchParams(window.location.search).get('filter');
+  if (f) {
+    var chip = document.querySelector('#chipRow .chip[data-filter="' + f + '"]');
+    if (chip) { pickChip(chip); }
+  }
+})();
+
+/* PR-F: xzd-hscroll 增强 */
+(function(){
+  var row = document.querySelector('.chip-row');
+  if (!row) return;
+  var isDown = false, startX = 0, startScroll = 0;
+  row.addEventListener('mousedown', function(e){ isDown = true; startX = e.pageX; startScroll = row.scrollLeft; row.classList.add('dragging'); });
+  ['mouseleave','mouseup'].forEach(function(evt){ row.addEventListener(evt, function(){ isDown = false; row.classList.remove('dragging'); }); });
+  row.addEventListener('mousemove', function(e){ if (!isDown) return; e.preventDefault(); row.scrollLeft = startScroll - (e.pageX - startX) * 1.5; });
+  row.addEventListener('wheel', function(e){ if (e.deltaY === 0) return; e.preventDefault(); row.scrollLeft += e.deltaY; }, {passive:false});
+})();
+</script>
 </body>
 </html>

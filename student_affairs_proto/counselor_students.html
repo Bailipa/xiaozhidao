@@ -332,6 +332,19 @@ function showToast(msg) {
   setTimeout(() => t.remove(), 1500);
 }
 document.getElementById('studentSearch').addEventListener('input', applyAllFilters);
+
+/* PR-F: ?class= URL 参数预选班级 chip 并触发筛选 */
+(function(){
+  var p = new URLSearchParams(window.location.search);
+  var cls = p.get('class');
+  if (cls) {
+    var chip = document.querySelector('.filter-chip[data-type="class"]');
+    if (chip) {
+      chip.firstChild.textContent = cls + ' ';
+      applyAllFilters();
+    }
+  }
+})();
 </script></form>
 
 

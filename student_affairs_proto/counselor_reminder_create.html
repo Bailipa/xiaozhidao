@@ -41,7 +41,8 @@
         .picker-header .cancel { font-size: 14px; color: #6B7280; cursor: pointer; }
         .picker-search { padding: 12px 16px 4px; flex-shrink: 0; }
         .picker-search input { width: 100%; padding: 10px 12px; background: #F5F5F5; border: 0; border-radius: 10px; font-size: 14px; outline: none; box-sizing: border-box; }
-        .picker-filters { display: flex; gap: 8px; padding: 8px 16px; overflow-x: auto; flex-shrink: 0; }
+        .picker-filters { display: flex; gap: 8px; padding: 8px 16px; overflow-x: auto; flex-shrink: 0; cursor: grab; }
+        .picker-filters.dragging { cursor: grabbing; scroll-behavior: auto; }
         .picker-chip { padding: 5px 12px; background: #F5F5F5; color: #444; border-radius: 14px; font-size: 12px; white-space: nowrap; border: 1px solid transparent; cursor: pointer; flex-shrink: 0; }
         .picker-chip.on { background: #EFF6FF; color: #1E5AE6; border-color: #1E5AE6; font-weight: 600; }
         .picker-list { flex: 1; overflow-y: auto; }
@@ -267,16 +268,15 @@
           renderStudentList();
         }
         function toggleClassSelection(cls) {
-          const classStudentNos = STUDENTS.filter(s => s.class === cls).map(s => s.no);
-          const allSelected = classStudentNos.every(no => pickerState.selected.has(no));
+          const classKey = '__class:' + cls;
           if (pickerState.mode === 'single') {
             pickerState.selected.clear();
-            pickerState.selected.add('__class:' + cls);
+            pickerState.selected.add(classKey);
           } else {
-            if (allSelected) {
-              classStudentNos.forEach(no => pickerState.selected.delete(no));
+            if (pickerState.selected.has(classKey)) {
+              pickerState.selected.delete(classKey);
             } else {
-              classStudentNos.forEach(no => pickerState.selected.add(no));
+              pickerState.selected.add(classKey);
             }
           }
           renderStudentList();
@@ -309,6 +309,17 @@
             display.textContent = '自定义 (' + classStudents.size + ' 人)';
           }
         }
+    /* PR-F: xzd-hscroll 鼠标拖拽 + 滚轮 hijack (对 .picker-filters) */
+    (function(){
+      var els = document.querySelectorAll('.picker-filters');
+      els.forEach(function(tabs){
+        var isDown = false, startX = 0, startScroll = 0;
+        tabs.addEventListener('mousedown', function(e){ isDown = true; startX = e.pageX; startScroll = tabs.scrollLeft; tabs.classList.add('dragging'); });
+        ['mouseleave','mouseup'].forEach(function(evt){ tabs.addEventListener(evt, function(){ isDown = false; tabs.classList.remove('dragging'); }); });
+        tabs.addEventListener('mousemove', function(e){ if (!isDown) return; e.preventDefault(); tabs.scrollLeft = startScroll - (e.pageX - startX) * 1.5; });
+        tabs.addEventListener('wheel', function(e){ if (e.deltaY === 0) return; e.preventDefault(); tabs.scrollLeft += e.deltaY; }, {passive:false});
+      });
+    })();
     </script></form>
 
 </body>
