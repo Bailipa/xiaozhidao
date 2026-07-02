@@ -266,7 +266,6 @@ body { background-color: #1a1a1a; display: flex; justify-content: center; align-
 <div class="parent-info">
 <div class="row"><span class="k">关系</span><span class="v" id="parentRelation" style="font-family:-apple-system,sans-serif;">—</span></div>
 <div class="row"><span class="k">手机号</span><span class="v mono" id="parentPhone">—</span></div>
-<div class="row"><span class="k">工作单位</span><span class="v" id="parentWork" style="font-family:-apple-system,sans-serif;">—</span></div>
 </div>
 <div class="flex gap-3">
 <button class="flex-1 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold" onclick="hideParentContact()">关闭</button>
@@ -287,17 +286,16 @@ body { background-color: #1a1a1a; display: flex; justify-content: center; align-
     "parent": null | {
       "name":"string",
       "relation":"父亲|母亲|其他",
-      "phone":"完整 11 位手机号",
-      "work":"string"
+      "phone":"完整 11 位手机号"
     }
   }
 */
 var parents = {
-  "张三": { name: "张大伟", relation: "父亲 · 张大伟", phone: "139 1234 5678", tel: "13912345678", work: "上海电气集团" },
-  "王五": { name: "王建国", relation: "父亲 · 王建国", phone: "138 8765 4321", tel: "13887654321", work: "中铁建设" },
-  "李四": { name: "李秀英", relation: "母亲 · 李秀英", phone: "186 1111 2222", tel: "18611112222", work: "自由职业" },
-  "钱七": { name: "钱爱国", relation: "父亲 · 钱爱国", phone: "137 5555 6666", tel: "13755556666", work: "奉贤中学" },
-  "赵六": { name: "赵美华", relation: "母亲 · 赵美华", phone: "189 3333 4444", tel: "18933334444", work: "社区卫生中心" }
+  "张三": { name: "张大伟", relation: "父亲 · 张大伟", phone: "139 1234 5678", tel: "13912345678" },
+  "王五": { name: "王建国", relation: "父亲 · 王建国", phone: "138 8765 4321", tel: "13887654321" },
+  "李四": { name: "李秀英", relation: "母亲 · 李秀英", phone: "186 1111 2222", tel: "18611112222" },
+  "钱七": { name: "钱爱国", relation: "父亲 · 钱爱国", phone: "137 5555 6666", tel: "13755556666" },
+  "赵六": { name: "赵美华", relation: "母亲 · 赵美华", phone: "189 3333 4444", tel: "18933334444" }
 };
 function showParentContact(studentName) {
   var p = parents[studentName];
@@ -305,7 +303,6 @@ function showParentContact(studentName) {
   document.getElementById("parentAvatar").textContent = p.name.charAt(0);
   document.getElementById("parentRelation").textContent = p.relation;
   document.getElementById("parentPhone").textContent = p.phone;
-  document.getElementById("parentWork").textContent = p.work;
   document.getElementById("parentHint").textContent = "拨打 " + studentName + " 的家长电话将被记录";
   document.getElementById("parentCallBtn").setAttribute("href", "tel:" + p.tel);
   document.getElementById("parentModal").classList.remove("hidden");
