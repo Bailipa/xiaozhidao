@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>学生详情 - 学工助手</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+:root { --color-primary:#1E5AE6; --color-danger:#DC2626; --color-warning:#F59E0B; --color-risk-low:#3B82F6; --bg-page:#F7F7F7; --divider:#F0F0F0; --text-primary:#191919; --text-regular:#444; --text-secondary:#888; }
+body { background-color:#1a1a1a; display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0; font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; }
+.phone-shell { width:375px; height:812px; background:var(--bg-page); border-radius:40px; overflow:hidden; position:relative; display:flex; flex-direction:column; box-shadow:0 0 50px rgba(0,0,0,0.5); border:8px solid #333; }
+.status-bar { height:44px; padding:0 20px; display:flex; justify-content:space-between; align-items:center; font-size:14px; color:#000; flex-shrink:0; }
+.nav-bar { height:44px; display:flex; align-items:center; padding:0 16px; background:#fff; flex-shrink:0; }
+.content { flex:1; overflow-y:auto; }
+.card { background:#fff; border-radius:16px; margin:12px 16px; padding:16px; box-shadow:0 1px 2px rgba(0,0,0,0.02); }
+.home-indicator { height:34px; background:#fff; display:flex; justify-content:center; align-items:flex-end; padding-bottom:8px; flex-shrink:0; }
+.home-indicator .bar { width:134px; height:5px; border-radius:3px; background:#000; opacity:0.85; }
+
+.tab-bar { display:flex; background:#fff; border-bottom:1px solid var(--divider); padding:0 8px; }
+.tab-bar a { flex:1; padding:10px 0; font-size:13px; color:var(--text-secondary); text-align:center; text-decoration:none; position:relative; }
+.tab-bar a.on { color:var(--color-primary); font-weight:600; }
+.tab-bar a.on::after { content:''; position:absolute; bottom:0; left:20%; right:20%; height:2px; background:var(--color-primary); border-radius:2px; }
+
+.risk-tag { display:inline-flex; align-items:center; gap:3px; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:600; }
+.risk-tag.high { background:#FEE2E2; color:var(--color-danger); }
+.risk-tag.mid { background:#FEF3C7; color:#B45309; }
+.risk-tag.low { background:#DBEAFE; color:var(--color-risk-low); }
+.risk-tag.none { background:#F3F4F6; color:var(--text-secondary); }
+
+.section-title { padding:14px 20px 6px; font-size:12px; color:var(--text-secondary); font-weight:600; }
+
+.list-item { display:flex; align-items:flex-start; gap:12px; padding:12px 0; border-bottom:1px solid var(--divider); }
+.list-item:last-child { border-bottom:0; }
+.list-item .dot { width:8px; height:8px; border-radius:50%; background:var(--color-primary); margin-top:6px; flex-shrink:0; }
+.list-item .body { flex:1; min-width:0; }
+.list-item .h { font-size:13px; font-weight:600; color:var(--text-primary); }
+.list-item .meta { font-size:11px; color:var(--text-secondary); margin-top:2px; }
+.list-item .desc { font-size:12px; color:var(--text-regular); margin-top:6px; line-height:1.6; }
+
+.kv { display:grid; grid-template-columns:80px 1fr; gap:10px 12px; font-size:13px; }
+.kv .k { color:var(--text-secondary); }
+.kv .v { color:var(--text-primary); font-weight:500; }
+
+.phone-masked { font-family:monospace; letter-spacing:1px; }
+.view-action { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--divider); }
+.view-action:last-child { border-bottom:0; }
+.view-action .label { font-size:13px; color:var(--text-primary); }
+.view-action a { font-size:11px; color:var(--color-primary); text-decoration:none; }
+
+.empty { text-align:center; padding:40px 20px; color:var(--text-secondary); font-size:12px; }
+.empty iconify-icon { font-size:36px; color:#E5E7EB; display:block; margin-bottom:8px; }
+
+.cat-pill { display:inline-block; padding:1px 6px; border-radius:4px; font-size:9px; font-weight:600; margin-right:4px; }
+.cat-pill.c1 { background:#E8F0FE; color:var(--color-primary); }
+.cat-pill.c2 { background:#FEF3C7; color:#B45309; }
+.cat-pill.c3 { background:#D1FAE5; color:#047857; }
+.cat-pill.c4 { background:#DCFCE7; color:#15803D; }
+.cat-pill.c5 { background:#FEE2E2; color:var(--color-danger); }
+</style>
+</head>
+<body>
+<div class="phone-shell">
+<div class="status-bar">
+<span>12:20</span>
+<div class="flex gap-1.5">
+<iconify-icon icon="mingcute:signal-fill"></iconify-icon>
+<iconify-icon icon="mingcute:wifi-fill"></iconify-icon>
+<iconify-icon icon="mingcute:battery-fill"></iconify-icon>
+</div>
+</div>
+<div class="nav-bar">
+<a class="p-2 -ml-2" href="counselor_students.html"><iconify-icon class="text-xl" icon="solar:alt-arrow-left-linear"></iconify-icon></a>
+<h1 class="flex-1 text-center text-base font-bold text-gray-900">学生详情</h1>
+</div>
+
+<div class="content pb-10">
+<div class="card flex items-center gap-4">
+<div class="w-16 h-16 rounded-full overflow-hidden border-2 border-blue-50 flex-shrink-0">
+<img alt="Student" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=张&background=1E5AE6&color=fff&size=128&bold=true&font-size=0.5"/>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-2">
+<span class="text-lg font-bold text-gray-900">张晓明</span>
+<span class="risk-tag high">红档风险</span>
+</div>
+<div class="text-xs text-gray-500 mt-0.5">计算机系 2024级(3)班 · 2024001 · 男</div>
+</div>
+</div>
+
+<div class="tab-bar">
+<a class="on" href="#tab1">基本信息</a>
+<a href="#tab2">谈心谈话</a>
+<a href="#tab3">异常记录</a>
+<a href="#tab4">风险预警</a>
+<a href="#tab5">工作日志</a>
+</div>
+
+<div id="tab1">
+<div class="card">
+<h3 class="text-xs font-bold text-gray-400 mb-3 uppercase">基础信息</h3>
+<div class="kv">
+<span class="k">学号</span><span class="v">2024001</span>
+<span class="k">姓名</span><span class="v">张晓明</span>
+<span class="k">性别</span><span class="v">男</span>
+<span class="k">政治面貌</span><span class="v">共青团员</span>
+<span class="k">班级</span><span class="v">计算机系 2024级(3)班</span>
+<span class="k">宿舍</span><span class="v">3 号楼 101 室</span>
+</div>
+</div>
+
+<div class="card">
+<h3 class="text-xs font-bold text-gray-400 mb-3 uppercase">联系方式</h3>
+<div class="view-action">
+<span class="label">本人手机 <span class="phone-masked text-gray-400">138****8001</span></span>
+<a href="?audit=1">查看完整(记录审计) →</a>
+</div>
+<div class="view-action">
+<span class="label">紧急联系人 <span class="phone-masked text-gray-400">139****1234</span></span>
+<a href="?audit=2">查看完整(记录审计) →</a>
+</div>
+<div class="view-action">
+<span class="label">家庭住址</span>
+<span class="text-xs text-gray-400">需二次确认后查看</span>
+</div>
+</div>
+
+<div class="card">
+<h3 class="text-xs font-bold text-gray-400 mb-3 uppercase">学籍信息</h3>
+<div class="kv">
+<span class="k">入学年份</span><span class="v">2024</span>
+<span class="k">学制</span><span class="v">四年制本科</span>
+<span class="k">专业</span><span class="v">计算机科学与技术</span>
+<span class="k">辅导员</span><span class="v">王辅导员</span>
+</div>
+</div>
+</div>
+
+<div id="tab2" style="display:none;">
+<div class="section-title">共 4 次谈心谈话 · 近 30 天 2 次</div>
+<div class="card">
+<div class="list-item">
+<div class="dot"></div>
+<div class="body">
+<div class="h">关于近期学业下滑的谈话</div>
+<div class="meta">2026-06-28 · 14:30 · 办公室</div>
+<div class="desc">学生反映高数学习压力大,已调整学习方法,建议跟进补课效果。</div>
+</div>
+</div>
+<div class="list-item">
+<div class="dot"></div>
+<div class="body">
+<div class="h">宿舍人际关系调解</div>
+<div class="meta">2026-06-15 · 19:00 · 宿舍楼下</div>
+<div class="desc">与室友作息冲突,经调解已达成共识,继续观察一周。</div>
+</div>
+</div>
+<div class="list-item">
+<div class="dot"></div>
+<div class="body">
+<div class="h">学期初心理状态访谈</div>
+<div class="meta">2026-03-10 · 10:00 · 谈话室</div>
+<div class="desc">学生情绪稳定,对新学期有明确规划,无明显压力源。</div>
+</div>
+</div>
+<div class="list-item">
+<div class="dot"></div>
+<div class="body">
+<div class="h">入学适应情况访谈</div>
+<div class="meta">2025-09-15 · 15:00 · 谈话室</div>
+<div class="desc">学生适应良好,班级融入顺利,已加入学生会学习部。</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="tab3" style="display:none;">
+<div class="section-title">共 3 条异常记录 · 当前红档 1 起</div>
+<div class="card">
+<div class="list-item">
+<div class="dot" style="background:var(--color-danger);"></div>
+<div class="body">
+<div class="h">学业警示 · 旷课异常 <span class="risk-tag high" style="margin-left:6px;">红档</span></div>
+<div class="meta">2026-06-30 · 今天 08:30</div>
+<div class="desc">《高等数学》旷课 1 次,辅导员回访电话未接通。状态:已关注 → 已约谈。</div>
+</div>
+</div>
+<div class="list-item">
+<div class="dot" style="background:var(--color-warning);"></div>
+<div class="body">
+<div class="h">学业警示 · 迟到 <span class="risk-tag mid" style="margin-left:6px;">黄档</span></div>
+<div class="meta">2026-05-22 · 08:55</div>
+<div class="desc">《大学英语》迟到 5 次(本月),已与任课老师沟通并提醒学生。状态:已结案。</div>
+</div>
+</div>
+<div class="list-item">
+<div class="dot" style="background:var(--color-risk-low);"></div>
+<div class="body">
+<div class="h">宿舍卫生 · 不合格 <span class="risk-tag low" style="margin-left:6px;">蓝档</span></div>
+<div class="meta">2026-04-08 · 21:00</div>
+<div class="desc">学院例行检查,3 号楼 101 室桌面物品摆放不符合规范,已现场整改。状态:已结案。</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="tab4" style="display:none;">
+<div class="section-title">当前风险等级 · 红档重点关注</div>
+<div class="card">
+<div class="flex items-center justify-between mb-3">
+<span class="text-sm text-gray-900 font-medium">风险评分</span>
+<span class="text-2xl font-bold" style="color:var(--color-danger);">78</span>
+</div>
+<div style="height:8px;background:#F3F4F6;border-radius:4px;overflow:hidden;display:flex;">
+<span style="display:block;height:100%;background:#FCA5A5;width:35%;"></span>
+<span style="display:block;height:100%;background:var(--color-danger);width:35%;"></span>
+</div>
+<div class="flex justify-between text-[10px] text-gray-400 mt-1">
+<span>低 (0-49)</span><span>中 (50-74)</span><span>高 (75-100)</span>
+</div>
+</div>
+
+<div class="card">
+<h3 class="text-xs font-bold text-gray-400 mb-3 uppercase">风险触发项</h3>
+<div class="list-item">
+<div class="dot" style="background:var(--color-danger);"></div>
+<div class="body">
+<div class="h">核心课程连续旷课 ≥ 1 次</div>
+<div class="meta">权重 40 · 触发于 2026-06-30</div>
+</div>
+</div>
+<div class="list-item">
+<div class="dot" style="background:var(--color-warning);"></div>
+<div class="body">
+<div class="h">近期心理健康测评压力值偏高</div>
+<div class="meta">权重 25 · 触发于 2026-06-15</div>
+</div>
+</div>
+<div class="list-item">
+<div class="dot" style="background:var(--color-warning);"></div>
+<div class="body">
+<div class="h">晚归次数 ≥ 3 次 / 月</div>
+<div class="meta">权重 13 · 触发于 2026-05-22</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="tab5" style="display:none;">
+<div class="section-title">共 6 条工作日志记录</div>
+<div class="card">
+<div class="list-item">
+<div class="dot"></div>
+<div class="body">
+<div class="h"><span class="cat-pill c1">谈心谈话</span>关于近期学业下滑的谈话</div>
+<div class="meta">2026-06-28 · 王辅导员</div>
+</div>
+</div>
+<div class="list-item">
+<div class="dot"></div>
+<div class="body">
+<div class="h"><span class="cat-pill c2">进宿舍</span>3 号楼 101 宿舍走访</div>
+<div class="meta">2026-06-20 · 王辅导员</div>
+</div>
+</div>
+<div class="list-item">
+<div class="dot"></div>
+<div class="body">
+<div class="h"><span class="cat-pill c3">进课堂</span>《高等数学》课堂巡查</div>
+<div class="meta">2026-06-18 · 王辅导员</div>
+</div>
+</div>
+<div class="list-item">
+<div class="dot"></div>
+<div class="body">
+<div class="h"><span class="cat-pill c4">组织班会</span>期末复习动员班会</div>
+<div class="meta">2026-06-10 · 王辅导员</div>
+</div>
+</div>
+<div class="list-item">
+<div class="dot"></div>
+<div class="body">
+<div class="h"><span class="cat-pill c5">班干会议</span>班委期末工作对接</div>
+<div class="meta">2026-06-05 · 王辅导员</div>
+</div>
+</div>
+<div class="list-item">
+<div class="dot"></div>
+<div class="body">
+<div class="h"><span class="cat-pill c1">谈心谈话</span>宿舍人际关系调解</div>
+<div class="meta">2026-06-15 · 王辅导员</div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+<div class="home-indicator"><div class="bar"></div></div>
+</div>
+<script>
+document.querySelectorAll('.tab-bar a').forEach(t => {
+  t.addEventListener('click', e => {
+    e.preventDefault();
+    document.querySelectorAll('.tab-bar a').forEach(x => x.classList.remove('on'));
+    document.querySelectorAll('[id^="tab"]').forEach(p => p.style.display = 'none');
+    t.classList.add('on');
+    document.getElementById(t.getAttribute('href').slice(1)).style.display = 'block';
+  });
+});
+</script>
+</body>
+</html>

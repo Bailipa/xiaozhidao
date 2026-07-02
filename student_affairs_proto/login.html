@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<!--
+  API Contract:
+  POST /api/auth/login
+  Request: { "username":"string", "password":"string" }
+  Response 200: {
+    "token":"string",
+    "role":"counselor|secretary|super_admin",
+    "force_reset": bool,
+    "wechat_bound": bool,
+    "user": { "id":"string", "name":"string", "department":"string" }
+  }
+  Response 401: { "error":"invalid_credentials", "remaining_attempts": int }
+  Response 423: { "error":"account_locked", "locked_until":"ISO-8601" }
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>登录 - 学工助手</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+:root { --color-primary:#1E5AE6; --color-success:#07C160; --color-danger:#DC2626; --bg-page:#F7F7F7; --text-primary:#191919; --text-regular:#444; --text-secondary:#888; --divider:#F0F0F0; }
+body { background-color:#1a1a1a; display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0; font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; }
+.phone-shell { width:375px; height:812px; background:#fff; border-radius:40px; overflow:hidden; position:relative; display:flex; flex-direction:column; box-shadow:0 0 50px rgba(0,0,0,0.5); border:8px solid #333; }
+.status-bar { height:44px; padding:0 20px; display:flex; justify-content:space-between; align-items:center; font-size:14px; color:#000; font-weight:600; flex-shrink:0; }
+.login-wrap { flex:1; padding:0 32px; display:flex; flex-direction:column; }
+.brand { margin-top:48px; display:flex; flex-direction:column; align-items:center; }
+.brand-logo { width:72px; height:72px; border-radius:18px; background:linear-gradient(135deg,#1E5AE6,#4080FF); display:flex; align-items:center; justify-content:center; color:#fff; font-size:34px; box-shadow:0 8px 20px rgba(30,90,230,0.25); }
+.brand-name { font-size:22px; font-weight:700; color:var(--text-primary); margin-top:16px; }
+.brand-sub { font-size:12px; color:var(--text-secondary); margin-top:4px; }
+.form { margin-top:40px; display:flex; flex-direction:column; gap:16px; }
+.field { position:relative; }
+.field input { width:100%; height:48px; padding:0 44px; border:1px solid var(--divider); border-radius:12px; font-size:14px; color:var(--text-primary); background:#fff; outline:none; transition:border-color 0.15s; box-sizing:border-box; }
+.field input:focus { border-color:var(--color-primary); }
+.field .prefix-icon { position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:18px; color:var(--text-secondary); }
+.field .suffix-icon { position:absolute; right:14px; top:50%; transform:translateY(-50%); font-size:18px; color:var(--text-secondary); cursor:pointer; }
+.field-error { font-size:11px; color:var(--color-danger); margin-top:4px; min-height:14px; }
+.role-tabs { display:flex; gap:8px; margin-bottom:8px; }
+.role-tabs span { flex:1; height:36px; display:flex; align-items:center; justify-content:center; border-radius:10px; background:#F5F6F8; font-size:13px; color:var(--text-regular); cursor:pointer; transition:all 0.15s; }
+.role-tabs span.on { background:rgba(30,90,230,0.08); color:var(--color-primary); font-weight:600; }
+.btn-primary { width:100%; height:48px; border-radius:24px; background:var(--color-primary); color:#fff; font-size:15px; font-weight:600; border:none; cursor:pointer; box-shadow:0 4px 12px rgba(30,90,230,0.3); margin-top:8px; }
+.btn-primary:disabled { background:#C0C4CC; box-shadow:none; }
+.helper-row { display:flex; justify-content:space-between; align-items:center; margin-top:16px; font-size:12px; }
+.helper-row a { color:var(--color-primary); text-decoration:none; }
+.helper-row .helper-tip { color:var(--text-secondary); }
+.footer-text { margin-top:auto; padding-bottom:24px; text-align:center; font-size:11px; color:var(--text-secondary); line-height:1.6; }
+.footer-text a { color:var(--color-primary); text-decoration:none; }
+.locked-banner { background:#FEF2F2; color:var(--color-danger); padding:10px 14px; border-radius:10px; font-size:12px; display:none; margin-bottom:8px; border:1px solid #FCA5A5; }
+.locked-banner.show { display:block; }
+.home-indicator { height:34px; display:flex; justify-content:center; align-items:flex-end; padding-bottom:8px; flex-shrink:0; }
+.home-indicator .bar { width:134px; height:5px; border-radius:3px; background:#000; opacity:0.85; }
+</style>
+</head>
+<body>
+<div class="phone-shell">
+<div class="status-bar">
+<span>12:20</span>
+<div class="flex gap-1.5">
+<iconify-icon icon="mingcute:signal-fill"></iconify-icon>
+<iconify-icon icon="mingcute:wifi-fill"></iconify-icon>
+<iconify-icon icon="mingcute:battery-fill"></iconify-icon>
+</div>
+</div>
+<div class="login-wrap">
+<div class="brand">
+<div class="brand-logo"><iconify-icon icon="material-symbols:school-outline"></iconify-icon></div>
+<div class="brand-name">学工助手</div>
+<div class="brand-sub">智能技术学部 · 智慧学工小程序</div>
+</div>
+<div class="form">
+<div class="locked-banner" id="lockedBanner">账号已被锁定,请于 <span id="lockedUntil">30 分钟后</span> 再试,或联系学工书记重置密码。</div>
+<div class="role-tabs" id="roleTabs">
+<span data-role="counselor" class="on">辅导员</span>
+<span data-role="secretary">学工书记</span>
+<span data-role="super_admin">技术人员</span>
+</div>
+<div class="field">
+<iconify-icon class="prefix-icon" icon="solar:user-circle-linear"></iconify-icon>
+<input id="username" placeholder="请输入账号" type="text" autocomplete="username"/>
+</div>
+<div class="field">
+<iconify-icon class="prefix-icon" icon="solar:lock-password-linear"></iconify-icon>
+<input id="password" placeholder="请输入密码(不少于 6 位)" type="password" autocomplete="current-password"/>
+<iconify-icon class="suffix-icon" id="togglePwd" icon="solar:eye-linear"></iconify-icon>
+</div>
+<div class="field-error" id="formError"></div>
+<button class="btn-primary" id="loginBtn">登 录</button>
+<div class="helper-row">
+<a href="counselor_password_reset.html">忘记密码?</a>
+<span class="helper-tip">首次登录请使用单位下发账号</span>
+</div>
+</div>
+<div class="footer-text">
+登录即表示已阅读并同意<br/>
+<a href="privacy_policy.html">《用户协议与隐私政策》</a>
+</div>
+</div>
+<div class="home-indicator"><div class="bar"></div></div>
+</div>
+<script>
+let currentRole = 'counselor';
+let pwVisible = false;
+let attemptCount = 0;
+
+document.querySelectorAll('#roleTabs span').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('#roleTabs span').forEach(s => s.classList.remove('on'));
+    el.classList.add('on');
+    currentRole = el.dataset.role;
+  });
+});
+
+document.getElementById('togglePwd').addEventListener('click', () => {
+  pwVisible = !pwVisible;
+  const input = document.getElementById('password');
+  input.type = pwVisible ? 'text' : 'password';
+  document.getElementById('togglePwd').setAttribute('icon', pwVisible ? 'solar:eye-closed-linear' : 'solar:eye-linear');
+});
+
+document.getElementById('loginBtn').addEventListener('click', onLogin);
+document.getElementById('password').addEventListener('keydown', e => { if (e.key === 'Enter') onLogin(); });
+
+async function onLogin() {
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+  const errEl = document.getElementById('formError');
+  errEl.textContent = '';
+  document.getElementById('lockedBanner').classList.remove('show');
+
+  if (!username) { errEl.textContent = '请输入账号'; return; }
+  if (!password) { errEl.textContent = '请输入密码'; return; }
+  if (password.length < 6) { errEl.textContent = '密码长度不少于 6 位'; return; }
+
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true;
+  btn.textContent = '登录中…';
+
+  setTimeout(() => {
+    if (username === 'locked_demo') {
+      btn.disabled = false; btn.textContent = '登 录';
+      const banner = document.getElementById('lockedBanner');
+      banner.classList.add('show');
+      return;
+    }
+    attemptCount++;
+    if (password === 'wrong' && attemptCount < 5) {
+      btn.disabled = false; btn.textContent = '登 录';
+      errEl.textContent = `账号或密码错误(还剩 ${5 - attemptCount} 次尝试机会)`;
+      return;
+    }
+    if (currentRole === 'counselor') {
+      if (password === 'first123') {
+        window.location.href = 'counselor_password_reset.html?first=1';
+      } else if (password === 'bound_needed') {
+        window.location.href = 'counselor_wechat_binding.html?bound=0';
+      } else {
+        window.location.href = 'counselor_workbench.html';
+      }
+    } else if (currentRole === 'secretary') {
+      window.location.href = 'secretary_workbench.html';
+    } else {
+      window.location.href = 'super_admin_workbench.html';
+    }
+  }, 600);
+}
+</script>
+</body>
+</html>

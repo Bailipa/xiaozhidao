@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>学生宿舍 - 学工助手</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+:root {
+  --color-primary: #1E5AE6;
+  --success: #07C160;
+  --warning: #FA9D3B;
+  --danger: #FA5151;
+  --bg-page: #F7F7F7;
+  --bg-card: #FFFFFF;
+  --divider: #F0F0F0;
+  --text-primary: #191919;
+  --text-regular: #444;
+  --text-secondary: #888;
+}
+body { background-color: #1a1a1a; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+.phone-shell { width: 375px; height: 812px; background: var(--bg-page); border-radius: 40px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+.status-bar { height: 44px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #000; flex-shrink: 0; }
+.nav-bar { height: 44px; display: flex; align-items: center; padding: 0 16px; background: #fff; flex-shrink: 0; }
+.content { flex: 1; overflow-y: auto; }
+
+.dorm-header { margin: 16px; padding: 20px; background: linear-gradient(135deg, #FF8A3D 0%, #FFB066 100%); border-radius: 16px; color: #fff; }
+.dorm-header .top { display: flex; align-items: center; gap: 12px; }
+.dorm-header .avatar { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 600; border: 2px solid rgba(255,255,255,0.4); }
+.dorm-header .name { font-size: 18px; font-weight: 700; }
+.dorm-header .sub { font-size: 12px; opacity: 0.9; margin-top: 2px; }
+.dorm-header .room-card { margin-top: 16px; background: rgba(255,255,255,0.15); border-radius: 12px; padding: 12px 16px; backdrop-filter: blur(10px); }
+.dorm-header .room-card .label { font-size: 11px; opacity: 0.85; }
+.dorm-header .room-card .value { font-size: 20px; font-weight: 700; margin-top: 2px; }
+.dorm-header .room-card .row { display: flex; gap: 16px; margin-top: 8px; }
+.dorm-header .room-card .cell { flex: 1; }
+.dorm-header .room-card .cell .k { font-size: 10px; opacity: 0.85; }
+.dorm-header .room-card .cell .v { font-size: 14px; font-weight: 600; margin-top: 2px; }
+
+.card { background: #fff; border-radius: 12px; margin: 12px 16px; padding: 16px; }
+.card .h { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+.card .h .right { font-size: 11px; color: var(--text-secondary); font-weight: 400; }
+
+.info-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; }
+.info-row + .info-row { border-top: 1px solid var(--divider); }
+.info-row .k { font-size: 13px; color: var(--text-secondary); }
+.info-row .v { font-size: 13px; color: var(--text-primary); font-weight: 500; }
+
+.roommate { display: flex; align-items: center; gap: 10px; padding: 10px 0; }
+.roommate + .roommate { border-top: 1px solid var(--divider); }
+.roommate .avatar { width: 36px; height: 36px; border-radius: 50%; background: #F0F2F5; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: var(--text-secondary); flex-shrink: 0; }
+.roommate .info { flex: 1; min-width: 0; }
+.roommate .name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.roommate .sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+.roommate .bed { font-size: 11px; color: var(--text-secondary); padding: 2px 8px; background: #F7F7F7; border-radius: 10px; flex-shrink: 0; }
+.roommate .leader { font-size: 10px; color: #C2700A; background: #FFF7E6; padding: 2px 6px; border-radius: 4px; flex-shrink: 0; }
+
+.action-bar { background: #fff; padding: 12px 16px 20px; display: flex; gap: 12px; flex-shrink: 0; border-top: 1px solid var(--divider); }
+.btn { flex: 1; height: 44px; border-radius: 22px; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; text-decoration: none; }
+.btn.primary { background: var(--color-primary); color: #fff; }
+.btn.secondary { background: #F2F3F5; color: var(--text-regular); }
+
+.home-indicator { height: 34px; background: #fff; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 8px; flex-shrink: 0; }
+.home-indicator .bar { width: 134px; height: 5px; border-radius: 3px; background: #000; opacity: 0.85; }
+</style>
+</head>
+<body>
+<div class="phone-shell">
+<div class="status-bar">
+  <span>12:20</span>
+  <div class="flex gap-1.5 text-[#000]">
+    <iconify-icon icon="mingcute:signal-fill"></iconify-icon>
+    <iconify-icon icon="mingcute:wifi-fill"></iconify-icon>
+    <iconify-icon icon="mingcute:battery-fill"></iconify-icon>
+  </div>
+</div>
+<div class="nav-bar">
+  <a class="p-2 -ml-2" href="counselor_student_detail.html"><iconify-icon class="text-xl" icon="solar:alt-arrow-left-linear"></iconify-icon></a>
+  <h1 class="flex-1 text-center text-base font-bold text-gray-900">学生宿舍</h1>
+  <span class="p-2 -mr-2 w-8"></span>
+</div>
+
+<div class="content">
+  <!-- 宿舍信息卡 -->
+  <div class="dorm-header">
+    <div class="top">
+      <div class="avatar">张</div>
+      <div>
+        <div class="name">张晓明</div>
+        <div class="sub">2024级(3)班 · 2024001</div>
+      </div>
+    </div>
+    <div class="room-card">
+      <div class="label">宿舍</div>
+      <div class="value">6 号楼 · 302 室</div>
+      <div class="row">
+        <div class="cell">
+          <div class="k">床位</div>
+          <div class="v">1 号床</div>
+        </div>
+        <div class="cell">
+          <div class="k">入住时间</div>
+          <div class="v">2024-09-01</div>
+        </div>
+        <div class="cell">
+          <div class="k">宿舍人数</div>
+          <div class="v">3 人</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 宿舍详情 -->
+  <div class="card">
+    <div class="h">宿舍详情 <span class="right">奉贤校区</span></div>
+    <div class="info-row"><span class="k">楼栋</span><span class="v">6 号楼(女生楼)</span></div>
+    <div class="info-row"><span class="k">楼层</span><span class="v">3 楼</span></div>
+    <div class="info-row"><span class="k">房间号</span><span class="v">302</span></div>
+    <div class="info-row"><span class="k">床位号</span><span class="v">1 号床(下铺靠窗)</span></div>
+    <div class="info-row"><span class="k">宿舍电话</span><span class="v">021-6087****</span></div>
+  </div>
+
+  <!-- 舍友列表 -->
+  <div class="card">
+    <div class="h">舍友 <span class="right">3 人</span></div>
+    <div class="roommate">
+      <div class="avatar" style="background:#FFF7E6;color:#C2700A;">张</div>
+      <div class="info">
+        <div class="name">张晓明 <span class="leader ml-1">宿舍长</span></div>
+        <div class="sub">2024级 计科1班 · 2024001</div>
+      </div>
+      <span class="bed">1号床</span>
+    </div>
+    <div class="roommate">
+      <div class="avatar">李</div>
+      <div class="info">
+        <div class="name">李四</div>
+        <div class="sub">2024级 计科1班 · 2024002</div>
+      </div>
+      <span class="bed">2号床</span>
+    </div>
+    <div class="roommate">
+      <div class="avatar">王</div>
+      <div class="info">
+        <div class="name">王五</div>
+        <div class="sub">2024级 计科2班 · 2024003</div>
+      </div>
+      <span class="bed">3号床</span>
+    </div>
+  </div>
+
+  <!-- 查寝联动 -->
+  <div class="card">
+    <div class="h">最近查寝</div>
+    <div class="info-row"><span class="k">2026-06-29</span><span class="v" style="color:var(--success);">全员在位 · 卫生优</span></div>
+    <div class="info-row"><span class="k">2026-06-22</span><span class="v" style="color:var(--success);">全员在位 · 卫生良</span></div>
+    <div class="info-row"><span class="k">2026-06-15</span><span class="v" style="color:var(--warning);">王五 晚归 1 次</span></div>
+  </div>
+</div>
+
+<div class="action-bar">
+  <a class="btn secondary" href="counselor_log_edit.html">写查寝日志</a>
+  <a class="btn primary" href="counselor_late_returns.html">查看宿舍晚归</a>
+</div>
+<div class="home-indicator"><div class="bar"></div></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<!--
+  角色:super_admin(技术员 / 李工)
+  说明:跨学部审计日志。所有角色(技术员 / 学工书记 / 辅导员)的关键
+       操作均记入 audit_logs 表,留存 365 天。本页提供跨学部、跨角色、
+       跨操作类型的检索能力,用于安全审计与问题追踪。
+  依据:申报书 4.1.1 (6) + 6.3 数据安全
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>审计日志 - 学工助手</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+:root {
+  --color-primary:#1E5AE6;
+  --color-success:#07C160;
+  --color-warning:#FA9D3B;
+  --color-danger:#DC2626;
+  --bg-page:#F5F6F8;
+  --bg-card:#FFFFFF;
+  --divider:#F3F4F6;
+  --text-primary:#191919;
+  --text-regular:#444;
+  --text-secondary:#6B7280;
+}
+body { background-color:#1a1a1a; display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0; font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; }
+.phone-shell { width:375px; height:812px; background:var(--bg-page); border-radius:40px; overflow:hidden; position:relative; display:flex; flex-direction:column; box-shadow:0 0 50px rgba(0,0,0,0.5); border:8px solid #333; }
+.status-bar { height:44px; padding:0 20px; display:flex; justify-content:space-between; align-items:center; font-size:14px; color:#000; flex-shrink:0; }
+.nav-bar { height:44px; display:flex; align-items:center; padding:0 16px; background:#fff; border-bottom:1px solid var(--divider); flex-shrink:0; }
+.content { flex:1; overflow-y:auto; padding-bottom:20px; }
+.tab-bar { height:84px; background:#fff; border-top:1px solid var(--divider); display:flex; justify-content:space-around; align-items:center; padding-bottom:20px; flex-shrink:0; }
+.tab-item { display:flex; flex-direction:column; align-items:center; text-align:center; color:#9CA3AF; text-decoration:none; }
+.tab-item.active { color:var(--color-primary); }
+.tab-item iconify-icon { font-size:24px; margin-bottom:4px; }
+.tab-item span { font-size:11px; }
+.home-indicator { height:34px; background:#fff; display:flex; justify-content:center; align-items:flex-end; padding-bottom:8px; flex-shrink:0; }
+.home-indicator .bar { width:134px; height:5px; border-radius:3px; background:#000; opacity:0.85; }
+
+.search-box { background:#fff; padding:10px 16px; border-bottom:1px solid var(--divider); }
+.search-box .row { display:flex; gap:8px; align-items:center; }
+.search-box input { flex:1; padding:9px 14px; background:#F5F5F5; border:0; border-radius:18px; font-size:13px; outline:none; }
+.chip-row { display:flex; gap:6px; padding:10px 16px; overflow-x:auto; background:#fff; border-bottom:1px solid var(--divider); }
+.chip { padding:4px 12px; background:#F5F5F5; color:var(--text-regular); border-radius:14px; font-size:12px; white-space:nowrap; }
+.chip.on { background:#EFF6FF; color:var(--color-primary); font-weight:600; }
+
+.banner { margin:12px 16px 0; padding:10px 12px; background:#FEF3C7; border-radius:10px; font-size:11px; color:#92400E; line-height:1.6; display:flex; gap:8px; }
+.banner iconify-icon { color:var(--color-warning); flex-shrink:0; font-size:16px; }
+
+.summary { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:12px 16px 0; }
+.summary .item { background:#fff; border-radius:10px; padding:10px 12px; text-align:center; }
+.summary .num { font-size:18px; font-weight:700; color:var(--text-primary); }
+.summary .label { font-size:10px; color:var(--text-secondary); margin-top:2px; }
+.summary .item.danger .num { color:var(--color-danger); }
+
+.day-h { padding:14px 16px 6px; font-size:11px; color:var(--text-secondary); font-weight:600; display:flex; justify-content:space-between; align-items:center; }
+.day-h .meta { font-size:10px; font-weight:400; }
+
+.log-row { background:#fff; margin:0 16px 8px; border-radius:10px; padding:10px 12px; border-left:3px solid var(--color-primary); }
+.log-row.high { border-left-color:var(--color-danger); }
+.log-row.warn { border-left-color:var(--color-warning); }
+.log-row.info { border-left-color:var(--color-primary); }
+.log-row .head { display:flex; justify-content:space-between; align-items:center; }
+.log-row .time { font-size:10px; color:var(--text-secondary); font-family:ui-monospace,"SF Mono",monospace; }
+.log-row .op { font-size:9px; padding:2px 6px; border-radius:3px; font-weight:600; }
+.log-row .op.create { background:#D1FAE5; color:#047857; }
+.log-row .op.update { background:#DBEAFE; color:var(--color-primary); }
+.log-row .op.delete { background:#FEE2E2; color:var(--color-danger); }
+.log-row .op.login { background:#F3F4F6; color:var(--text-secondary); }
+.log-row .op.security { background:#FEF3C7; color:#B45309; }
+.log-row .body { margin-top:6px; }
+.log-row .title { font-size:12px; color:var(--text-primary); font-weight:600; }
+.log-row .desc { font-size:11px; color:var(--text-regular); margin-top:3px; line-height:1.6; }
+.log-row .meta { font-size:10px; color:var(--text-secondary); margin-top:6px; padding-top:6px; border-top:1px dashed var(--divider); display:flex; gap:14px; flex-wrap:wrap; }
+.log-row .meta span b { color:var(--text-primary); font-weight:600; }
+</style>
+</head>
+<body>
+<div class="phone-shell">
+<div class="status-bar">
+<span>12:20</span>
+<div class="flex gap-1.5 text-[#000]">
+<iconify-icon icon="mingcute:signal-fill"></iconify-icon>
+<iconify-icon icon="mingcute:wifi-fill"></iconify-icon>
+<iconify-icon icon="mingcute:battery-fill"></iconify-icon>
+</div>
+</div>
+
+<div class="nav-bar">
+<h1 class="flex-1 text-center text-base font-bold text-gray-900">审计日志</h1>
+<a class="text-xs text-blue-600 font-bold flex items-center gap-1" href="#" onclick="alert('导出 CSV(演示)'); return false;">
+<iconify-icon icon="solar:export-bold-duotone"></iconify-icon> 导出
+</a>
+</div>
+
+<div class="content">
+<div class="search-box">
+<div class="row">
+<input placeholder="🔍 操作人 / 操作对象 / IP" value=""/>
+<a class="text-[11px] text-blue-600 font-bold" href="#" onclick="alert('高级筛选(演示)'); return false;">筛选</a>
+</div>
+</div>
+
+<div class="chip-row">
+<span class="chip on">全部</span>
+<span class="chip">账号操作</span>
+<span class="chip">数据写操作</span>
+<span class="chip">敏感数据访问</span>
+<span class="chip">登录/登出</span>
+<span class="chip">异常告警</span>
+</div>
+
+<div class="banner">
+<iconify-icon icon="solar:shield-check-bold"></iconify-icon>
+<div>所有日志留存 <strong>365 天</strong>,支持按时间、操作者、操作类型、操作对象、学部等多维度检索。导出后可用于外部审计。</div>
+</div>
+
+<div class="summary">
+<div class="item"><div class="num">2,847</div><div class="label">本月操作总数</div></div>
+<div class="item"><div class="num">12</div><div class="label">敏感数据访问</div></div>
+<div class="item danger"><div class="num">3</div><div class="label">异常告警</div></div>
+</div>
+
+<div class="day-h">今天 · 6月30日 <span class="meta">12 条</span></div>
+
+<div class="log-row security high">
+<div class="head">
+<span class="time">12:20:45</span>
+<span class="op security">账号异常</span>
+</div>
+<div class="body">
+<div class="title">学工副书记账号异地登录尝试</div>
+<div class="desc">账号 liusj@sit.edu.cn 在非常用 IP (北京·203.0.113.42) 尝试登录,系统已自动锁定 30 分钟。</div>
+<div class="meta">
+<span>操作人:<b>系统自动</b></span>
+<span>对象:<b>刘书记</b></span>
+<span>学部:<b>智能技术学部</b></span>
+</div>
+</div>
+</div>
+
+<div class="log-row info">
+<div class="head">
+<span class="time">12:21:08</span>
+<span class="op update">权限调整</span>
+</div>
+<div class="body">
+<div class="title">学工书记为辅导员授权「数据看板」模块</div>
+<div class="desc">刘书记为王辅导员开放了「数据看板」模块权限,此前未授权。本次授权将记入审计。</div>
+<div class="meta">
+<span>操作人:<b>刘书记</b></span>
+<span>对象:<b>王辅导员</b></span>
+<span>IP:<b>10.0.1.42</b></span>
+</div>
+</div>
+</div>
+
+<div class="log-row info">
+<div class="head">
+<span class="time">11:40:22</span>
+<span class="op update">异常处理</span>
+</div>
+<div class="body">
+<div class="title">王辅导员完成异常跟进(AN2026063001)</div>
+<div class="desc">将异常「张晓明 · 缺勤」状态更新为「已约谈」,并填写跟进说明。系统已自动通知学工书记。</div>
+<div class="meta">
+<span>操作人:<b>王辅导员</b></span>
+<span>对象:<b>异常 AN2026063001</b></span>
+<span>结果:<b>成功</b></span>
+</div>
+</div>
+</div>
+
+<div class="log-row info">
+<div class="head">
+<span class="time">10:32:15</span>
+<span class="op create">数据导入</span>
+</div>
+<div class="body">
+<div class="title">王辅导员导入门禁流水数据</div>
+<div class="desc">文件:门禁流水_2026-05.xlsx · 共 125 行 · 118 行有效入库 · 7 行格式异常已标红</div>
+<div class="meta">
+<span>操作人:<b>王辅导员</b></span>
+<span>类型:<b>门禁记录</b></span>
+</div>
+</div>
+</div>
+
+<div class="day-h">昨天 · 6月29日 <span class="meta">38 条</span></div>
+
+<div class="log-row info">
+<div class="head">
+<span class="time">16:48:30</span>
+<span class="op create">日志创建</span>
+</div>
+<div class="body">
+<div class="title">王辅导员提交工作日志 L012</div>
+<div class="desc">类型:谈心谈话 · 关联学生:张晓明 · 字数 286 字 · 含 2 张图片附件</div>
+<div class="meta">
+<span>操作人:<b>王辅导员</b></span>
+<span>对象:<b>日志 L012</b></span>
+</div>
+</div>
+</div>
+
+<div class="log-row security">
+<div class="head">
+<span class="time">14:22:18</span>
+<span class="op security">密码重置</span>
+</div>
+<div class="body">
+<div class="title">刘书记重置辅导员临时密码</div>
+<div class="desc">为辅导员周辅导员生成 6 位临时密码并通过短信下发,强制首次登录后修改。</div>
+<div class="meta">
+<span>操作人:<b>刘书记</b></span>
+<span>对象:<b>周辅导员</b></span>
+<span>流水号:<b>OP2026062901</b></span>
+</div>
+</div>
+</div>
+
+<div class="log-row info">
+<div class="head">
+<span class="time">09:15:42</span>
+<span class="op login">登录</span>
+</div>
+<div class="body">
+<div class="title">李工 登录平台后台</div>
+<div class="desc">使用账号 lig@sit.edu.cn 从可信 IP (10.0.0.5) 登录后台,会话有效期 8 小时。</div>
+<div class="meta">
+<span>操作人:<b>李工</b></span>
+<span>角色:<b>super_admin</b></span>
+</div>
+</div>
+</div>
+
+<div class="day-h">6月28日 <span class="meta">查看更多 →</span></div>
+
+<div class="log-row info">
+<div class="head">
+<span class="time">17:08:55</span>
+<span class="op create">账号创建</span>
+</div>
+<div class="body">
+<div class="title">刘书记创建辅导员账号</div>
+<div class="desc">创建工号 xiet@sit.edu.cn,初始密码已短信下发,强制首次登录修改。</div>
+<div class="meta">
+<span>操作人:<b>刘书记</b></span>
+<span>对象:<b>谢辅导员</b></span>
+</div>
+</div>
+</div>
+</div>
+
+<div class="tab-bar">
+<a class="tab-item" href="super_admin_workbench.html">
+<iconify-icon icon="solar:widget-2-linear"></iconify-icon>
+<span>平台</span>
+</a>
+<a class="tab-item" href="super_admin_accounts.html">
+<iconify-icon icon="solar:users-group-rounded-linear"></iconify-icon>
+<span>账号</span>
+</a>
+<a class="tab-item active" href="super_admin_audit_logs.html">
+<iconify-icon icon="solar:document-text-bold"></iconify-icon>
+<span>审计</span>
+</a>
+<a class="tab-item" href="super_admin_system.html">
+<iconify-icon icon="solar:pulse-linear"></iconify-icon>
+<span>系统</span>
+</a>
+<a class="tab-item" href="#">
+<iconify-icon icon="solar:user-circle-linear"></iconify-icon>
+<span>我的</span>
+</a>
+</div>
+<div class="home-indicator"><div class="bar"></div></div>
+</div>
+</body>
+</html>

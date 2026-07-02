@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>数据导入 - 学工助手</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+/* mini-program 风格:实际单位 px(注释 rpx 表示 750rpx 设计稿对应 375px 屏) */
+:root {
+  --color-primary: #1E5AE6;
+  --success: #07C160;
+  --warning: #FA9D3B;
+  --danger: #FA5151;
+  --bg-page: #F7F7F7;
+  --bg-card: #FFFFFF;
+  --divider: #F0F0F0;
+  --text-primary: #191919;
+  --text-regular: #444;
+  --text-secondary: #888;
+  --text-placeholder: #C0C4CC;
+}
+body { background-color: #1a1a1a; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+.phone-shell { width: 375px; height: 812px; background: var(--bg-page); border-radius: 40px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+.status-bar { height: 44px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #000; flex-shrink: 0; }
+.nav-bar { height: 44px; display: flex; align-items: center; padding: 0 16px; background: #fff; flex-shrink: 0; }
+.content { flex: 1; overflow-y: auto; }
+.tab-bar { height: 84px; background: #fff; border-top: 1px solid #E5E7EB; display: flex; justify-content: space-around; align-items: center; padding-bottom: 20px; flex-shrink: 0; }
+.tab-item { display: flex; flex-direction: column; align-items: center; text-align: center; color: #9CA3AF; text-decoration: none; }
+.tab-item.active { color: var(--color-primary); }
+.tab-item iconify-icon { font-size: 24px; margin-bottom: 4px; }
+.tab-item span { font-size: 11px; }
+.plus-tab { width: 52px; height: 52px; background: var(--color-primary); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #fff; position: absolute; top: -16px; left: 50%; transform: translateX(-50%); box-shadow: 0 4px 12px rgba(30, 90, 230, 0.4); }
+
+/* 导入卡片 */
+.import-card { background: #fff; border-radius: 12px; margin: 12px 16px; padding: 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
+.import-card:active { background: #F5F5F5; }
+.import-card .icon-wrap { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.import-card .body { flex: 1; min-width: 0; }
+.import-card .body h3 { font-size: 15px; font-weight: 600; color: var(--text-primary); margin: 0 0 4px 0; }
+.import-card .body p { font-size: 12px; color: var(--text-secondary); margin: 0; line-height: 1.4; }
+.import-card .badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; flex-shrink: 0; }
+
+.section-title { padding: 16px 20px 8px; font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+
+.history-item { background: #fff; padding: 12px 16px; display: flex; align-items: center; gap: 12px; }
+.history-item + .history-item { border-top: 1px solid var(--divider); }
+.history-item .name { font-size: 14px; color: var(--text-primary); flex: 1; }
+.history-item .meta { font-size: 11px; color: var(--text-secondary); }
+
+.home-indicator { height: 34px; background: #fff; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 8px; flex-shrink: 0; }
+.home-indicator .bar { width: 134px; height: 5px; border-radius: 3px; background: #000; opacity: 0.85; }
+</style>
+</head>
+<body>
+<div class="phone-shell">
+<div class="status-bar">
+  <span>12:20</span>
+  <div class="flex gap-1.5 text-[#000]">
+    <iconify-icon icon="mingcute:signal-fill"></iconify-icon>
+    <iconify-icon icon="mingcute:wifi-fill"></iconify-icon>
+    <iconify-icon icon="mingcute:battery-fill"></iconify-icon>
+  </div>
+</div>
+<div class="nav-bar">
+  <a class="p-2 -ml-2" href="counselor_workbench.html"><iconify-icon class="text-xl" icon="solar:alt-arrow-left-linear"></iconify-icon></a>
+  <h1 class="flex-1 text-center text-base font-bold text-gray-900">数据导入</h1>
+  <span class="p-2 -mr-2 w-8"></span>
+</div>
+<div class="content">
+  <!-- 说明 banner -->
+<div class="mx-4 mt-4 p-3 bg-blue-50 rounded-xl">
+<p class="text-xs text-blue-700 leading-relaxed">支持以下三类数据批量导入。系统将自动校验数据格式,异常行会标红提示,确认无误后再入库。</p>
+</div>
+
+  <!-- 导入类型卡片 -->
+  <div class="section-title">导入类型</div>
+
+  <a class="import-card" href="counselor_import_gate.html">
+    <div class="icon-wrap bg-blue-50 text-blue-600">
+      <iconify-icon class="text-2xl" icon="solar:login-3-bold-duotone"></iconify-icon>
+    </div>
+    <div class="body">
+      <h3>门禁晚归记录 <span class="badge bg-green-50 text-green-600 ml-1">已就绪</span></h3>
+      <p>从门禁系统导出门禁流水,自动识别晚归 / 夜间未返校</p>
+    </div>
+    <iconify-icon class="text-gray-300 text-xl" icon="solar:alt-arrow-right-linear"></iconify-icon>
+  </a>
+
+  <a class="import-card" href="counselor_import_counselor_map.html">
+    <div class="icon-wrap bg-purple-50 text-purple-600">
+      <iconify-icon class="text-2xl" icon="solar:users-group-two-rounded-bold-duotone"></iconify-icon>
+    </div>
+    <div class="body">
+      <h3>学生-辅导员对应表 <span class="badge bg-amber-50 text-amber-600 ml-1">示例数据</span></h3>
+      <p>维护学生所属辅导员,用于异常按人分发与统计归属</p>
+    </div>
+    <iconify-icon class="text-gray-300 text-xl" icon="solar:alt-arrow-right-linear"></iconify-icon>
+  </a>
+
+  <a class="import-card" href="counselor_import_dorm.html">
+    <div class="icon-wrap bg-orange-50 text-orange-600">
+      <iconify-icon class="text-2xl" icon="solar:home-2-bold-duotone"></iconify-icon>
+    </div>
+    <div class="body">
+      <h3>学生-宿舍对应表 <span class="badge bg-amber-50 text-amber-600 ml-1">待补充</span></h3>
+      <p>维护学生宿舍信息,查看舍友、查寝联动等场景</p>
+    </div>
+    <iconify-icon class="text-gray-300 text-xl" icon="solar:alt-arrow-right-linear"></iconify-icon>
+  </a>
+
+  <!-- 最近导入记录 -->
+  <div class="section-title">最近导入记录</div>
+  <div class="bg-white mx-4 rounded-xl overflow-hidden">
+    <div class="history-item">
+      <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+        <iconify-icon class="text-base" icon="solar:login-3-bold-duotone"></iconify-icon>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="name">门禁流水_2026-05.xlsx</div>
+        <div class="meta">125 行 · 118 有效 · 7 错误 · 5/15 10:32 · 王辅导员</div>
+      </div>
+      <span class="badge bg-green-50 text-green-600">成功</span>
+    </div>
+    <div class="history-item">
+      <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0">
+        <iconify-icon class="text-base" icon="solar:users-group-two-rounded-bold-duotone"></iconify-icon>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="name">学生名单_2024级.xlsx</div>
+        <div class="meta">10 行 · 10 成功 · 5/14 16:08 · 王辅导员</div>
+      </div>
+      <span class="badge bg-green-50 text-green-600">成功</span>
+    </div>
+    <div class="history-item">
+      <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+        <iconify-icon class="text-base" icon="solar:login-3-bold-duotone"></iconify-icon>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="name">门禁流水_2026-04.xlsx</div>
+        <div class="meta">0 行 · 文件为空 · 4/30 09:15 · 王辅导员</div>
+      </div>
+      <span class="badge bg-red-50 text-red-600">失败</span>
+    </div>
+  </div>
+</div>
+<div class="home-indicator"><div class="bar"></div></div>
+</div>
+</body>
+</html>

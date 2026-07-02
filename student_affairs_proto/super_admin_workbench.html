@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<!--
+  角色:super_admin(技术员 / 李工)
+  说明:平台运维总览。本页仅供技术人员使用,聚焦账号体系健康度、
+       服务可用性、异常告警,不涉及具体业务数据。
+  依据:申报书 4.1.1 (1)(2)(6) + 4.2 非功能要求
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>运维总览 - 学工助手</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+:root {
+  --color-primary:#1E5AE6;
+  --color-success:#07C160;
+  --color-warning:#FA9D3B;
+  --color-danger:#DC2626;
+  --bg-page:#F5F6F8;
+  --bg-card:#FFFFFF;
+  --divider:#F3F4F6;
+  --text-primary:#191919;
+  --text-regular:#444;
+  --text-secondary:#6B7280;
+}
+body { background-color:#1a1a1a; display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0; font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; }
+.phone-shell { width:375px; height:812px; background:var(--bg-page); border-radius:40px; overflow:hidden; position:relative; display:flex; flex-direction:column; box-shadow:0 0 50px rgba(0,0,0,0.5); border:8px solid #333; }
+.status-bar { height:44px; padding:0 20px; display:flex; justify-content:space-between; align-items:center; font-size:14px; color:#000; flex-shrink:0; }
+.content { flex:1; overflow-y:auto; padding-bottom:20px; }
+.tab-bar { height:84px; background:#fff; border-top:1px solid var(--divider); display:flex; justify-content:space-around; align-items:center; padding-bottom:20px; flex-shrink:0; }
+.tab-item { display:flex; flex-direction:column; align-items:center; text-align:center; color:#9CA3AF; text-decoration:none; }
+.tab-item.active { color:var(--color-primary); }
+.tab-item iconify-icon { font-size:24px; margin-bottom:4px; }
+.tab-item span { font-size:11px; }
+.home-indicator { height:34px; background:#fff; display:flex; justify-content:center; align-items:flex-end; padding-bottom:8px; flex-shrink:0; }
+.home-indicator .bar { width:134px; height:5px; border-radius:3px; background:#000; opacity:0.85; }
+
+.card { background:#fff; border-radius:12px; margin:12px 16px 0; padding:14px 16px; box-shadow:0 1px 2px rgba(0,0,0,0.02); }
+.card .h { font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; }
+.card .h .meta { font-size:11px; color:var(--text-secondary); font-weight:400; }
+.card .h a { font-size:11px; color:var(--color-primary); text-decoration:none; }
+
+.kpi-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+.kpi { background:#fff; border-radius:12px; padding:12px; position:relative; overflow:hidden; }
+.kpi .label { font-size:11px; color:var(--text-secondary); }
+.kpi .num { font-size:22px; font-weight:700; color:var(--text-primary); margin-top:2px; line-height:1.2; }
+.kpi .delta { font-size:10px; margin-top:4px; font-weight:600; }
+.kpi .delta.up { color:var(--color-success); }
+.kpi .delta.down { color:var(--color-danger); }
+.kpi .ic { position:absolute; right:8px; top:8px; font-size:22px; color:rgba(30,90,230,0.1); }
+
+/* 服务状态 */
+.service-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+.svc { background:#F8FAFC; border:1px solid #E2E8F0; border-radius:10px; padding:12px; position:relative; }
+.svc .name { font-size:11px; color:var(--text-regular); display:flex; align-items:center; gap:4px; }
+.svc .dot { width:6px; height:6px; border-radius:50%; background:var(--color-success); display:inline-block; }
+.svc.warn .dot { background:var(--color-warning); }
+.svc.down .dot { background:var(--color-danger); }
+.svc .v { font-size:14px; font-weight:700; color:var(--text-primary); margin-top:6px; }
+.svc .sub { font-size:10px; color:var(--text-secondary); margin-top:2px; }
+
+/* 告警列表 */
+.alert { display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--divider); }
+.alert:last-child { border-bottom:0; }
+.alert .ic { width:32px; height:32px; border-radius:8px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:16px; }
+.alert.high .ic { background:#FEE2E2; color:var(--color-danger); }
+.alert.warn .ic { background:#FEF3C7; color:var(--color-warning); }
+.alert.info .ic { background:#DBEAFE; color:var(--color-primary); }
+.alert .body { flex:1; min-width:0; }
+.alert .title { font-size:13px; color:var(--text-primary); font-weight:600; }
+.alert .sub { font-size:10px; color:var(--text-secondary); margin-top:2px; }
+.alert .badge { font-size:9px; padding:1px 6px; border-radius:4px; font-weight:600; flex-shrink:0; }
+.alert .badge.high { background:#FEE2E2; color:var(--color-danger); }
+.alert .badge.warn { background:#FEF3C7; color:#B45309; }
+.alert .badge.info { background:#DBEAFE; color:var(--color-primary); }
+
+.quick-row { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+.quick-row a { display:flex; flex-direction:column; align-items:center; gap:6px; padding:10px 4px; background:#fff; border-radius:10px; text-decoration:none; }
+.quick-row .ic { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+.quick-row span { font-size:11px; color:var(--text-primary); font-weight:500; }
+</style>
+</head>
+<body>
+<div class="phone-shell">
+<div class="status-bar">
+<span>12:20</span>
+<div class="flex gap-1.5 text-[#000]">
+<iconify-icon icon="mingcute:signal-fill"></iconify-icon>
+<iconify-icon icon="mingcute:wifi-fill"></iconify-icon>
+<iconify-icon icon="mingcute:battery-fill"></iconify-icon>
+</div>
+</div>
+
+<div class="content">
+<!-- 顶部身份 -->
+<div class="px-5 pt-4 pb-2 flex justify-between items-center">
+<div>
+<h2 class="text-lg font-bold text-gray-900">李工,下午好</h2>
+<p class="text-xs text-gray-500 mt-1">技术运维 · 智能技术学部 · 6月30日</p>
+</div>
+<div class="w-11 h-11 rounded-full overflow-hidden border-2 border-white shadow-sm bg-gray-900 flex items-center justify-center text-white">
+<iconify-icon class="text-xl" icon="solar:settings-bold"></iconify-icon>
+</div>
+</div>
+
+<!-- 平台 KPI -->
+<div class="kpi-grid mx-4 mt-2 gap-2">
+<div class="kpi">
+<div class="ic"><iconify-icon icon="solar:buildings-2-bold"></iconify-icon></div>
+<div class="label">覆盖学部</div>
+<div class="num">3</div>
+<div class="delta">智能 / 计算机 / 电气</div>
+</div>
+<div class="kpi">
+<div class="ic"><iconify-icon icon="solar:user-circle-bold"></iconify-icon></div>
+<div class="label">账号总数</div>
+<div class="num">86</div>
+<div class="delta up">↑ 本月新增 4</div>
+</div>
+<div class="kpi">
+<div class="ic"><iconify-icon icon="solar:users-group-rounded-bold"></iconify-icon></div>
+<div class="label">今日活跃</div>
+<div class="num">62</div>
+<div class="delta up">↑ 8% 较昨日</div>
+</div>
+<div class="kpi">
+<div class="ic"><iconify-icon icon="solar:shield-cross-bold"></iconify-icon></div>
+<div class="label">异常登录(7日)</div>
+<div class="num">3</div>
+<div class="delta down">↓ 2 起</div>
+</div>
+</div>
+
+<!-- 快捷入口 -->
+<div class="quick-row mx-4 mt-3">
+<a href="super_admin_accounts.html">
+<div class="ic bg-blue-50 text-blue-600"><iconify-icon icon="solar:user-plus-bold-duotone"></iconify-icon></div>
+<span>账号管理</span>
+</a>
+<a href="super_admin_audit_logs.html">
+<div class="ic bg-purple-50 text-purple-600"><iconify-icon icon="solar:document-text-bold-duotone"></iconify-icon></div>
+<span>审计日志</span>
+</a>
+<a href="super_admin_system.html">
+<div class="ic bg-emerald-50 text-emerald-600"><iconify-icon icon="solar:pulse-bold-duotone"></iconify-icon></div>
+<span>服务监控</span>
+</a>
+<a href="#" onclick="alert('短信配额配置(演示)'); return false;">
+<div class="ic bg-orange-50 text-orange-600"><iconify-icon icon="solar:smartphone-bold-duotone"></iconify-icon></div>
+<span>短信配置</span>
+</a>
+</div>
+
+<!-- 服务状态 -->
+<div class="card">
+<div class="h">服务状态 <span class="meta">实时</span></div>
+<div class="service-grid">
+<div class="svc">
+<div class="name"><span class="dot"></span> API 网关</div>
+<div class="v">99.98%</div>
+<div class="sub">P95 156ms</div>
+</div>
+<div class="svc">
+<div class="name"><span class="dot"></span> MySQL 主库</div>
+<div class="v">正常</div>
+<div class="sub">连接数 28/100</div>
+</div>
+<div class="svc warn">
+<div class="name"><span class="dot"></span> 微信订阅消息</div>
+<div class="v">限流预警</div>
+<div class="sub">配额 78%</div>
+</div>
+<div class="svc">
+<div class="name"><span class="dot"></span> 短信网关</div>
+<div class="v">正常</div>
+<div class="sub">余量 1,250 条</div>
+</div>
+<div class="svc">
+<div class="name"><span class="dot"></span> 对象存储</div>
+<div class="v">12.4 GB</div>
+<div class="sub">配额 25%</div>
+</div>
+<div class="svc">
+<div class="name"><span class="dot"></span> 数据备份</div>
+<div class="v">今日已备份</div>
+<div class="sub">03:00 全量</div>
+</div>
+</div>
+</div>
+
+<!-- 待处理告警 -->
+<div class="card">
+<div class="h">待处理告警 <span class="meta">3 条</span> <a href="super_admin_audit_logs.html">查看全部 →</a></div>
+<div class="alert high">
+<div class="ic"><iconify-icon icon="solar:danger-triangle-bold"></iconify-icon></div>
+<div class="body">
+<div class="title">学工副书记账号异常登录</div>
+<div class="sub">2026-06-30 02:17 · IP 异地 · 上海→北京 · 已锁定</div>
+</div>
+<span class="badge high">紧急</span>
+</div>
+<div class="alert warn">
+<div class="ic"><iconify-icon icon="solar:shield-warning-bold"></iconify-icon></div>
+<div class="body">
+<div class="title">微信订阅消息配额临近上限</div>
+<div class="sub">本月已发送 38,920 / 50,000 条 · 7 天后预计耗尽</div>
+</div>
+<span class="badge warn">提醒</span>
+</div>
+<div class="alert info">
+<div class="ic"><iconify-icon icon="solar:restart-bold"></iconify-icon></div>
+<div class="body">
+<div class="title">5 个辅导员账号申请密码重置</div>
+<div class="sub">来自智能技术学部 · 待人工审核</div>
+</div>
+<span class="badge info">待审</span>
+</div>
+</div>
+
+<!-- 最近系统事件 -->
+<div class="card">
+<div class="h">最近系统事件</div>
+<div class="alert info">
+<div class="ic"><iconify-icon icon="solar:check-circle-bold"></iconify-icon></div>
+<div class="body">
+<div class="title">数据库每日全量备份完成</div>
+<div class="sub">2026-06-30 03:00 · 耗时 4 分 12 秒 · 412 MB</div>
+</div>
+</div>
+<div class="alert info">
+<div class="ic"><iconify-icon icon="solar:upload-square-bold"></iconify-icon></div>
+<div class="body">
+<div class="title">智能技术学部批量导入 128 名学生</div>
+<div class="sub">2026-06-29 16:08 · 操作人:刘书记</div>
+</div>
+</div>
+<div class="alert warn">
+<div class="ic"><iconify-icon icon="solar:bell-bing-bold"></iconify-icon></div>
+<div class="body">
+<div class="title">晚归提醒发送失败 2 条</div>
+<div class="sub">2026-06-29 23:45 · 已自动短信兜底</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="tab-bar">
+<a class="tab-item active" href="super_admin_workbench.html">
+<iconify-icon icon="solar:widget-2-bold"></iconify-icon>
+<span>平台</span>
+</a>
+<a class="tab-item" href="super_admin_accounts.html">
+<iconify-icon icon="solar:users-group-rounded-linear"></iconify-icon>
+<span>账号</span>
+</a>
+<a class="tab-item" href="super_admin_audit_logs.html">
+<iconify-icon icon="solar:document-text-linear"></iconify-icon>
+<span>审计</span>
+</a>
+<a class="tab-item" href="super_admin_system.html">
+<iconify-icon icon="solar:pulse-linear"></iconify-icon>
+<span>系统</span>
+</a>
+<a class="tab-item" href="#">
+<iconify-icon icon="solar:user-circle-linear"></iconify-icon>
+<span>我的</span>
+</a>
+</div>
+<div class="home-indicator"><div class="bar"></div></div>
+</div>
+</body>
+</html>

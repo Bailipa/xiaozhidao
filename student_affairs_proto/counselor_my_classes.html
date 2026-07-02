@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<!--
+  API Contract:
+  GET /api/me/classes
+  Response 200: {
+    "summary": { "class_count": int, "student_count": int, "counselor": "string" },
+    "classes": [
+      {
+        "class_id": "string",
+        "class_name": "string",
+        "grade": "string",
+        "student_count": int,
+        "focus_count": int,
+        "anomaly_count_30d": int,
+        "counselor_username": "string",
+        "counselor_name": "string"
+      }
+    ]
+  }
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>我的班级 - 学工助手</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+:root { --color-primary:#1E5AE6; --success:#07C160; --warning:#FA9D3B; --danger:#FA5151; --bg-page:#F7F7F7; --bg-card:#FFFFFF; --divider:#F0F0F0; --text-primary:#191919; --text-regular:#444; --text-secondary:#888; }
+body { background-color:#1a1a1a; display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0; font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; }
+.phone-shell { width:375px; height:812px; background:var(--bg-page); border-radius:40px; overflow:hidden; position:relative; display:flex; flex-direction:column; }
+.status-bar { height:44px; padding:0 20px; display:flex; justify-content:space-between; align-items:center; font-size:14px; color:#000; flex-shrink:0; }
+.nav-bar { height:44px; display:flex; align-items:center; padding:0 16px; background:#fff; flex-shrink:0; }
+.content { flex:1; overflow-y:auto; }
+.summary-card { background:linear-gradient(135deg,#1E5AE6 0%,#4080FF 100%); color:#fff; margin:16px; padding:18px; border-radius:12px; display:flex; justify-content:space-around; }
+.summary-card .cell { text-align:center; }
+.summary-card .num { font-size:24px; font-weight:700; line-height:1.2; }
+.summary-card .label { font-size:11px; opacity:0.85; margin-top:2px; }
+.summary-card .divider { width:1px; background:rgba(255,255,255,0.25); }
+.class-card { background:#fff; margin:8px 16px; padding:14px; border-radius:12px; box-shadow:0 1px 2px rgba(0,0,0,0.02); display:flex; align-items:center; gap:12px; }
+.class-card .icon { width:40px; height:40px; border-radius:10px; background:#EFF6FF; color:var(--color-primary); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.class-card .info { flex:1; min-width:0; }
+.class-card .name { font-size:14px; font-weight:600; color:var(--text-primary); }
+.class-card .sub { font-size:11px; color:var(--text-secondary); margin-top:2px; }
+.class-card .stats { display:flex; gap:12px; margin-top:4px; font-size:10px; }
+.class-card .stats .s { color:var(--text-secondary); }
+.class-card .stats .s .v { color:var(--text-primary); font-weight:600; margin-right:2px; }
+.class-card .arrow { color:#C0C4CC; font-size:18px; }
+.home-indicator { height:34px; background:#fff; display:flex; justify-content:center; align-items:flex-end; padding-bottom:8px; flex-shrink:0; }
+.home-indicator .bar { width:134px; height:5px; border-radius:3px; background:#000; opacity:0.85; }
+</style>
+</head>
+<body>
+<div class="phone-shell">
+<script type="application/json" id="page-data">
+{
+  "summary": { "class_count": 4, "student_count": 128, "counselor": "wangjy@sit.edu.cn" },
+  "classes": [
+    { "class_id":"C001","class_name":"计科1班","grade":"2024","student_count":32,"focus_count":2,"anomaly_count_30d":3,"counselor_username":"wangjy@sit.edu.cn","counselor_name":"王辅导员" },
+    { "class_id":"C002","class_name":"计科2班","grade":"2024","student_count":34,"focus_count":1,"anomaly_count_30d":5,"counselor_username":"wangjy@sit.edu.cn","counselor_name":"王辅导员" },
+    { "class_id":"C003","class_name":"软工1班","grade":"2024","student_count":30,"focus_count":0,"anomaly_count_30d":1,"counselor_username":"wangjy@sit.edu.cn","counselor_name":"王辅导员" },
+    { "class_id":"C004","class_name":"大数据1班","grade":"2024","student_count":32,"focus_count":1,"anomaly_count_30d":2,"counselor_username":"wangjy@sit.edu.cn","counselor_name":"王辅导员" }
+  ]
+}
+</script>
+<div class="status-bar">
+  <span>12:20</span>
+  <div class="flex gap-1.5 text-[#000]">
+    <iconify-icon icon="mingcute:signal-fill"></iconify-icon>
+    <iconify-icon icon="mingcute:wifi-fill"></iconify-icon>
+    <iconify-icon icon="mingcute:battery-fill"></iconify-icon>
+  </div>
+</div>
+<div class="nav-bar">
+  <a class="p-2 -ml-2" href="counselor_profile.html"><iconify-icon class="text-xl" icon="solar:alt-arrow-left-linear"></iconify-icon></a>
+  <h1 class="flex-1 text-center text-base font-bold text-gray-900">我的班级</h1>
+  <span class="p-2 -mr-2 w-8"></span>
+</div>
+<div class="content">
+  <div class="summary-card">
+    <div class="cell"><div class="num">4</div><div class="label">班级</div></div>
+    <div class="divider"></div>
+    <div class="cell"><div class="num">128</div><div class="label">学生</div></div>
+    <div class="divider"></div>
+    <div class="cell"><div class="num">4</div><div class="label">重点关注</div></div>
+  </div>
+
+  <a class="class-card" href="counselor_students.html">
+    <div class="icon"><iconify-icon icon="solar:users-group-rounded-bold-duotone"></iconify-icon></div>
+    <div class="info">
+      <div class="name">计科1班 <span class="text-xs font-normal text-gray-400 ml-1">2024级(1)班</span></div>
+      <div class="sub">辅导员:王辅导员</div>
+      <div class="stats">
+        <span class="s"><span class="v">32</span>人</span>
+        <span class="s"><span class="v" style="color:var(--danger);">2</span>重点</span>
+        <span class="s">近 30 天 <span class="v">3</span> 次异常</span>
+      </div>
+    </div>
+    <iconify-icon class="arrow" icon="solar:alt-arrow-right-linear"></iconify-icon>
+  </a>
+
+  <a class="class-card" href="counselor_students.html">
+    <div class="icon"><iconify-icon icon="solar:users-group-rounded-bold-duotone"></iconify-icon></div>
+    <div class="info">
+      <div class="name">计科2班 <span class="text-xs font-normal text-gray-400 ml-1">2024级(2)班</span></div>
+      <div class="sub">辅导员:王辅导员</div>
+      <div class="stats">
+        <span class="s"><span class="v">34</span>人</span>
+        <span class="s"><span class="v" style="color:var(--danger);">1</span>重点</span>
+        <span class="s">近 30 天 <span class="v">5</span> 次异常</span>
+      </div>
+    </div>
+    <iconify-icon class="arrow" icon="solar:alt-arrow-right-linear"></iconify-icon>
+  </a>
+
+  <a class="class-card" href="counselor_students.html">
+    <div class="icon"><iconify-icon icon="solar:users-group-rounded-bold-duotone"></iconify-icon></div>
+    <div class="info">
+      <div class="name">软工1班 <span class="text-xs font-normal text-gray-400 ml-1">2024级(3)班</span></div>
+      <div class="sub">辅导员:王辅导员</div>
+      <div class="stats">
+        <span class="s"><span class="v">30</span>人</span>
+        <span class="s">近 30 天 <span class="v">1</span> 次异常</span>
+      </div>
+    </div>
+    <iconify-icon class="arrow" icon="solar:alt-arrow-right-linear"></iconify-icon>
+  </a>
+
+  <a class="class-card" href="counselor_students.html">
+    <div class="icon"><iconify-icon icon="solar:users-group-rounded-bold-duotone"></iconify-icon></div>
+    <div class="info">
+      <div class="name">大数据1班 <span class="text-xs font-normal text-gray-400 ml-1">2024级(4)班</span></div>
+      <div class="sub">辅导员:王辅导员</div>
+      <div class="stats">
+        <span class="s"><span class="v">32</span>人</span>
+        <span class="s"><span class="v" style="color:var(--danger);">1</span>重点</span>
+        <span class="s">近 30 天 <span class="v">2</span> 次异常</span>
+      </div>
+    </div>
+    <iconify-icon class="arrow" icon="solar:alt-arrow-right-linear"></iconify-icon>
+  </a>
+</div>
+<div class="home-indicator"><div class="bar"></div></div>
+</div>
+</body>
+</html>

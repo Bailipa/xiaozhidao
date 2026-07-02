@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<!--
+  API Contract:
+  POST /api/students/import
+  Request: multipart/form-data with file (xlsx/xls/csv)
+  Response 200: {
+    "summary": { "total": int, "valid": int, "invalid": int, "duplicate": int },
+    "preview": [ { row: int, valid: bool, data: { 学号, 姓名, 班级, 性别, 联系方式, 政治面貌, 宿舍号 }, error?: string } ],
+    "errors": [ { row, field, message } ]
+  }
+  POST /api/students/import/confirm
+  Request: { "rows": [valid_indices] }
+  Response 200: { "imported": int, "skipped": int }
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>学生花名册导入 - 学工助手</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+:root { --color-primary:#1E5AE6; --success:#07C160; --warning:#FA9D3B; --danger:#DC2626; --bg-page:#F7F7F7; --bg-card:#FFFFFF; --divider:#F0F0F0; --text-primary:#191919; --text-regular:#444; --text-secondary:#888; }
+body { background-color:#1a1a1a; display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0; font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; }
+.phone-shell { width:375px; height:812px; background:var(--bg-page); border-radius:40px; overflow:hidden; position:relative; display:flex; flex-direction:column; box-shadow:0 0 50px rgba(0,0,0,0.5); border:8px solid #333; }
+.status-bar { height:44px; padding:0 20px; display:flex; justify-content:space-between; align-items:center; font-size:14px; color:#000; flex-shrink:0; }
+.nav-bar { height:44px; display:flex; align-items:center; padding:0 16px; background:#fff; flex-shrink:0; }
+.content { flex:1; overflow-y:auto; padding-bottom:100px; }
+.step-bar { display:flex; padding:16px 20px; background:#fff; gap:8px; align-items:center; border-bottom:1px solid var(--divider); }
+.step { flex:1; display:flex; align-items:center; gap:6px; }
+.step .n { width:20px; height:20px; border-radius:50%; background:#E5E7EB; color:#9CA3AF; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.step .label { font-size:11px; color:#9CA3AF; }
+.step.active .n { background:var(--color-primary); color:#fff; }
+.step.active .label { color:var(--color-primary); font-weight:600; }
+.step.done .n { background:var(--success); color:#fff; }
+.step.done .label { color:var(--text-regular); }
+.step-line { flex:0 0 12px; height:1px; background:#E5E7EB; }
+
+.upload-zone { margin:24px 16px; padding:40px 20px; background:#fff; border:2px dashed #DCDFE6; border-radius:12px; text-align:center; }
+.upload-zone.has-file { border-style:solid; border-color:var(--success); background:#F0FFF4; }
+.upload-zone .icon { font-size:48px; color:#C0C4CC; margin-bottom:10px; }
+.upload-zone.has-file .icon { color:var(--success); }
+.upload-zone .primary { font-size:14px; color:var(--text-primary); font-weight:600; }
+.upload-zone .hint { font-size:11px; color:var(--text-secondary); margin-top:6px; line-height:1.6; }
+.upload-zone .file-name { font-size:13px; color:var(--text-primary); font-weight:600; margin-top:10px; }
+.upload-zone .file-meta { font-size:11px; color:var(--text-secondary); margin-top:2px; }
+
+.template-card { margin:16px; padding:16px; background:#fff; border-radius:12px; }
+.template-card .h { font-size:13px; font-weight:600; color:var(--text-primary); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; }
+.template-card .h a { font-size:11px; color:var(--color-primary); text-decoration:none; }
+.field-list { display:flex; flex-wrap:wrap; gap:6px; }
+.field-list span { font-size:11px; padding:4px 10px; background:#F5F6F8; color:var(--text-regular); border-radius:10px; }
+
+.summary-row { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:16px; }
+.summary-row .item { background:#fff; border-radius:10px; padding:12px 8px; text-align:center; }
+.summary-row .num { font-size:18px; font-weight:700; color:var(--text-primary); }
+.summary-row .num.danger { color:var(--danger); }
+.summary-row .num.success { color:var(--success); }
+.summary-row .num.warning { color:var(--warning); }
+.summary-row .label { font-size:10px; color:var(--text-secondary); margin-top:4px; }
+
+.preview-table-wrap { margin:0 16px; background:#fff; border-radius:12px; overflow:hidden; }
+.preview-head { display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid var(--divider); }
+.preview-head h4 { font-size:13px; font-weight:600; color:var(--text-primary); margin:0; }
+.preview-head .stats { font-size:11px; color:var(--text-secondary); }
+.preview-table { width:100%; border-collapse:collapse; font-size:10px; }
+.preview-table th { background:#F7F7F7; color:var(--text-secondary); font-weight:600; padding:6px 4px; text-align:left; white-space:nowrap; }
+.preview-table td { padding:6px 4px; border-top:1px solid var(--divider); color:var(--text-primary); white-space:nowrap; max-width:80px; overflow:hidden; text-overflow:ellipsis; }
+.preview-table tr.invalid { background:#FEF2F2; }
+.preview-table tr.invalid td { color:var(--danger); }
+.preview-table tr.duplicate { background:#FFF7E6; }
+.preview-table tr.duplicate td { color:var(--warning); }
+
+.error-list { margin:0 16px 16px; padding:12px; background:#FEF2F2; border:1px solid #FCA5A5; border-radius:10px; }
+.error-list .h { font-size:12px; font-weight:600; color:var(--danger); margin-bottom:6px; }
+.error-list li { font-size:11px; color:#7F1D1D; line-height:1.7; }
+
+.action-bar { position:absolute; left:0; right:0; bottom:0; background:#fff; padding:12px 16px 28px; display:flex; gap:10px; border-top:1px solid var(--divider); }
+.btn { flex:1; height:44px; border-radius:22px; font-size:14px; font-weight:600; display:flex; align-items:center; justify-content:center; border:none; cursor:pointer; }
+.btn.primary { background:var(--color-primary); color:#fff; box-shadow:0 4px 12px rgba(30,90,230,0.3); }
+.btn.secondary { background:#F2F3F5; color:var(--text-regular); }
+.btn:disabled { background:#C0C4CC; color:#fff; box-shadow:none; }
+.btn.danger { background:var(--danger); color:#fff; }
+
+.home-indicator { height:34px; background:#fff; display:flex; justify-content:center; align-items:flex-end; padding-bottom:8px; flex-shrink:0; }
+.home-indicator .bar { width:134px; height:5px; border-radius:3px; background:#000; opacity:0.85; }
+
+.tip-card { margin:16px; padding:12px; background:#FEF3C7; border-radius:10px; font-size:11px; color:#92400E; line-height:1.6; display:flex; gap:8px; }
+.tip-card iconify-icon { color:var(--warning); flex-shrink:0; font-size:16px; }
+</style>
+</head>
+<body>
+<div class="phone-shell">
+<div class="status-bar">
+<span>12:20</span>
+<div class="flex gap-1.5">
+<iconify-icon icon="mingcute:signal-fill"></iconify-icon>
+<iconify-icon icon="mingcute:wifi-fill"></iconify-icon>
+<iconify-icon icon="mingcute:battery-fill"></iconify-icon>
+</div>
+</div>
+<div class="nav-bar">
+<a class="p-2 -ml-2" href="counselor_students.html"><iconify-icon class="text-xl" icon="solar:alt-arrow-left-linear"></iconify-icon></a>
+<h1 class="flex-1 text-center text-base font-bold text-gray-900">导入学生花名册</h1>
+<span class="p-2 -mr-2 w-8"></span>
+</div>
+
+<div class="step-bar">
+<div class="step active" id="step1">
+<div class="n">1</div>
+<div class="label">选文件</div>
+</div>
+<div class="step-line"></div>
+<div class="step" id="step2">
+<div class="n">2</div>
+<div class="label">预览校验</div>
+</div>
+<div class="step-line"></div>
+<div class="step" id="step3">
+<div class="n">3</div>
+<div class="label">导入完成</div>
+</div>
+</div>
+
+<div class="content" id="content">
+<div id="paneUpload">
+<div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+<div class="icon"><iconify-icon icon="solar:upload-square-bold-duotone"></iconify-icon></div>
+<div class="primary">点击选择 Excel 文件</div>
+<div class="hint">支持 .xlsx / .xls / .csv 格式<br/>文件大小不超过 10MB</div>
+<input id="fileInput" type="file" accept=".xlsx,.xls,.csv" style="display:none;" onchange="onFileSelected(event)"/>
+</div>
+
+<div class="template-card">
+<div class="h">所需字段 <a href="#" onclick="alert('模板字段说明已展开(原型演示)'); return false;">下载模板 ↓</a></div>
+<div class="field-list">
+<span>学号 *</span>
+<span>姓名 *</span>
+<span>班级 *</span>
+<span>性别</span>
+<span>联系方式</span>
+<span>政治面貌</span>
+<span>宿舍号</span>
+</div>
+</div>
+
+<div class="tip-card">
+<iconify-icon icon="solar:info-circle-linear"></iconify-icon>
+<div>学号作为唯一识别字段,重复学号将被合并并标记。学号、姓名、班级为必填项,缺失将记入错误明细。</div>
+</div>
+</div>
+
+<div id="panePreview" style="display:none;">
+<div class="upload-zone has-file" id="fileSummary">
+<div class="icon"><iconify-icon icon="solar:file-check-bold"></iconify-icon></div>
+<div class="file-name" id="fileName">学生花名册.xlsx</div>
+<div class="file-meta" id="fileMeta">128 KB · 解析耗时 0.4s</div>
+</div>
+
+<div class="summary-row">
+<div class="item"><div class="num">125</div><div class="label">总行数</div></div>
+<div class="item"><div class="num success">118</div><div class="label">有效</div></div>
+<div class="item"><div class="num warning">5</div><div class="label">重复</div></div>
+<div class="item"><div class="num danger">2</div><div class="label">错误</div></div>
+</div>
+
+<div class="preview-table-wrap">
+<div class="preview-head">
+<h4>数据预览</h4>
+<span class="stats">展示前 8 行</span>
+</div>
+<table class="preview-table">
+<thead><tr><th>#</th><th>学号</th><th>姓名</th><th>班级</th><th>性别</th><th>电话</th><th>政治面貌</th></tr></thead>
+<tbody id="previewBody"></tbody>
+</table>
+</div>
+
+<div class="error-list">
+<div class="h">错误明细 (2 条)</div>
+<ul>
+<li>第 47 行:缺少必填字段「学号」</li>
+<li>第 89 行:联系方式格式不正确(应为 11 位手机号)</li>
+</ul>
+</div>
+</div>
+
+<div id="paneDone" style="display:none;">
+<div style="text-align:center;padding:48px 20px;">
+<div style="width:80px;height:80px;border-radius:50%;background:#F0FDF4;display:inline-flex;align-items:center;justify-content:center;margin-bottom:20px;">
+<iconify-icon style="font-size:48px;color:#07C160;" icon="solar:check-circle-bold"></iconify-icon>
+</div>
+<div style="font-size:18px;font-weight:700;color:var(--text-primary);">导入成功</div>
+<div style="font-size:13px;color:var(--text-secondary);margin-top:8px;line-height:1.7;">
+已导入 <span style="color:var(--color-primary);font-weight:700;">118</span> 条<br/>
+跳过 <span style="color:var(--warning);font-weight:700;">5</span> 条重复 / <span style="color:var(--danger);font-weight:700;">2</span> 条错误
+</div>
+<a class="btn primary" href="counselor_students.html" style="margin-top:24px;display:inline-flex;width:auto;padding:0 32px;">查看学生列表</a>
+</div>
+</div>
+</div>
+
+<div class="action-bar" id="actionBar">
+<button class="btn secondary" onclick="cancelImport()">取消</button>
+<button class="btn primary" id="primaryBtn" onclick="nextStep()">下一步</button>
+</div>
+<div class="home-indicator"><div class="bar"></div></div>
+</div>
+<script>
+const SAMPLE = [
+  { row:1, valid:true, data:{学号:'2024001', 姓名:'张晓明', 班级:'2024级(3)班', 性别:'男', 联系方式:'13800000001', 政治面貌:'共青团员', 宿舍号:'3-101'} },
+  { row:2, valid:true, data:{学号:'2024002', 姓名:'李华', 班级:'2024级(3)班', 性别:'女', 联系方式:'13800000002', 政治面貌:'群众', 宿舍号:'3-102'} },
+  { row:3, valid:true, data:{学号:'2024003', 姓名:'王五', 班级:'2024级(3)班', 性别:'男', 联系方式:'13800000003', 政治面貌:'共青团员', 宿舍号:'3-103'} },
+  { row:4, valid:true, data:{学号:'2024005', 姓名:'赵子涵', 班级:'2024级(3)班', 性别:'女', 联系方式:'13800000005', 政治面貌:'共青团员', 宿舍号:'3-105'} },
+  { row:5, valid:true, data:{学号:'2024009', 姓名:'孙宇轩', 班级:'2024级(3)班', 性别:'男', 联系方式:'13800000009', 政治面貌:'群众', 宿舍号:'3-109'} },
+  { row:6, valid:false, class:'duplicate', data:{学号:'2024001', 姓名:'张晓明', 班级:'2024级(3)班', 性别:'男', 联系方式:'13800000001', 政治面貌:'共青团员', 宿舍号:'3-101'} },
+  { row:7, valid:true, data:{学号:'2024010', 姓名:'陈思雨', 班级:'2024级(3)班', 性别:'女', 联系方式:'13800000010', 政治面貌:'共青团员', 宿舍号:'3-110'} },
+  { row:8, valid:false, class:'invalid', data:{学号:'', 姓名:'林某', 班级:'2024级(3)班', 性别:'男', 联系方式:'13800000011', 政治面貌:'群众', 宿舍号:'3-111'} }
+];
+
+function onFileSelected(ev) {
+  const f = ev.target.files[0];
+  if (!f) return;
+  document.getElementById('fileName').textContent = f.name;
+  document.getElementById('fileMeta').textContent = (f.size/1024).toFixed(1) + ' KB · 解析中...';
+  setTimeout(() => {
+    document.getElementById('fileMeta').textContent = (f.size/1024).toFixed(1) + ' KB · 解析耗时 0.4s';
+  }, 500);
+  document.getElementById('uploadZone').classList.add('has-file');
+}
+
+function renderPreview() {
+  const tb = document.getElementById('previewBody');
+  tb.innerHTML = SAMPLE.map(r => {
+    const cls = r.valid ? '' : r.class;
+    return `<tr class="${cls}"><td>${r.row}</td><td>${r.data.学号||'<空>'}</td><td>${r.data.姓名}</td><td>${r.data.班级}</td><td>${r.data.性别}</td><td>${r.data.联系方式||'-'}</td><td>${r.data.政治面貌}</td></tr>`;
+  }).join('');
+}
+
+let step = 1;
+function setStep(n) {
+  step = n;
+  ['step1','step2','step3'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.classList.remove('active','done');
+    if (i+1 < n) el.classList.add('done');
+    else if (i+1 === n) el.classList.add('active');
+  });
+  document.getElementById('paneUpload').style.display = n===1?'block':'none';
+  document.getElementById('panePreview').style.display = n===2?'block':'none';
+  document.getElementById('paneDone').style.display = n===3?'block':'none';
+  if (n===2) {
+    renderPreview();
+    document.getElementById('primaryBtn').textContent = '确认导入 118 条';
+  } else if (n===1) {
+    document.getElementById('primaryBtn').textContent = '下一步';
+  } else {
+    document.getElementById('actionBar').style.display = 'none';
+  }
+}
+
+function nextStep() {
+  if (step === 1) {
+    if (!document.getElementById('fileName') || !document.querySelector('.has-file')) {
+      alert('请先选择文件');
+      return;
+    }
+    setStep(2);
+  } else if (step === 2) {
+    const btn = document.getElementById('primaryBtn');
+    btn.disabled = true; btn.textContent = '导入中…';
+    setTimeout(() => setStep(3), 800);
+  }
+}
+
+function cancelImport() {
+  if (step === 1) { window.location.href = 'counselor_students.html'; return; }
+  showConfirm(function() {
+    if (step === 3) { window.location.href = 'counselor_students.html'; }
+    else { setStep(1); document.getElementById('fileInput').value = ''; document.getElementById('uploadZone').classList.remove('has-file'); }
+  });
+}
+
+function showConfirm(onOk) {
+  const m = document.createElement('div');
+  m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99;display:flex;align-items:center;justify-content:center;padding:0 32px;';
+  m.innerHTML = '<div style="background:#fff;border-radius:14px;width:100%;overflow:hidden;">'
+    + '<div style="padding:24px 20px;text-align:center;">'
+    + '<iconify-icon style="font-size:32px;color:#DC2626;" icon="solar:close-circle-bold"></iconify-icon>'
+    + '<div style="font-size:16px;font-weight:700;color:#191919;margin-top:10px;">确认取消导入?</div>'
+    + '<div style="font-size:12px;color:#888;margin-top:6px;line-height:1.6;">已选择的文件和预览数据将被丢弃,需重新导入。</div>'
+    + '</div>'
+    + '<div style="display:flex;border-top:1px solid #F0F0F0;">'
+    + '<button data-cancel style="flex:1;height:48px;background:#fff;color:#888;font-size:15px;border:none;border-right:1px solid #F0F0F0;cursor:pointer;">继续导入</button>'
+    + '<button data-ok style="flex:1;height:48px;background:#fff;color:#DC2626;font-size:15px;font-weight:600;border:none;cursor:pointer;">确认取消</button>'
+    + '</div></div>';
+  document.body.appendChild(m);
+  m.querySelector('[data-cancel]').onclick = function() { m.remove(); };
+  m.querySelector('[data-ok]').onclick = function() { m.remove(); onOk && onOk(); };
+}
+
+setStep(1);
+</script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<!--
+  API Contract:
+  GET /api/me/settings
+  Response 200: {
+    "notifications": {
+      "anomaly_push": bool,
+      "reminder_push": bool,
+      "sound": bool,
+      "vibration": bool,
+      "quiet_hours": { "enabled":bool, "start":"HH:mm", "end":"HH:mm" }
+    },
+    "appearance": {
+      "theme": "light|dark|system",
+      "font_size": "standard|large|xlarge"
+    }
+  }
+  PUT /api/me/settings
+  Request: same structure as above (partial update)
+  Response 200: { "updated_at":"ISO-8601" }
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>通用设置 - 学工助手</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+:root { --color-primary:#1E5AE6; --success:#07C160; --warning:#FA9D3B; --danger:#FA5151; --bg-page:#F7F7F7; --bg-card:#FFFFFF; --divider:#F0F0F0; --text-primary:#191919; --text-regular:#444; --text-secondary:#888; }
+body { background-color:#1a1a1a; display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0; font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; }
+.phone-shell { width:375px; height:812px; background:var(--bg-page); border-radius:40px; overflow:hidden; position:relative; display:flex; flex-direction:column; }
+.status-bar { height:44px; padding:0 20px; display:flex; justify-content:space-between; align-items:center; font-size:14px; color:#000; flex-shrink:0; }
+.nav-bar { height:44px; display:flex; align-items:center; padding:0 16px; background:#fff; flex-shrink:0; }
+.content { flex:1; overflow-y:auto; }
+.section-h { padding:16px 20px 6px; font-size:12px; color:var(--text-secondary); font-weight:600; }
+.card { background:#fff; margin:0 16px 12px; border-radius:12px; overflow:hidden; }
+.cell { display:flex; align-items:center; padding:14px 16px; gap:12px; }
+.cell + .cell { border-top:1px solid var(--divider); }
+.cell .k { font-size:14px; color:var(--text-primary); flex:1; }
+.cell .v { font-size:13px; color:var(--text-secondary); }
+.cell .arrow { color:#C0C4CC; font-size:16px; }
+.toggle { width:44px; height:24px; border-radius:12px; background:var(--success); position:relative; flex-shrink:0; }
+.toggle::after { content:''; position:absolute; top:2px; right:2px; width:20px; height:20px; background:#fff; border-radius:50%; box-shadow:0 1px 2px rgba(0,0,0,0.2); }
+.toggle.off { background:#E5E7EB; }
+.toggle.off::after { right:auto; left:2px; }
+.seg { display:inline-flex; background:#F2F3F5; border-radius:8px; padding:2px; }
+.seg span { font-size:12px; padding:4px 10px; border-radius:6px; color:var(--text-secondary); }
+.seg span.on { background:#fff; color:var(--color-primary); font-weight:600; box-shadow:0 1px 2px rgba(0,0,0,0.06); }
+.about { text-align:center; padding:24px 0 8px; color:var(--text-secondary); font-size:11px; line-height:1.6; }
+.about a { color:var(--color-primary); text-decoration:none; }
+.home-indicator { height:34px; background:#fff; display:flex; justify-content:center; align-items:flex-end; padding-bottom:8px; flex-shrink:0; }
+.home-indicator .bar { width:134px; height:5px; border-radius:3px; background:#000; opacity:0.85; }
+</style>
+</head>
+<body>
+<div class="phone-shell">
+<script type="application/json" id="page-data">
+{
+  "notifications": {
+    "anomaly_push": true,
+    "reminder_push": true,
+    "sound": true,
+    "vibration": false,
+    "quiet_hours": { "enabled": true, "start": "22:00", "end": "07:00" }
+  },
+  "appearance": {
+    "theme": "light",
+    "font_size": "standard"
+  }
+}
+</script>
+<div class="status-bar">
+  <span>12:20</span>
+  <div class="flex gap-1.5 text-[#000]">
+    <iconify-icon icon="mingcute:signal-fill"></iconify-icon>
+    <iconify-icon icon="mingcute:wifi-fill"></iconify-icon>
+    <iconify-icon icon="mingcute:battery-fill"></iconify-icon>
+  </div>
+</div>
+<div class="nav-bar">
+  <a class="p-2 -ml-2" href="counselor_profile.html"><iconify-icon class="text-xl" icon="solar:alt-arrow-left-linear"></iconify-icon></a>
+  <h1 class="flex-1 text-center text-base font-bold text-gray-900">通用设置</h1>
+  <span class="p-2 -mr-2 w-8"></span>
+</div>
+<div class="content">
+  <div class="section-h">通知</div>
+  <div class="card">
+    <div class="cell">
+      <span class="k">异常实时提醒</span>
+      <div class="toggle"></div>
+    </div>
+    <div class="cell">
+      <span class="k">事务提醒推送</span>
+      <div class="toggle"></div>
+    </div>
+    <div class="cell">
+      <span class="k">声音</span>
+      <div class="toggle"></div>
+    </div>
+    <div class="cell">
+      <span class="k">振动</span>
+      <div class="toggle off"></div>
+    </div>
+    <a class="cell" href="#">
+      <span class="k">免打扰时段</span>
+      <span class="v">22:00 - 07:00</span>
+      <iconify-icon class="arrow" icon="solar:alt-arrow-right-linear"></iconify-icon>
+    </a>
+  </div>
+
+  <div class="section-h">外观</div>
+  <div class="card">
+    <div class="cell">
+      <span class="k">主题</span>
+      <div class="seg">
+        <span>浅色</span>
+        <span>深色</span>
+        <span class="on">跟随系统</span>
+      </div>
+    </div>
+    <div class="cell">
+      <span class="k">字号</span>
+      <div class="seg">
+        <span class="on">标准</span>
+        <span>大号</span>
+        <span>特大</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-h">数据</div>
+  <div class="card">
+    <a class="cell" href="#">
+      <span class="k">清除缓存</span>
+      <span class="v">12.4 MB</span>
+      <iconify-icon class="arrow" icon="solar:alt-arrow-right-linear"></iconify-icon>
+    </a>
+    <a class="cell" href="#">
+      <span class="k">导出我的工作数据</span>
+      <iconify-icon class="arrow" icon="solar:alt-arrow-right-linear"></iconify-icon>
+    </a>
+  </div>
+
+  <div class="section-h">关于</div>
+  <div class="card">
+    <a class="cell" href="counselor_about.html">
+      <span class="k">关于学工助手</span>
+      <span class="v">v1.0.0</span>
+      <iconify-icon class="arrow" icon="solar:alt-arrow-right-linear"></iconify-icon>
+    </a>
+    <a class="cell" href="#">
+      <span class="k">用户协议</span>
+      <iconify-icon class="arrow" icon="solar:alt-arrow-right-linear"></iconify-icon>
+    </a>
+    <a class="cell" href="#">
+      <span class="k">隐私政策</span>
+      <iconify-icon class="arrow" icon="solar:alt-arrow-right-linear"></iconify-icon>
+    </a>
+    <a class="cell" href="#">
+      <span class="k">检查更新</span>
+      <span class="v">已是最新</span>
+      <iconify-icon class="arrow" icon="solar:alt-arrow-right-linear"></iconify-icon>
+    </a>
+  </div>
+
+  <div class="about">
+    学工助手 · 企业版<br/>
+    © 2026 上海应用技术大学 · 智能技术学部
+  </div>
+</div>
+<div class="home-indicator"><div class="bar"></div></div>
+</div>
+</body>
+</html>

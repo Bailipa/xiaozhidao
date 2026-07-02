@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<!--
+  角色:super_admin(技术员 / 李工)
+  说明:全平台账号管理。跨学部查看所有辅导员账号,支持搜索、筛选、
+       创建账号、停用、重置密码。涉及学工书记创建账号的入口请走
+       secretary_counselor_new.html。
+  依据:申报书 4.1.1 (1)(2)(5)
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>账号管理 - 学工助手</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+:root {
+  --color-primary:#1E5AE6;
+  --color-success:#07C160;
+  --color-warning:#FA9D3B;
+  --color-danger:#DC2626;
+  --bg-page:#F5F6F8;
+  --bg-card:#FFFFFF;
+  --divider:#F3F4F6;
+  --text-primary:#191919;
+  --text-regular:#444;
+  --text-secondary:#6B7280;
+}
+body { background-color:#1a1a1a; display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0; font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; }
+.phone-shell { width:375px; height:812px; background:var(--bg-page); border-radius:40px; overflow:hidden; position:relative; display:flex; flex-direction:column; box-shadow:0 0 50px rgba(0,0,0,0.5); border:8px solid #333; }
+.status-bar { height:44px; padding:0 20px; display:flex; justify-content:space-between; align-items:center; font-size:14px; color:#000; flex-shrink:0; }
+.nav-bar { height:44px; display:flex; align-items:center; padding:0 16px; background:#fff; border-bottom:1px solid var(--divider); flex-shrink:0; }
+.content { flex:1; overflow-y:auto; padding-bottom:20px; }
+.tab-bar { height:84px; background:#fff; border-top:1px solid var(--divider); display:flex; justify-content:space-around; align-items:center; padding-bottom:20px; flex-shrink:0; }
+.tab-item { display:flex; flex-direction:column; align-items:center; text-align:center; color:#9CA3AF; text-decoration:none; }
+.tab-item.active { color:var(--color-primary); }
+.tab-item iconify-icon { font-size:24px; margin-bottom:4px; }
+.tab-item span { font-size:11px; }
+.home-indicator { height:34px; background:#fff; display:flex; justify-content:center; align-items:flex-end; padding-bottom:8px; flex-shrink:0; }
+.home-indicator .bar { width:134px; height:5px; border-radius:3px; background:#000; opacity:0.85; }
+
+.search-box { background:#fff; padding:10px 16px; border-bottom:1px solid var(--divider); }
+.search-box .row { display:flex; gap:8px; align-items:center; }
+.search-box input { flex:1; padding:9px 14px; background:#F5F5F5; border:0; border-radius:18px; font-size:13px; outline:none; }
+.chip-row { display:flex; gap:6px; padding:10px 16px; overflow-x:auto; background:#fff; border-bottom:1px solid var(--divider); }
+.chip { padding:4px 12px; background:#F5F5F5; color:var(--text-regular); border-radius:14px; font-size:12px; white-space:nowrap; }
+.chip.on { background:#EFF6FF; color:var(--color-primary); font-weight:600; }
+
+.toolbar { display:flex; justify-content:space-between; align-items:center; padding:14px 16px 6px; }
+.toolbar .h { font-size:12px; color:var(--text-secondary); }
+.toolbar .h b { color:var(--text-primary); }
+.toolbar a { font-size:11px; padding:5px 12px; background:var(--color-primary); color:#fff; border-radius:14px; display:inline-flex; align-items:center; gap:4px; text-decoration:none; font-weight:600; }
+
+.acct-card { background:#fff; margin:6px 16px; padding:12px 14px; border-radius:10px; display:flex; align-items:center; gap:10px; box-shadow:0 1px 2px rgba(0,0,0,0.02); }
+.acct-card .av { width:38px; height:38px; border-radius:50%; overflow:hidden; flex-shrink:0; }
+.acct-card .av img { width:100%; height:100%; object-fit:cover; }
+.acct-card .info { flex:1; min-width:0; }
+.acct-card .name { font-size:13px; font-weight:600; color:var(--text-primary); display:flex; align-items:center; gap:6px; }
+.acct-card .name .role { font-size:9px; padding:1px 5px; border-radius:3px; background:#EFF6FF; color:var(--color-primary); font-weight:600; }
+.acct-card .name .role.sec { background:#FEF3C7; color:#B45309; }
+.acct-card .name .role.adm { background:#F3E8FF; color:#7C3AED; }
+.acct-card .meta { font-size:10px; color:var(--text-secondary); margin-top:2px; }
+.acct-card .status { font-size:9px; padding:1px 6px; border-radius:8px; font-weight:600; flex-shrink:0; }
+.acct-card .status.on { background:#D1FAE5; color:#047857; }
+.acct-card .status.off { background:#F3F4F6; color:var(--text-secondary); }
+.acct-card .status.lock { background:#FEE2E2; color:var(--color-danger); }
+
+.fab { position:fixed; bottom:104px; right:24px; width:54px; height:54px; background:var(--color-primary); color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 16px rgba(30,90,230,0.4); z-index:20; }
+</style>
+</head>
+<body>
+<div class="phone-shell">
+<div class="status-bar">
+<span>12:20</span>
+<div class="flex gap-1.5 text-[#000]">
+<iconify-icon icon="mingcute:signal-fill"></iconify-icon>
+<iconify-icon icon="mingcute:wifi-fill"></iconify-icon>
+<iconify-icon icon="mingcute:battery-fill"></iconify-icon>
+</div>
+</div>
+
+<div class="nav-bar">
+<h1 class="flex-1 text-center text-base font-bold text-gray-900">账号管理</h1>
+<a class="text-xs text-blue-600 font-bold flex items-center gap-1" href="#" onclick="alert('导出名单(演示)'); return false;">
+<iconify-icon icon="solar:export-bold-duotone"></iconify-icon> 导出
+</a>
+</div>
+
+<div class="content">
+<div class="search-box">
+<div class="row">
+<input placeholder="🔍 搜索姓名 / 工号 / 学部"/>
+<a class="text-[11px] text-blue-600 font-bold" href="#" onclick="alert('高级筛选(演示)'); return false;">筛选</a>
+</div>
+</div>
+
+<div class="chip-row">
+<span class="chip on">全部 86</span>
+<span class="chip">智能技术学部 42</span>
+<span class="chip">计算机学院 28</span>
+<span class="chip">电气学院 16</span>
+<span class="chip">已停用 5</span>
+<span class="chip">已锁定 2</span>
+</div>
+
+<div class="toolbar">
+<span class="h">共 <b>86</b> 个账号 · 按最近活跃排序</span>
+</div>
+
+<div class="acct-card">
+<div class="av"><img alt="" src="https://ui-avatars.com/api/?name=王&background=1E5AE6&color=fff&size=64&bold=true&font-size=0.5"/></div>
+<div class="info">
+<div class="name">王辅导员 <span class="role">辅导员</span></div>
+<div class="meta">智能技术学部 · wangjy@sit.edu.cn · 12:20 在线</div>
+</div>
+<span class="status on">正常</span>
+</div>
+
+<div class="acct-card">
+<div class="av"><img alt="" src="https://ui-avatars.com/api/?name=刘&background=1E5AE6&color=fff&size=64&bold=true&font-size=0.5"/></div>
+<div class="info">
+<div class="name">刘书记 <span class="role sec">学工书记</span></div>
+<div class="meta">智能技术学部 · liusj@sit.edu.cn · 11:58 在线</div>
+</div>
+<span class="status on">正常</span>
+</div>
+
+<div class="acct-card">
+<div class="av" style="background:#1a1a1a;color:#fff;display:flex;align-items:center;justify-content:center;">
+<iconify-icon icon="solar:settings-bold"></iconify-icon>
+</div>
+<div class="info">
+<div class="name">李工 <span class="role adm">技术人员</span></div>
+<div class="meta">平台级 · 仅运维 · 当前会话</div>
+</div>
+<span class="status on">正常</span>
+</div>
+
+<div class="acct-card">
+<div class="av"><img alt="" src="https://ui-avatars.com/api/?name=陈&background=1E5AE6&color=fff&size=64&bold=true&font-size=0.5"/></div>
+<div class="info">
+<div class="name">陈辅导员 <span class="role">辅导员</span></div>
+<div class="meta">计算机学院 · chenxj@sit.edu.cn · 昨日活跃</div>
+</div>
+<span class="status on">正常</span>
+</div>
+
+<div class="acct-card">
+<div class="av"><img alt="" src="https://ui-avatars.com/api/?name=赵&background=1E5AE6&color=fff&size=64&bold=true&font-size=0.5"/></div>
+<div class="info">
+<div class="name">赵书记 <span class="role sec">学工书记</span></div>
+<div class="meta">电气学院 · zhaosw@sit.edu.cn · 2 小时前</div>
+</div>
+<span class="status on">正常</span>
+</div>
+
+<div class="acct-card">
+<div class="av"><img alt="" src="https://ui-avatars.com/api/?name=孙&background=1E5AE6&color=fff&size=64&bold=true&font-size=0.5"/></div>
+<div class="info">
+<div class="name">孙辅导员 <span class="role">辅导员</span></div>
+<div class="meta">智能技术学部 · 连续 5 次登录失败 · 已锁定</div>
+</div>
+<span class="status lock">锁定</span>
+</div>
+
+<div class="acct-card">
+<div class="av"><img alt="" src="https://ui-avatars.com/api/?name=李&background=1E5AE6&color=fff&size=64&bold=true&font-size=0.5"/></div>
+<div class="info">
+<div class="name">李辅导员 <span class="role">辅导员</span></div>
+<div class="meta">智能技术学部 · 已申请停用 · 2024-12-01</div>
+</div>
+<span class="status off">停用</span>
+</div>
+
+<div class="acct-card">
+<div class="av"><img alt="" src="https://ui-avatars.com/api/?name=周&background=1E5AE6&color=fff&size=64&bold=true&font-size=0.5"/></div>
+<div class="info">
+<div class="name">周辅导员 <span class="role">辅导员</span></div>
+<div class="meta">计算机学院 · zhouyq@sit.edu.cn · 今日 09:15</div>
+</div>
+<span class="status on">正常</span>
+</div>
+</div>
+
+<a class="fab" href="#" onclick="alert('新建账号(演示)。完整流程见 secretary_counselor_new.html'); return false;">
+<iconify-icon class="text-2xl" icon="solar:add-circle-bold"></iconify-icon>
+</a>
+
+<div class="tab-bar">
+<a class="tab-item" href="super_admin_workbench.html">
+<iconify-icon icon="solar:widget-2-linear"></iconify-icon>
+<span>平台</span>
+</a>
+<a class="tab-item active" href="super_admin_accounts.html">
+<iconify-icon icon="solar:users-group-rounded-bold"></iconify-icon>
+<span>账号</span>
+</a>
+<a class="tab-item" href="super_admin_audit_logs.html">
+<iconify-icon icon="solar:document-text-linear"></iconify-icon>
+<span>审计</span>
+</a>
+<a class="tab-item" href="super_admin_system.html">
+<iconify-icon icon="solar:pulse-linear"></iconify-icon>
+<span>系统</span>
+</a>
+<a class="tab-item" href="#">
+<iconify-icon icon="solar:user-circle-linear"></iconify-icon>
+<span>我的</span>
+</a>
+</div>
+<div class="home-indicator"><div class="bar"></div></div>
+</div>
+</body>
+</html>

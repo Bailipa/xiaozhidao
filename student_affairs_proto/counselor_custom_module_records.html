@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<!--
+  API Contract:
+  GET /api/me/custom-modules/{module_id}
+  Response 200: {
+    "module": { "module_id":"string", "name":"string", "purpose":"string",
+      "record_count":int, "visibility":"private|shared", "created_at":"ISO-8601" }
+  }
+  GET /api/me/custom-modules/{module_id}/records?page=1&size=20
+  Response 200: {
+    "module": {...},
+    "records": [
+      { "record_id":"string", "content_text":"string", "content_html":"string",
+        "image_urls":["string"], "visibility":"private|shared",
+        "created_at":"ISO-8601", "updated_at":"ISO-8601" }
+    ]
+  }
+  POST /api/me/custom-modules/{module_id}/records
+  Request: { "content_html":"string", "image_urls":["string"], "visibility":"string" }
+  Response 201: { "record_id":"string" }
+  DELETE /api/me/custom-modules/{module_id}/records/{record_id}
+  Response 200: { "message":"string" }
+  PUT /api/me/custom-modules/{module_id}/records/{record_id}
+  Request: { "content_html":"string", "visibility":"string" }
+  Response 200: { "record_id":"string", "updated_at":"ISO-8601" }
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>自定义记录 - 学工助手</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+:root { --color-primary:#1E5AE6; --success:#07C160; --warning:#FA9D3B; --danger:#FA5151; --bg-page:#F7F7F7; --bg-card:#FFFFFF; --divider:#F0F0F0; --text-primary:#191919; --text-secondary:#888; }
+body { background-color:#1a1a1a; display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0; font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; }
+.phone-shell { width:375px; height:812px; background:var(--bg-page); border-radius:40px; overflow:hidden; position:relative; display:flex; flex-direction:column; }
+.status-bar { height:44px; padding:0 20px; display:flex; justify-content:space-between; align-items:center; font-size:14px; color:#000; flex-shrink:0; }
+.nav-bar { height:44px; display:flex; align-items:center; padding:0 16px; background:#fff; flex-shrink:0; }
+.content { flex:1; overflow-y:auto; }
+
+.module-header { margin:16px; padding:16px; background:linear-gradient(135deg,#818CF8 0%,#6366F1 100%); color:#fff; border-radius:12px; }
+.module-header .name { font-size:18px; font-weight:700; }
+.module-header .purpose { font-size:12px; opacity:0.9; margin-top:4px; line-height:1.5; }
+.module-header .row { display:flex; gap:14px; margin-top:12px; }
+.module-header .stat { background:rgba(255,255,255,0.15); border-radius:8px; padding:6px 10px; flex:1; }
+.module-header .stat .k { font-size:10px; opacity:0.85; }
+.module-header .stat .v { font-size:14px; font-weight:700; margin-top:2px; }
+
+.perm-row { background:#fff; margin:0 16px 12px; padding:12px 14px; border-radius:10px; display:flex; align-items:center; justify-content:space-between; }
+.perm-row .label { font-size:13px; color:var(--text-primary); display:flex; align-items:center; gap:6px; }
+.perm-row .sub { font-size:11px; color:var(--text-secondary); margin-top:2px; }
+.toggle { width:40px; height:22px; border-radius:11px; background:var(--success); position:relative; flex-shrink:0; transition:background 0.2s; }
+.toggle::after { content:''; position:absolute; top:2px; right:2px; width:18px; height:18px; background:#fff; border-radius:50%; box-shadow:0 1px 2px rgba(0,0,0,0.2); transition:right 0.2s; }
+.toggle.off { background:#E5E7EB; }
+.toggle.off::after { right:auto; left:2px; }
+
+.record-card { background:#fff; margin:8px 16px; padding:14px; border-radius:12px; box-shadow:0 1px 2px rgba(0,0,0,0.02); }
+.record-card .meta { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.record-card .time { font-size:11px; color:var(--text-secondary); display:flex; align-items:center; gap:4px; }
+.record-card .visibility { font-size:10px; padding:2px 6px; border-radius:4px; }
+.record-card .visibility.private { background:#F5F5F5; color:#888; }
+.record-card .visibility.shared { background:#ECFDF5; color:var(--success); }
+.record-card .content { font-size:13px; color:var(--text-primary); line-height:1.7; }
+.record-card .images { display:flex; gap:6px; margin-top:8px; }
+.record-card .images .img { width:64px; height:64px; border-radius:8px; background:linear-gradient(135deg,#A5B4FC,#818CF8); }
+.record-card .actions { display:flex; justify-content:flex-end; gap:12px; margin-top:10px; padding-top:10px; border-top:1px solid #F5F5F5; }
+.record-card .actions a { font-size:11px; padding:4px 10px; border-radius:12px; }
+.record-card .actions .edit { background:#EFF6FF; color:var(--color-primary); }
+.record-card .actions .del { color:var(--danger); }
+
+.fab { position:fixed; bottom:30px; right:30px; width:54px; height:54px; background:var(--color-primary); color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 16px rgba(30,90,230,0.4); z-index:20; }
+.fab iconify-icon { font-size:24px; }
+
+.empty { text-align:center; padding:50px 20px; color:var(--text-secondary); font-size:13px; }
+.empty .icon { font-size:48px; color:#C0C4CC; margin-bottom:12px; }
+
+.section-h { padding:14px 20px 4px; font-size:12px; color:var(--text-secondary); font-weight:600; }
+
+.home-indicator { height:34px; background:#fff; display:flex; justify-content:center; align-items:flex-end; padding-bottom:8px; flex-shrink:0; }
+.home-indicator .bar { width:134px; height:5px; border-radius:3px; background:#000; opacity:0.85; }
+</style>
+</head>
+<body>
+<div class="phone-shell">
+<script type="application/json" id="page-data">
+{
+  "modules": {
+    "M001": {
+      "module": { "module_id":"M001", "name":"我今天的工作心得", "purpose":"每天下班前记录当天的反思、感悟和学生工作的得失", "record_count":12, "visibility":"shared", "created_at":"2025-09-05T10:30:00+08:00" },
+      "records": [
+        { "record_id":"R001-1", "content_text":"今天和王五谈了一个小时,主要聊他最近和室友关系紧张的问题。他愿意主动找辅导员说明情况,说明信任度提升了。明天要跟进他室友那边的情况。", "image_urls":[], "visibility":"shared", "created_at":"2026-06-30T18:00:00+08:00" },
+        { "record_id":"R001-2", "content_text":"今天处理了张晓明的家长来访,家长对孩子晚归很焦虑。我建议家长多用正向沟通,不要只盯着成绩,孩子反应明显。", "image_urls":[], "visibility":"shared", "created_at":"2026-06-29T19:30:00+08:00" },
+        { "record_id":"R001-3", "content_text":"班会效果好,学生主动分享了暑期实践的收获。下次可以邀请更多同学准备,丰富形式。", "image_urls":[], "visibility":"shared", "created_at":"2026-06-28T17:00:00+08:00" }
+      ]
+    },
+    "M002": {
+      "module": { "module_id":"M002", "name":"班会反思", "purpose":"每次班会结束后记录班会效果与待改进点", "record_count":4, "visibility":"private", "created_at":"2025-10-15T14:00:00+08:00" },
+      "records": [
+        { "record_id":"R002-1", "content_text":"职业规划班会反思:邀请了 3 位大四学长分享,学生反馈积极。但形式上太单向,下次可以加入小组讨论环节。", "image_urls":[], "visibility":"private", "created_at":"2026-05-22T16:30:00+08:00" },
+        { "record_id":"R002-2", "content_text":"心理健康主题班会:准备材料花了 2 天,实际效果不错。后续可以做成模板复用。", "image_urls":[], "visibility":"private", "created_at":"2026-04-18T17:00:00+08:00" }
+      ]
+    },
+    "M003": {
+      "module": { "module_id":"M003", "name":"重点学生观察", "purpose":"持续跟踪重点关注学生的行为变化和心理动态", "record_count":6, "visibility":"shared", "created_at":"2025-11-01T09:00:00+08:00" },
+      "records": [
+        { "record_id":"R003-1", "content_text":"张晓明:本周情绪稳定,愿意参与班级活动。但仍需关注晚归问题,家长配合度有所提升。", "image_urls":[], "visibility":"shared", "created_at":"2026-06-28T11:20:00+08:00" },
+        { "record_id":"R003-2", "content_text":"李四:近期与室友关系有缓和迹象,主动邀请室友一起吃饭。建议保持观察。", "image_urls":[], "visibility":"shared", "created_at":"2026-06-25T10:00:00+08:00" },
+        { "record_id":"R003-3", "content_text":"王五:心理测评结果好转,定期与心理咨询师沟通。本周无异常行为。", "image_urls":[], "visibility":"shared", "created_at":"2026-06-22T14:30:00+08:00" }
+      ]
+    }
+  }
+}
+</script>
+<div class="status-bar">
+  <span>12:20</span>
+  <div class="flex gap-1.5 text-[#000]">
+    <iconify-icon icon="mingcute:signal-fill"></iconify-icon>
+    <iconify-icon icon="mingcute:wifi-fill"></iconify-icon>
+    <iconify-icon icon="mingcute:battery-fill"></iconify-icon>
+  </div>
+</div>
+<div class="nav-bar">
+  <a class="p-2 -ml-2" href="counselor_custom_modules.html"><iconify-icon class="text-xl" icon="solar:alt-arrow-left-linear"></iconify-icon></a>
+  <h1 class="flex-1 text-center text-base font-bold text-gray-900" id="moduleName">模块记录</h1>
+  <a class="p-2 -mr-2" href="#"><iconify-icon class="text-xl text-gray-400" icon="solar:menu-dots-bold"></iconify-icon></a>
+</div>
+
+<div class="content">
+  <div class="module-header" id="moduleHeader">
+    <div class="name">模块名称</div>
+    <div class="purpose">模块用途</div>
+    <div class="row">
+      <div class="stat"><div class="k">记录数</div><div class="v" id="statCount">0</div></div>
+      <div class="stat"><div class="k">可见性</div><div class="v" id="statVis">仅自己</div></div>
+      <div class="stat"><div class="k">创建于</div><div class="v" id="statCreated">—</div></div>
+    </div>
+  </div>
+
+  <div class="perm-row">
+    <div>
+      <div class="label"><iconify-icon class="text-blue-500" icon="solar:shield-user-bold"></iconify-icon> 授权学工书记查看</div>
+      <div class="sub">关闭后,学工书记将无法在管理端看到本模块的记录</div>
+    </div>
+    <div class="toggle" id="permToggle" onclick="togglePerm()"></div>
+  </div>
+
+  <div class="section-h">记录列表 <span style="font-weight:400;" id="recordCount">0 条</span></div>
+
+  <div id="recordList"></div>
+</div>
+
+<a class="fab" href="counselor_custom_record_edit.html?mid=M001">
+  <iconify-icon icon="solar:pen-bold"></iconify-icon>
+</a>
+
+<div class="home-indicator"><div class="bar"></div></div>
+</div>
+
+<script>
+var currentMid = 'M001';
+var DATA = null;
+(function(){
+  var p = new URLSearchParams(window.location.search);
+  if (p.get('mid')) currentMid = p.get('mid');
+  try { DATA = JSON.parse(document.getElementById('page-data').textContent); } catch(e) { DATA = null; }
+  if (!DATA) return;
+  var m = DATA.modules[currentMid];
+  if (!m) return;
+  document.getElementById('moduleName').textContent = m.module.name;
+  document.querySelector('.module-header .name').textContent = m.module.name;
+  document.querySelector('.module-header .purpose').textContent = m.module.purpose;
+  document.getElementById('statCount').textContent = m.module.record_count;
+  document.getElementById('statVis').textContent = m.module.visibility === 'shared' ? '已授权' : '仅自己';
+  document.getElementById('statCreated').textContent = m.module.created_at.substring(0, 7);
+  document.getElementById('recordCount').textContent = '(' + m.records.length + ' 条)';
+  if (m.module.visibility !== 'shared') document.getElementById('permToggle').classList.add('off');
+  // FAB href
+  document.querySelector('.fab').setAttribute('href', 'counselor_custom_record_edit.html?mid=' + currentMid);
+  // render records
+  var list = document.getElementById('recordList');
+  if (m.records.length === 0) {
+    list.innerHTML = '<div class="empty"><div class="icon"><iconify-icon icon="solar:document-add-bold-duotone"></iconify-icon></div>该模块暂无记录<br/>点击右下角 + 创建第一条</div>';
+    return;
+  }
+  var html = '';
+  m.records.forEach(function(r) {
+    var date = r.created_at.substring(0, 10);
+    var time = r.created_at.substring(11, 16);
+    html += '<div class="record-card">'
+      + '<div class="meta">'
+      + '<span class="time"><iconify-icon icon="solar:clock-circle-linear"></iconify-icon> ' + date + ' ' + time + '</span>'
+      + '<span class="visibility ' + r.visibility + '">' + (r.visibility === 'shared' ? '已授权' : '仅自己') + '</span>'
+      + '</div>'
+      + '<div class="content">' + r.content_text + '</div>'
+      + (r.image_urls.length > 0 ? '<div class="images">' + r.image_urls.map(function(){return '<div class="img"></div>';}).join('') + '</div>' : '')
+      + '<div class="actions">'
+      + '<a class="del" href="#" onclick="delRecord(\'' + r.record_id + '\'); return false;">删除</a>'
+      + '<a class="edit" href="counselor_custom_record_edit.html?mid=' + currentMid + '&rid=' + r.record_id + '">编辑</a>'
+      + '</div></div>';
+  });
+  list.innerHTML = html;
+})();
+
+function togglePerm() {
+  var t = document.getElementById('permToggle');
+  t.classList.toggle('off');
+  var shared = !t.classList.contains('off');
+  document.getElementById('statVis').textContent = shared ? '已授权' : '仅自己';
+}
+function delRecord(rid) {
+  showConfirm({
+    title: '确认删除这条记录?',
+    desc: '删除后无法恢复,此操作将记入审计日志。',
+    onConfirm: () => { toast('已删除 ' + rid); }
+  });
+}
+function showConfirm({title, desc, onConfirm, danger}) {
+  const m = document.createElement('div');
+  m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99;display:flex;align-items:center;justify-content:center;padding:0 32px;';
+  m.innerHTML = `
+    <div style="background:#fff;border-radius:14px;width:100%;overflow:hidden;">
+      <div style="padding:24px 20px;text-align:center;">
+        <iconify-icon style="font-size:32px;color:${danger?'#DC2626':'#1E5AE6'};" icon="${danger?'solar:trash-bin-trash-bold':'solar:shield-warning-bold'}"></iconify-icon>
+        <div style="font-size:16px;font-weight:700;color:#191919;margin-top:10px;">${title}</div>
+        <div style="font-size:12px;color:#888;margin-top:6px;line-height:1.6;">${desc}</div>
+      </div>
+      <div style="display:flex;border-top:1px solid #F0F0F0;">
+        <button data-cancel style="flex:1;height:48px;background:#fff;color:#888;font-size:15px;border:none;border-right:1px solid #F0F0F0;cursor:pointer;">取消</button>
+        <button data-ok style="flex:1;height:48px;background:#fff;color:${danger?'#DC2626':'#1E5AE6'};font-size:15px;font-weight:600;border:none;cursor:pointer;">确认</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(m);
+  m.querySelector('[data-cancel]').onclick = () => m.remove();
+  m.querySelector('[data-ok]').onclick = () => { m.remove(); onConfirm && onConfirm(); };
+}
+function toast(msg) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;left:50%;bottom:80px;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:#fff;padding:8px 16px;border-radius:8px;font-size:13px;z-index:999;';
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 1800);
+}
+</script>
+</body>
+</html>

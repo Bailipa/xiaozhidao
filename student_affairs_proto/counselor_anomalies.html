@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>异常跟进 - 学工助手</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+        :root { --color-primary: #1E5AE6; --color-bg-page: #F5F6F8; }
+        body { background-color: #1a1a1a; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+        .phone-shell { width: 375px; height: 812px; background: var(--color-bg-page); border-radius: 40px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+        .status-bar { height: 44px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #000; flex-shrink: 0; }
+        .nav-bar { height: 44px; display: flex; align-items: center; padding: 0 16px; background: #fff; border-bottom: 1px solid #F3F4F6; flex-shrink: 0; }
+        .content { flex: 1; overflow-y: auto; }
+        .tab-bar { height: 84px; background: #fff; border-top: 1px solid #E5E7EB; display: flex; justify-content: space-around; align-items: center; padding-bottom: 20px; position: relative; flex-shrink: 0; }
+        .tab-item { display: flex; flex-direction: column; align-items: center; text-align: center; color: #9CA3AF; text-decoration: none; }
+        .tab-item.active { color: var(--color-primary); }
+        .tab-item iconify-icon { font-size: 24px; margin-bottom: 4px; }
+        .tab-item span { font-size: 11px; }
+        .plus-tab { width: 52px; height: 52px; background: var(--color-primary); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #fff; position: absolute; top: -16px; left: 50%; transform: translateX(-50%); box-shadow: 0 4px 12px rgba(30, 90, 230, 0.4); border: 2px solid #fff; }
+        .filter-tabs { display: flex; background: #fff; padding: 0 16px; gap: 20px; border-bottom: 1px solid #F3F4F6; overflow-x: auto; flex-shrink: 0; }
+        .filter-tab { padding: 12px 0; font-size: 13px; color: #6B7280; white-space: nowrap; position: relative; }
+        .filter-tab.active { color: var(--color-primary); font-weight: bold; }
+        .filter-tab.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: var(--color-primary); }
+        .anomaly-card { background: #fff; border-radius: 16px; margin: 12px 16px; padding: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .home-indicator { height:34px; background:#fff; display:flex; justify-content:center; align-items:flex-end; padding-bottom:8px; flex-shrink:0; }
+        .home-indicator .bar { width:134px; height:5px; border-radius:3px; background:#000; opacity:0.85; }
+    </style>
+</head>
+<body>
+<div class="phone-shell">
+<div class="status-bar">
+<span>12:20</span>
+<div class="flex gap-1.5 text-[#000]">
+<iconify-icon icon="mingcute:signal-fill"></iconify-icon>
+<iconify-icon icon="mingcute:wifi-fill"></iconify-icon>
+<iconify-icon icon="mingcute:battery-fill"></iconify-icon>
+</div>
+</div>
+<div class="nav-bar">
+<h1 class="text-base font-bold text-gray-900 mx-auto">异常跟进</h1>
+</div>
+<div class="filter-tabs no-scrollbar">
+<div class="filter-tab active">全部</div>
+<div class="filter-tab">红档</div>
+<div class="filter-tab">黄档</div>
+<div class="filter-tab">蓝档</div>
+<div class="filter-tab">已关注</div>
+<div class="filter-tab">已约谈</div>
+<div class="filter-tab">已结案</div>
+</div>
+<!-- 晚归专项入口 -->
+<a class="mx-4 mt-3 mb-1 flex items-center gap-3 p-3 bg-gradient-to-r from-blue-500 to-blue-500 text-white rounded-xl shadow-sm" href="counselor_late_returns.html">
+<div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+  <iconify-icon class="text-xl" icon="solar:login-3-bold-duotone"></iconify-icon>
+</div>
+<div class="flex-1 min-w-0">
+  <div class="text-sm font-bold">晚归专项入口</div>
+  <div class="text-[10px] opacity-90 mt-0.5">门禁数据自动识别 · 5 起本周晚归待跟进</div>
+</div>
+<iconify-icon class="text-xl" icon="solar:alt-arrow-right-linear"></iconify-icon>
+</a>
+<!-- 班级异常看板入口 -->
+<a class="mx-4 mt-2 mb-1 flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100" href="counselor_class_anomaly_board.html">
+<div class="w-10 h-10 rounded-xl bg-pink-50 flex items-center justify-center flex-shrink-0 text-pink-500">
+  <iconify-icon class="text-xl" icon="solar:graph-new-up-bold-duotone"></iconify-icon>
+</div>
+<div class="flex-1 min-w-0">
+  <div class="text-sm font-bold text-gray-900">班级异常看板</div>
+  <div class="text-[10px] text-gray-400 mt-0.5">按班级/年级/风险等级聚合查看</div>
+</div>
+<iconify-icon class="text-xl text-gray-300" icon="solar:alt-arrow-right-linear"></iconify-icon>
+</a>
+<div class="content pt-2 pb-20">
+<!-- 异常项 -->
+<a class="anomaly-card block" href="counselor_anomaly_detail.html">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-full bg-red-500"></div>
+<span class="text-xs font-bold text-red-600">红档风险</span>
+</div>
+<span class="text-[10px] text-orange-600 font-bold bg-orange-50 px-2 py-0.5 rounded">未跟进</span>
+</div>
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 rounded-full bg-gray-100 overflow-hidden">
+<img alt="Student" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=张&background=1E5AE6&color=fff&size=128&bold=true&font-size=0.5"/>
+</div>
+<div>
+<div class="font-bold text-gray-900">张晓明 <span class="text-xs font-normal text-gray-400 ml-1">2024级(3)班</span></div>
+<div class="text-xs text-gray-500 mt-0.5">缺勤异常 · 今天 08:30</div>
+</div>
+</div>
+<div class="bg-gray-50 p-3 rounded-xl text-xs text-gray-600 leading-relaxed mb-4">
+                    该学生今日未按时参加《高等数学》课程，辅导员回访电话未接通。
+                </div>
+<div class="flex justify-between items-center">
+<span class="text-[10px] text-gray-400">更新于 10分钟前</span>
+<span class="px-4 py-1.5 bg-blue-600 text-white text-xs rounded-lg font-bold">去跟进</span>
+</div>
+</a>
+<a class="anomaly-card block" href="counselor_anomaly_detail.html">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-full bg-yellow-500"></div>
+<span class="text-xs font-bold text-yellow-600">黄档风险</span>
+</div>
+<span class="text-[10px] text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded">已约谈</span>
+</div>
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 rounded-full bg-gray-100 overflow-hidden">
+<img alt="Student" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=赵&background=1E5AE6&color=fff&size=128&bold=true&font-size=0.5"/>
+</div>
+<div>
+<div class="font-bold text-gray-900">赵子涵 <span class="text-xs font-normal text-gray-400 ml-1">2024级(3)班</span></div>
+<div class="text-xs text-gray-500 mt-0.5">心理预警 · 昨天 16:45</div>
+</div>
+</div>
+<div class="bg-gray-50 p-3 rounded-xl text-xs text-gray-600 leading-relaxed mb-4">
+                    心理测评结果显示压力值较高，已安排心理咨询室初步谈话。
+                </div>
+<div class="flex justify-between items-center">
+<span class="text-[10px] text-gray-400">更新于 2小时前</span>
+<span class="px-4 py-1.5 border border-blue-600 text-blue-600 text-xs rounded-lg font-bold">查看记录</span>
+</div>
+</a>
+<!-- 空状态 -->
+<div class="mt-20 text-center px-10" id="emptyAnomalies" style="display: none;">
+<div class="w-20 h-20 bg-green-50 rounded-full mx-auto flex items-center justify-center mb-4">
+<iconify-icon class="text-5xl text-green-500" icon="solar:check-circle-bold-duotone"></iconify-icon>
+</div>
+<h3 class="text-base font-bold text-gray-900">太棒了！暂无异常</h3>
+<p class="text-xs text-gray-400 mt-2">目前所带班级学生状况良好，请继续保持关注</p>
+</div>
+</div>
+<div class="tab-bar">
+  <a class="tab-item" href="counselor_workbench.html">
+    <iconify-icon icon="solar:home-2-linear"></iconify-icon>
+    <span>工作台</span>
+  </a>
+  <a class="tab-item" href="counselor_students.html">
+    <iconify-icon icon="solar:users-group-rounded-linear"></iconify-icon>
+    <span>学生</span>
+  </a>
+  <a class="plus-tab" href="counselor_log_edit.html">
+    <iconify-icon icon="solar:add-square-bold" style="font-size:30px;"></iconify-icon>
+  </a>
+  <div class="w-12"></div>
+  <a class="tab-item active" href="counselor_anomalies.html">
+    <iconify-icon icon="solar:danger-bold"></iconify-icon>
+    <span>异常</span>
+  </a>
+  <a class="tab-item" href="counselor_profile.html">
+    <iconify-icon icon="solar:user-circle-linear"></iconify-icon>
+    <span>我的</span>
+  </a>
+</div>
+<div class="home-indicator"><div class="bar"></div></div>
+</div>
+</body>
+</html>

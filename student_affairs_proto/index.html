@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>学工助手</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+:root { --color-primary:#1E5AE6; --bg-page:#F5F6F8; --color-text-primary:#111827; --color-text-secondary:#6B7280; }
+body { background-color:#1a1a1a; display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0; font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; }
+.phone-shell { width:375px; height:812px; background:#fff; border-radius:40px; overflow:hidden; position:relative; box-shadow:0 0 50px rgba(0,0,0,0.5); border:8px solid #333; display:flex; flex-direction:column; }
+.status-bar { height:44px; padding:0 20px; display:flex; justify-content:space-between; align-items:center; font-size:14px; color:#000; font-weight:600; flex-shrink:0; }
+</style>
+</head>
+<body>
+<div class="phone-shell">
+<div class="status-bar">
+<span>12:20</span>
+<div class="flex gap-1.5">
+<iconify-icon icon="mingcute:signal-fill"></iconify-icon>
+<iconify-icon icon="mingcute:wifi-fill"></iconify-icon>
+<iconify-icon icon="mingcute:battery-fill"></iconify-icon>
+</div>
+</div>
+<div class="flex-1 px-6 pt-12 pb-10 flex flex-col items-center justify-between text-center">
+<div>
+<div class="w-20 h-20 rounded-2xl mx-auto flex items-center justify-center shadow-lg mb-6" style="background:#1E5AE6;color:#fff;box-shadow:0 8px 20px rgba(30,90,230,0.25);">
+<iconify-icon class="text-white text-5xl" icon="material-symbols:school-outline"></iconify-icon>
+</div>
+<h1 class="text-2xl font-bold text-gray-900 mb-2">学工助手</h1>
+<p class="text-gray-500 text-sm">智能技术学部 · 智慧学工小程序</p>
+</div>
+<div class="w-full space-y-4">
+<a class="block w-full p-6 rounded-2xl shadow-sm border transition-colors text-left" href="login.html" style="background:#1E5AE6;color:#fff;border-color:#1E5AE6;box-shadow:0 4px 12px rgba(30,90,230,0.3);">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full flex items-center justify-center" style="background:rgba(255,255,255,0.2);">
+<iconify-icon class="text-2xl" icon="solar:login-2-bold"></iconify-icon>
+</div>
+<div class="flex-1">
+<div class="font-bold text-base">账号登录</div>
+<div class="text-xs mt-0.5 opacity-80">使用单位下发的账号登录</div>
+</div>
+<iconify-icon class="text-xl opacity-80" icon="solar:alt-arrow-right-linear"></iconify-icon>
+</div>
+</a>
+<div class="flex items-start gap-2 text-left p-3 rounded-xl" style="background:#FEF3C7;color:#92400E;font-size:11px;line-height:1.6;">
+<iconify-icon style="color:#FA9D3B;font-size:16px;flex-shrink:0;" icon="solar:shield-warning-linear"></iconify-icon>
+<div>小程序涉及学生敏感信息,登录及查看敏感字段将记入审计日志,留存 365 天。</div>
+</div>
+</div>
+<div class="text-gray-400 text-xs mt-8" style="line-height:1.6;">
+<a class="text-gray-500 underline" href="privacy_policy.html">《用户协议与隐私政策》</a><br/>
+版本号 v1.0.0<br/>
+© 2026 学工助手数字化研究室
+</div>
+</div>
+<div class="h-[34px] flex justify-center items-end pb-2">
+<div class="w-32 h-1 bg-gray-300 rounded-full"></div>
+</div>
+</div>
+</body>
+</html>

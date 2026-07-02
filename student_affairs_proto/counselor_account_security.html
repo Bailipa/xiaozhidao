@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<!--
+  API Contract:
+  GET /api/me/security
+  Response 200: {
+    "account": {
+      "username": "string",
+      "role": "辅导员|学工书记|管理员",
+      "last_login_at": "ISO-8601",
+      "created_at": "ISO-8601",
+      "last_password_change_at": "ISO-8601"
+    },
+    "devices": [
+      { "device_id":"string", "device":"string", "os":"string", "location":"string", "last_active":"ISO-8601", "current":bool }
+    ]
+  }
+  POST /api/me/password
+  Request: { "old_password":"string", "new_password":"string" }
+  Response 200: { "message":"string", "last_password_change_at":"ISO-8601" }
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>账号与安全 - 学工助手</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+:root { --color-primary:#1E5AE6; --success:#07C160; --warning:#FA9D3B; --danger:#FA5151; --bg-page:#F7F7F7; --bg-card:#FFFFFF; --divider:#F0F0F0; --text-primary:#191919; --text-regular:#444; --text-secondary:#888; }
+body { background-color:#1a1a1a; display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0; font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; }
+.phone-shell { width:375px; height:812px; background:var(--bg-page); border-radius:40px; overflow:hidden; position:relative; display:flex; flex-direction:column; }
+.status-bar { height:44px; padding:0 20px; display:flex; justify-content:space-between; align-items:center; font-size:14px; color:#000; flex-shrink:0; }
+.nav-bar { height:44px; display:flex; align-items:center; padding:0 16px; background:#fff; flex-shrink:0; }
+.content { flex:1; overflow-y:auto; }
+.section-h { padding:16px 20px 6px; font-size:12px; color:var(--text-secondary); font-weight:600; }
+.card { background:#fff; margin:0 16px 12px; border-radius:12px; overflow:hidden; }
+.cell { display:flex; align-items:center; padding:14px 16px; gap:12px; }
+.cell + .cell { border-top:1px solid var(--divider); }
+.cell .k { font-size:14px; color:var(--text-primary); flex:1; }
+.cell .v { font-size:13px; color:var(--text-secondary); }
+.cell .v.mono { font-family:ui-monospace,"SF Mono",monospace; }
+.cell .arrow { color:#C0C4CC; font-size:16px; }
+.cell.action .k { color:var(--color-primary); font-weight:500; }
+.device-cell { padding:14px 16px; display:flex; align-items:center; gap:12px; }
+.device-cell + .device-cell { border-top:1px solid var(--divider); }
+.device-cell .icon { width:36px; height:36px; border-radius:8px; background:#F0F2F5; color:var(--text-secondary); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.device-cell .info { flex:1; min-width:0; }
+.device-cell .name { font-size:14px; font-weight:600; color:var(--text-primary); display:flex; align-items:center; gap:6px; }
+.device-cell .name .current { font-size:10px; padding:1px 6px; background:#07C160; color:#fff; border-radius:4px; }
+.device-cell .sub { font-size:11px; color:var(--text-secondary); margin-top:2px; }
+.device-cell .logout { font-size:12px; color:var(--danger); padding:4px 8px; flex-shrink:0; }
+.home-indicator { height:34px; background:#fff; display:flex; justify-content:center; align-items:flex-end; padding-bottom:8px; flex-shrink:0; }
+.home-indicator .bar { width:134px; height:5px; border-radius:3px; background:#000; opacity:0.85; }
+</style>
+</head>
+<body>
+<div class="phone-shell">
+<script type="application/json" id="page-data">
+{
+  "account": {
+    "username": "wangjy@sit.edu.cn",
+    "role": "辅导员",
+    "last_login_at": "2026-06-30T08:15:00+08:00",
+    "created_at": "2024-09-01T10:00:00+08:00",
+    "last_password_change_at": "2026-03-15T14:22:00+08:00"
+  },
+  "devices": [
+    { "device_id":"D001", "device":"iPhone 15 Pro", "os":"iOS 18.2", "location":"上海·奉贤", "last_active":"2026-06-30T12:20:00+08:00", "current":true },
+    { "device_id":"D002", "device":"MacBook Pro 14", "os":"macOS 15.1", "location":"上海·徐汇", "last_active":"2026-06-29T22:40:00+08:00", "current":false },
+    { "device_id":"D003", "device":"Huawei Mate 60", "os":"HarmonyOS 4.2", "location":"上海·奉贤", "last_active":"2026-06-25T09:10:00+08:00", "current":false }
+  ]
+}
+</script>
+<div class="status-bar">
+  <span>12:20</span>
+  <div class="flex gap-1.5 text-[#000]">
+    <iconify-icon icon="mingcute:signal-fill"></iconify-icon>
+    <iconify-icon icon="mingcute:wifi-fill"></iconify-icon>
+    <iconify-icon icon="mingcute:battery-fill"></iconify-icon>
+  </div>
+</div>
+<div class="nav-bar">
+  <a class="p-2 -ml-2" href="counselor_profile.html"><iconify-icon class="text-xl" icon="solar:alt-arrow-left-linear"></iconify-icon></a>
+  <h1 class="flex-1 text-center text-base font-bold text-gray-900">账号与安全</h1>
+  <span class="p-2 -mr-2 w-8"></span>
+</div>
+<div class="content">
+  <div class="section-h">账号信息</div>
+  <div class="card">
+    <div class="cell">
+      <span class="k">用户名</span>
+      <span class="v mono">wangjy@sit.edu.cn</span>
+    </div>
+    <div class="cell">
+      <span class="k">角色</span>
+      <span class="v">辅导员</span>
+    </div>
+    <div class="cell">
+      <span class="k">最后登录</span>
+      <span class="v">2026-06-30 08:15</span>
+    </div>
+    <div class="cell">
+      <span class="k">注册时间</span>
+      <span class="v">2024-09-01</span>
+    </div>
+    <div class="cell">
+      <span class="k">上次改密</span>
+      <span class="v">2026-03-15 (建议每 90 天改一次)</span>
+    </div>
+  </div>
+
+  <div class="section-h">安全操作</div>
+  <div class="card">
+    <a class="cell action" href="#">
+      <iconify-icon class="text-blue-500 text-lg" icon="solar:lock-password-bold"></iconify-icon>
+      <span class="k">修改密码</span>
+      <iconify-icon class="arrow" icon="solar:alt-arrow-right-linear"></iconify-icon>
+    </a>
+    <a class="cell action" href="counselor_wechat_binding.html">
+      <iconify-icon class="text-green-500 text-lg" icon="solar:shield-keyhole-bold"></iconify-icon>
+      <span class="k">两步验证</span>
+      <span class="v">未开启</span>
+      <iconify-icon class="arrow" icon="solar:alt-arrow-right-linear"></iconify-icon>
+    </a>
+    <a class="cell action" href="#">
+      <iconify-icon class="text-orange-500 text-lg" icon="solar:logout-2-bold"></iconify-icon>
+      <span class="k">退出所有设备</span>
+      <iconify-icon class="arrow" icon="solar:alt-arrow-right-linear"></iconify-icon>
+    </a>
+  </div>
+
+  <div class="section-h">登录设备 (3)</div>
+  <div class="card">
+    <div class="device-cell">
+      <div class="icon"><iconify-icon icon="solar:smartphone-2-bold-duotone"></iconify-icon></div>
+      <div class="info">
+        <div class="name">iPhone 15 Pro <span class="current">当前</span></div>
+        <div class="sub">iOS 18.2 · 上海·奉贤 · 刚刚活跃</div>
+      </div>
+    </div>
+    <div class="device-cell">
+      <div class="icon"><iconify-icon icon="solar:monitor-smartphone-bold-duotone"></iconify-icon></div>
+      <div class="info">
+        <div class="name">MacBook Pro 14</div>
+        <div class="sub">macOS 15.1 · 上海·徐汇 · 昨天 22:40</div>
+      </div>
+      <a class="logout" href="#">退出</a>
+    </div>
+    <div class="device-cell">
+      <div class="icon"><iconify-icon icon="solar:smartphone-2-bold-duotone"></iconify-icon></div>
+      <div class="info">
+        <div class="name">Huawei Mate 60</div>
+        <div class="sub">HarmonyOS 4.2 · 上海·奉贤 · 5 天前</div>
+      </div>
+      <a class="logout" href="#">退出</a>
+    </div>
+  </div>
+</div>
+<div class="home-indicator"><div class="bar"></div></div>
+</div>
+</body>
+</html>

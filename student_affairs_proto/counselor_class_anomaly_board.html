@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>班级异常看板 - 学工助手</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+:root { --color-primary:#1E5AE6; --color-danger:#DC2626; --color-warning:#F59E0B; --color-risk-low:#3B82F6; --success:#07C160; --bg-page:#F7F7F7; --divider:#F0F0F0; --text-primary:#191919; --text-secondary:#888; }
+body { background-color:#1a1a1a; display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0; font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; }
+.phone-shell { width:375px; height:812px; background:var(--bg-page); border-radius:40px; overflow:hidden; position:relative; display:flex; flex-direction:column; box-shadow:0 0 50px rgba(0,0,0,0.5); border:8px solid #333; }
+.status-bar { height:44px; padding:0 20px; display:flex; justify-content:space-between; align-items:center; font-size:14px; color:#000; flex-shrink:0; }
+.nav-bar { height:44px; display:flex; align-items:center; padding:0 16px; background:#fff; flex-shrink:0; }
+.content { flex:1; overflow-y:auto; padding-bottom:80px; }
+.tab-bar { height:84px; background:#fff; border-top:1px solid #E5E7EB; display:flex; justify-content:space-around; align-items:center; padding-bottom:20px; position:relative; flex-shrink:0; }
+.tab-item { display:flex; flex-direction:column; align-items:center; text-align:center; color:#9CA3AF; text-decoration:none; }
+.tab-item.active { color:var(--color-primary); }
+.tab-item iconify-icon { font-size:24px; margin-bottom:4px; }
+.tab-item span { font-size:11px; }
+.plus-tab { width:52px; height:52px; background:var(--color-primary); border-radius:16px; display:flex; align-items:center; justify-content:center; color:#fff; position:absolute; top:-16px; left:50%; transform:translateX(-50%); box-shadow:0 4px 12px rgba(30,90,230,0.4); border:2px solid #fff; }
+.home-indicator { height:34px; background:#fff; display:flex; justify-content:center; align-items:flex-end; padding-bottom:8px; flex-shrink:0; }
+.home-indicator .bar { width:134px; height:5px; border-radius:3px; background:#000; opacity:0.85; }
+
+.summary { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:14px 16px; }
+.summary .item { background:#fff; border-radius:10px; padding:14px 6px; text-align:center; }
+.summary .num { font-size:20px; font-weight:700; }
+.summary .label { font-size:10px; color:var(--text-secondary); margin-top:4px; }
+.summary .item.all .num { color:var(--color-primary); }
+.summary .item.pend .num { color:var(--color-danger); }
+.summary .item.done .num { color:var(--success); }
+.summary .item.cov .num { color:var(--color-warning); }
+
+.tabs { display:flex; background:#fff; padding:0 16px; gap:20px; border-bottom:1px solid #F3F4F6; }
+.tabs span { padding:12px 0; font-size:13px; color:var(--text-secondary); position:relative; cursor:pointer; }
+.tabs span.on { color:var(--color-primary); font-weight:600; }
+.tabs span.on::after { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; background:var(--color-primary); }
+
+.section-title { padding:18px 16px 10px; font-size:13px; font-weight:600; color:var(--text-primary); display:flex; justify-content:space-between; align-items:center; }
+.section-title .meta { font-size:11px; color:var(--text-secondary); font-weight:400; }
+
+.matrix-card { background:#fff; margin:0 16px 12px; border-radius:12px; overflow:hidden; }
+.matrix-table { width:100%; border-collapse:collapse; font-size:11px; }
+.matrix-table th, .matrix-table td { padding:10px 6px; text-align:center; border-bottom:1px solid var(--divider); }
+.matrix-table th { background:#FAFAFA; color:var(--text-secondary); font-weight:600; font-size:10px; }
+.matrix-table th:first-child, .matrix-table td:first-child { text-align:left; padding-left:14px; }
+.matrix-table td { color:var(--text-primary); }
+.matrix-table tr:last-child td { border-bottom:0; }
+.cell { display:inline-block; min-width:28px; padding:3px 6px; border-radius:4px; font-weight:600; }
+.cell.high { background:#FEE2E2; color:var(--color-danger); }
+.cell.mid { background:#FEF3C7; color:#B45309; }
+.cell.low { background:#DBEAFE; color:var(--color-risk-low); }
+.cell.zero { color:#9CA3AF; }
+.cell.total { background:#F5F6F8; color:var(--text-primary); }
+
+.bar-card { background:#fff; margin:0 16px 12px; border-radius:12px; padding:14px 16px; }
+.bar-row { display:flex; align-items:center; gap:8px; margin-bottom:10px; font-size:11px; }
+.bar-row:last-child { margin-bottom:0; }
+.bar-row .name { width:80px; color:var(--text-primary); flex-shrink:0; }
+.bar-row .bar { flex:1; height:8px; background:#F3F4F6; border-radius:4px; overflow:hidden; display:flex; }
+.bar-row .bar span { display:block; height:100%; }
+.bar-row .num { width:36px; text-align:right; font-weight:600; color:var(--text-primary); flex-shrink:0; }
+.seg-high { background:var(--color-danger); }
+.seg-mid { background:var(--color-warning); }
+.seg-low { background:var(--color-risk-low); }
+
+.legend { display:flex; gap:12px; padding:0 16px 14px; font-size:10px; color:var(--text-secondary); flex-wrap:wrap; }
+.legend .item { display:flex; align-items:center; gap:4px; }
+.legend .dot { width:8px; height:8px; border-radius:2px; }
+
+.dist-card { background:#fff; margin:0 16px 16px; border-radius:12px; padding:14px 16px; }
+.dist-row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--divider); font-size:12px; }
+.dist-row:last-child { border-bottom:0; }
+.dist-row .k { color:var(--text-regular); }
+.dist-row .v { font-weight:700; color:var(--text-primary); }
+</style>
+</head>
+<body>
+<div class="phone-shell">
+<div class="status-bar">
+<span>12:20</span>
+<div class="flex gap-1.5">
+<iconify-icon icon="mingcute:signal-fill"></iconify-icon>
+<iconify-icon icon="mingcute:wifi-fill"></iconify-icon>
+<iconify-icon icon="mingcute:battery-fill"></iconify-icon>
+</div>
+</div>
+<div class="nav-bar">
+<a class="p-2 -ml-2" href="counselor_anomalies.html"><iconify-icon class="text-xl" icon="solar:alt-arrow-left-linear"></iconify-icon></a>
+<h1 class="flex-1 text-center text-base font-bold text-gray-900">班级异常看板</h1>
+<span class="p-2 -mr-2 w-8"></span>
+</div>
+
+<div class="content">
+<div class="summary">
+<div class="item all"><div class="num">11</div><div class="label">异常总数</div></div>
+<div class="item pend"><div class="num">4</div><div class="label">待处理</div></div>
+<div class="item done"><div class="num">5</div><div class="label">已结案</div></div>
+<div class="item cov"><div class="num">100%</div><div class="label">班级覆盖</div></div>
+</div>
+
+<div class="tabs">
+<span class="on" data-tab="matrix">班级 × 风险</span>
+<span data-tab="trend">趋势</span>
+<span data-tab="type">类型分布</span>
+</div>
+
+<div id="paneMatrix">
+<div class="section-title">各班级异常分布矩阵 <span class="meta">近 30 天</span></div>
+<div class="matrix-card">
+<table class="matrix-table">
+<thead><tr><th>班级</th><th>红档</th><th>黄档</th><th>蓝档</th><th>已结案</th><th>合计</th></tr></thead>
+<tbody>
+<tr><td>2024级(1)班</td><td><span class="cell high">2</span></td><td><span class="cell mid">1</span></td><td><span class="cell low">1</span></td><td><span class="cell zero">0</span></td><td><span class="cell total">4</span></td></tr>
+<tr><td>2024级(2)班</td><td><span class="cell high">1</span></td><td><span class="cell zero">0</span></td><td><span class="cell low">1</span></td><td><span class="cell zero">0</span></td><td><span class="cell total">2</span></td></tr>
+<tr><td>2024级(3)班</td><td><span class="cell high">1</span></td><td><span class="cell mid">1</span></td><td><span class="cell low">1</span></td><td><span class="cell zero">0</span></td><td><span class="cell total">3</span></td></tr>
+<tr><td>2024级(4)班</td><td><span class="cell zero">0</span></td><td><span class="cell mid">1</span></td><td><span class="cell low">1</span></td><td><span class="cell zero">0</span></td><td><span class="cell total">2</span></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="section-title">各班级异常构成 <span class="meta">点击柱状区域可筛选</span></div>
+<div class="bar-card">
+<div class="bar-row"><span class="name">2024级(1)班</span><span class="bar"><span class="seg-high" style="width:50%;"></span><span class="seg-mid" style="width:25%;"></span><span class="seg-low" style="width:25%;"></span></span><span class="num">4</span></div>
+<div class="bar-row"><span class="name">2024级(2)班</span><span class="bar"><span class="seg-high" style="width:50%;"></span><span class="seg-mid" style="width:0%;"></span><span class="seg-low" style="width:50%;"></span></span><span class="num">2</span></div>
+<div class="bar-row"><span class="name">2024级(3)班</span><span class="bar"><span class="seg-high" style="width:33%;"></span><span class="seg-mid" style="width:33%;"></span><span class="seg-low" style="width:34%;"></span></span><span class="num">3</span></div>
+<div class="bar-row"><span class="name">2024级(4)班</span><span class="bar"><span class="seg-high" style="width:0%;"></span><span class="seg-mid" style="width:50%;"></span><span class="seg-low" style="width:50%;"></span></span><span class="num">2</span></div>
+</div>
+
+<div class="legend">
+<div class="item"><span class="dot" style="background:var(--color-danger);"></span>红档重点关注</div>
+<div class="item"><span class="dot" style="background:var(--color-warning);"></span>黄档一般关注</div>
+<div class="item"><span class="dot" style="background:var(--color-risk-low);"></span>蓝档普通提醒</div>
+</div>
+</div>
+
+<div id="paneTrend" style="display:none;">
+<div class="section-title">近 30 天异常趋势</div>
+<div class="bar-card">
+<svg viewBox="0 0 320 140" style="width:100%;height:140px;">
+<line x1="0" y1="120" x2="320" y2="120" stroke="#E5E7EB" stroke-width="1"/>
+<line x1="0" y1="80" x2="320" y2="80" stroke="#F3F4F6" stroke-width="1" stroke-dasharray="3,3"/>
+<line x1="0" y1="40" x2="320" y2="40" stroke="#F3F4F6" stroke-width="1" stroke-dasharray="3,3"/>
+<polyline points="0,100 30,90 60,85 90,75 120,80 150,60 180,55 210,65 240,50 270,45 300,40" fill="none" stroke="#1E5AE6" stroke-width="2"/>
+<polyline points="0,110 30,100 60,95 90,90 120,85 150,80 180,75 210,70 240,75 270,65 300,60" fill="none" stroke="#F59E0B" stroke-width="2" stroke-dasharray="4,2"/>
+<g font-size="9" fill="#9CA3AF">
+<text x="0" y="135">6/1</text><text x="60" y="135">6/6</text><text x="120" y="135">6/11</text><text x="180" y="135">6/16</text><text x="240" y="135">6/21</text><text x="300" y="135">6/30</text>
+</g>
+</svg>
+<div class="legend">
+<div class="item"><span class="dot" style="background:#1E5AE6;"></span>红档</div>
+<div class="item"><span class="dot" style="background:#F59E0B;"></span>黄档+蓝档</div>
+</div>
+</div>
+</div>
+
+<div id="paneType" style="display:none;">
+<div class="section-title">异常类型分布</div>
+<div class="dist-card">
+<div class="dist-row"><span class="k">学业警示 · 旷课</span><span class="v">3</span></div>
+<div class="dist-row"><span class="k">学业警示 · 迟到</span><span class="v">1</span></div>
+<div class="dist-row"><span class="k">心理预警</span><span class="v">1</span></div>
+<div class="dist-row"><span class="k">晚归 · 22:00-22:30</span><span class="v">2</span></div>
+<div class="dist-row"><span class="k">晚归 · 22:30 之后</span><span class="v">1</span></div>
+<div class="dist-row"><span class="k">宿舍卫生 · 不合格</span><span class="v">2</span></div>
+<div class="dist-row"><span class="k">课堂纪律 · 玩手机</span><span class="v">1</span></div>
+</div>
+</div>
+
+</div>
+<div class="tab-bar">
+<a class="tab-item" href="counselor_workbench.html">
+<iconify-icon icon="solar:home-2-linear"></iconify-icon>
+<span>工作台</span>
+</a>
+<a class="tab-item" href="counselor_students.html">
+<iconify-icon icon="solar:users-group-rounded-linear"></iconify-icon>
+<span>学生</span>
+</a>
+<a class="plus-tab" href="counselor_log_edit.html">
+<iconify-icon icon="solar:add-square-bold" style="font-size:30px;"></iconify-icon>
+</a>
+<div class="w-12"></div>
+<a class="tab-item active" href="counselor_anomalies.html">
+<iconify-icon icon="solar:danger-bold"></iconify-icon>
+<span>异常</span>
+</a>
+<a class="tab-item" href="counselor_profile.html">
+<iconify-icon icon="solar:user-circle-linear"></iconify-icon>
+<span>我的</span>
+</a>
+</div>
+<div class="home-indicator"><div class="bar"></div></div>
+</div>
+<script>
+document.querySelectorAll('.tabs span').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tabs span').forEach(x => x.classList.remove('on'));
+    document.querySelectorAll('[id^="pane"]').forEach(p => p.style.display = 'none');
+    t.classList.add('on');
+    document.getElementById('pane' + t.dataset.tab.charAt(0).toUpperCase() + t.dataset.tab.slice(1)).style.display = 'block';
+  });
+});
+</script>
+</body>
+</html>

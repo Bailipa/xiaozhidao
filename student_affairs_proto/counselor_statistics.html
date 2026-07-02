@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>个人统计 - 学工助手</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+:root { --color-primary:#1E5AE6; --color-danger:#DC2626; --color-warning:#F59E0B; --color-risk-low:#3B82F6; --success:#07C160; --bg-page:#F7F7F7; --divider:#F0F0F0; --text-primary:#191919; --text-secondary:#888; }
+body { background-color:#1a1a1a; display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0; font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; }
+.phone-shell { width:375px; height:812px; background:var(--bg-page); border-radius:40px; overflow:hidden; position:relative; display:flex; flex-direction:column; box-shadow:0 0 50px rgba(0,0,0,0.5); border:8px solid #333; }
+.status-bar { height:44px; padding:0 20px; display:flex; justify-content:space-between; align-items:center; font-size:14px; color:#000; flex-shrink:0; }
+.nav-bar { height:44px; display:flex; align-items:center; padding:0 16px; background:#fff; flex-shrink:0; }
+.content { flex:1; overflow-y:auto; padding-bottom:80px; }
+.tab-bar { height:84px; background:#fff; border-top:1px solid #E5E7EB; display:flex; justify-content:space-around; align-items:center; padding-bottom:20px; position:relative; flex-shrink:0; }
+.tab-item { display:flex; flex-direction:column; align-items:center; text-align:center; color:#9CA3AF; text-decoration:none; }
+.tab-item.active { color:var(--color-primary); }
+.tab-item iconify-icon { font-size:24px; margin-bottom:4px; }
+.tab-item span { font-size:11px; }
+.plus-tab { width:52px; height:52px; background:var(--color-primary); border-radius:16px; display:flex; align-items:center; justify-content:center; color:#fff; position:absolute; top:-16px; left:50%; transform:translateX(-50%); box-shadow:0 4px 12px rgba(30,90,230,0.4); border:2px solid #fff; }
+.home-indicator { height:34px; background:#fff; display:flex; justify-content:center; align-items:flex-end; padding-bottom:8px; flex-shrink:0; }
+.home-indicator .bar { width:134px; height:5px; border-radius:3px; background:#000; opacity:0.85; }
+
+.time-tabs { display:flex; padding:14px 16px 0; gap:8px; }
+.time-tabs span { flex:1; height:32px; display:flex; align-items:center; justify-content:center; border-radius:16px; background:#fff; font-size:12px; color:var(--text-secondary); cursor:pointer; border:1px solid var(--divider); }
+.time-tabs span.on { background:var(--color-primary); color:#fff; border-color:var(--color-primary); font-weight:600; }
+
+.kpi-row { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin:14px 16px; }
+.kpi { background:#fff; border-radius:12px; padding:14px; position:relative; overflow:hidden; }
+.kpi .label { font-size:11px; color:var(--text-secondary); }
+.kpi .num { font-size:24px; font-weight:700; color:var(--text-primary); margin-top:4px; }
+.kpi .delta { font-size:10px; margin-top:4px; font-weight:600; }
+.kpi .delta.up { color:var(--success); }
+.kpi .delta.down { color:var(--color-danger); }
+.kpi .ic { position:absolute; right:10px; top:10px; font-size:24px; color:rgba(30,90,230,0.1); }
+
+.section { background:#fff; margin:0 16px 12px; border-radius:12px; padding:14px 16px; }
+.section .h { font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; }
+.section .h .meta { font-size:11px; color:var(--text-secondary); font-weight:400; }
+.section .h a { font-size:11px; color:var(--color-primary); text-decoration:none; }
+
+.bar-mini { display:flex; align-items:flex-end; gap:6px; height:90px; padding:8px 0; }
+.bar-mini .col { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; }
+.bar-mini .b { width:100%; border-radius:4px 4px 0 0; background:linear-gradient(180deg, #4080FF, #1E5AE6); min-height:4px; }
+.bar-mini .label { font-size:9px; color:var(--text-secondary); }
+
+.cat-bars { display:flex; flex-direction:column; gap:10px; }
+.cat-row { display:flex; align-items:center; gap:8px; font-size:11px; }
+.cat-row .name { width:80px; color:var(--text-primary); }
+.cat-row .bar { flex:1; height:6px; background:#F3F4F6; border-radius:3px; overflow:hidden; }
+.cat-row .bar span { display:block; height:100%; background:var(--color-primary); }
+.cat-row .num { width:30px; text-align:right; color:var(--text-primary); font-weight:600; }
+
+.coverage { display:flex; align-items:center; gap:14px; }
+.coverage .ring { position:relative; width:80px; height:80px; flex-shrink:0; }
+.coverage .ring svg { transform:rotate(-90deg); }
+.coverage .center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.coverage .center .num { font-size:18px; font-weight:700; color:var(--text-primary); }
+.coverage .center .label { font-size:9px; color:var(--text-secondary); }
+.coverage .desc { flex:1; font-size:11px; color:var(--text-secondary); line-height:1.7; }
+.coverage .desc strong { color:var(--text-primary); }
+
+.student-list .item { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--divider); font-size:12px; }
+.student-list .item:last-child { border-bottom:0; }
+.student-list .item .avatar { width:32px; height:32px; border-radius:50%; overflow:hidden; flex-shrink:0; }
+.student-list .item .avatar img { width:100%; height:100%; object-fit:cover; }
+.student-list .item .info { flex:1; }
+.student-list .item .info .name { color:var(--text-primary); font-weight:600; }
+.student-list .item .info .meta { font-size:10px; color:var(--text-secondary); margin-top:2px; }
+.student-list .item .status { font-size:10px; padding:2px 8px; border-radius:10px; }
+.student-list .item .status.red { background:#FEE2E2; color:var(--color-danger); }
+.student-list .item .status.yellow { background:#FEF3C7; color:#B45309; }
+</style>
+</head>
+<body>
+<div class="phone-shell">
+<div class="status-bar">
+<span>12:20</span>
+<div class="flex gap-1.5">
+<iconify-icon icon="mingcute:signal-fill"></iconify-icon>
+<iconify-icon icon="mingcute:wifi-fill"></iconify-icon>
+<iconify-icon icon="mingcute:battery-fill"></iconify-icon>
+</div>
+</div>
+<div class="nav-bar">
+<a class="p-2 -ml-2" href="counselor_workbench.html"><iconify-icon class="text-xl" icon="solar:alt-arrow-left-linear"></iconify-icon></a>
+<h1 class="flex-1 text-center text-base font-bold text-gray-900">个人统计</h1>
+<span class="p-2 -mr-2 w-8"></span>
+</div>
+
+<div class="content">
+<div class="time-tabs">
+<span class="on" data-range="month">本月</span>
+<span data-range="semester">本学期</span>
+<span data-range="year">本年度</span>
+</div>
+
+<div class="kpi-row">
+<div class="kpi">
+<div class="ic"><iconify-icon icon="solar:clipboard-text-bold"></iconify-icon></div>
+<div class="label">工作日志总数</div>
+<div class="num">38</div>
+<div class="delta up">↑ 12% 较上月</div>
+</div>
+<div class="kpi">
+<div class="ic"><iconify-icon icon="solar:user-speak-bold"></iconify-icon></div>
+<div class="label">谈心谈话次数</div>
+<div class="num">18</div>
+<div class="delta up">↑ 4 次</div>
+</div>
+<div class="kpi">
+<div class="ic"><iconify-icon icon="solar:danger-triangle-bold"></iconify-icon></div>
+<div class="label">异常跟进数</div>
+<div class="num">11</div>
+<div class="delta down">↓ 2 起</div>
+</div>
+<div class="kpi">
+<div class="ic"><iconify-icon icon="solar:calendar-mark-bold"></iconify-icon></div>
+<div class="label">完成提醒</div>
+<div class="num">28</div>
+<div class="delta up">↑ 6 条</div>
+</div>
+</div>
+
+<div class="section">
+<div class="h">本月日志分类 <span class="meta">按 5 类</span></div>
+<div class="cat-bars">
+<div class="cat-row"><span class="name">谈心谈话</span><span class="bar"><span style="width:80%;"></span></span><span class="num">12</span></div>
+<div class="cat-row"><span class="name">进宿舍</span><span class="bar"><span style="width:50%;"></span></span><span class="num">8</span></div>
+<div class="cat-row"><span class="name">进课堂</span><span class="bar"><span style="width:43%;"></span></span><span class="num">7</span></div>
+<div class="cat-row"><span class="name">组织班会</span><span class="bar"><span style="width:37%;"></span></span><span class="num">6</span></div>
+<div class="cat-row"><span class="name">班干会议</span><span class="bar"><span style="width:30%;"></span></span><span class="num">5</span></div>
+</div>
+</div>
+
+<div class="section">
+<div class="h">近 6 个月日志趋势</div>
+<div class="bar-mini">
+<div class="col"><div class="b" style="height:30%;"></div><span class="label">1月</span></div>
+<div class="col"><div class="b" style="height:45%;"></div><span class="label">2月</span></div>
+<div class="col"><div class="b" style="height:55%;"></div><span class="label">3月</span></div>
+<div class="col"><div class="b" style="height:60%;"></div><span class="label">4月</span></div>
+<div class="col"><div class="b" style="height:75%;"></div><span class="label">5月</span></div>
+<div class="col"><div class="b" style="height:90%;"></div><span class="label">6月</span></div>
+</div>
+</div>
+
+<div class="section">
+<div class="h">谈心谈话覆盖率</div>
+<div class="coverage">
+<div class="ring">
+<svg width="80" height="80" viewBox="0 0 80 80">
+<circle cx="40" cy="40" r="32" stroke="#F3F4F6" stroke-width="8" fill="none"/>
+<circle cx="40" cy="40" r="32" stroke="#1E5AE6" stroke-width="8" fill="none" stroke-dasharray="201" stroke-dashoffset="40" stroke-linecap="round"/>
+</svg>
+<div class="center"><div class="num">80%</div><div class="label">已覆盖</div></div>
+</div>
+<div class="desc">所带班级 <strong>128</strong> 名学生中,本月已与 <strong>102</strong> 名完成至少一次谈心谈话。未覆盖 26 人,建议优先跟进重点学生。</div>
+</div>
+</div>
+
+<div class="section">
+<div class="h">重点学生跟进 <a href="counselor_students.html">查看全部 →</a></div>
+<div class="student-list">
+<div class="item">
+<div class="avatar"><img alt="" src="https://ui-avatars.com/api/?name=张&background=1E5AE6&color=fff&size=64&bold=true&font-size=0.5"/></div>
+<div class="info">
+<div class="name">张晓明</div>
+<div class="meta">2024级(3)班 · 红档</div>
+</div>
+<span class="status red">未跟进</span>
+</div>
+<div class="item">
+<div class="avatar"><img alt="" src="https://ui-avatars.com/api/?name=赵&background=1E5AE6&color=fff&size=64&bold=true&font-size=0.5"/></div>
+<div class="info">
+<div class="name">赵子涵</div>
+<div class="meta">2024级(3)班 · 黄档</div>
+</div>
+<span class="status yellow">已约谈</span>
+</div>
+<div class="item">
+<div class="avatar"><img alt="" src="https://ui-avatars.com/api/?name=孙&background=1E5AE6&color=fff&size=64&bold=true&font-size=0.5"/></div>
+<div class="info">
+<div class="name">孙宇轩</div>
+<div class="meta">2024级(3)班 · 蓝档</div>
+</div>
+<span class="status yellow">已约谈</span>
+</div>
+</div>
+</div>
+
+</div>
+
+<div class="tab-bar">
+<a class="tab-item" href="counselor_workbench.html">
+<iconify-icon icon="solar:home-2-linear"></iconify-icon>
+<span>工作台</span>
+</a>
+<a class="tab-item" href="counselor_students.html">
+<iconify-icon icon="solar:users-group-rounded-linear"></iconify-icon>
+<span>学生</span>
+</a>
+<a class="plus-tab" href="counselor_log_edit.html">
+<iconify-icon icon="solar:add-square-bold" style="font-size:30px;"></iconify-icon>
+</a>
+<div class="w-12"></div>
+<a class="tab-item" href="counselor_anomalies.html">
+<iconify-icon icon="solar:danger-linear"></iconify-icon>
+<span>异常</span>
+</a>
+<a class="tab-item active" href="counselor_profile.html">
+<iconify-icon icon="solar:user-circle-bold"></iconify-icon>
+<span>我的</span>
+</a>
+</div>
+<div class="home-indicator"><div class="bar"></div></div>
+</div>
+<script>
+document.querySelectorAll('.time-tabs span').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.time-tabs span').forEach(x => x.classList.remove('on'));
+    t.classList.add('on');
+  });
+});
+</script>
+</body>
+</html>

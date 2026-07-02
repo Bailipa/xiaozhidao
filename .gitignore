@@ -1,0 +1,12 @@
+# macOS
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+.fseventsd
+
+# 编辑器 / 临时
+*.swp
+*.swo
+*~
+*.tmp

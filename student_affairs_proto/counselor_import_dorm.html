@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>导入学生-宿舍对应表 - 学工助手</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+:root {
+  --color-primary: #1E5AE6;
+  --success: #07C160;
+  --warning: #FA9D3B;
+  --danger: #FA5151;
+  --bg-page: #F7F7F7;
+  --bg-card: #FFFFFF;
+  --divider: #F0F0F0;
+  --text-primary: #191919;
+  --text-regular: #444;
+  --text-secondary: #888;
+}
+body { background-color: #1a1a1a; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+.phone-shell { width: 375px; height: 812px; background: var(--bg-page); border-radius: 40px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+.status-bar { height: 44px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #000; flex-shrink: 0; }
+.nav-bar { height: 44px; display: flex; align-items: center; padding: 0 16px; background: #fff; flex-shrink: 0; }
+.content { flex: 1; overflow-y: auto; }
+.steps { display: flex; align-items: center; padding: 16px 20px; background: #fff; border-bottom: 1px solid var(--divider); }
+.step { display: flex; align-items: center; flex: 1; }
+.step .num { width: 22px; height: 22px; border-radius: 50%; background: #E5E7EB; color: #fff; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.step.active .num, .step.done .num { background: var(--color-primary); }
+.step .label { margin-left: 6px; font-size: 12px; color: var(--text-secondary); }
+.step.active .label, .step.done .label { color: var(--text-primary); font-weight: 600; }
+.step-line { flex: 1; height: 1px; background: #E5E7EB; margin: 0 8px; }
+.step-line.done { background: var(--color-primary); }
+.upload-zone { margin: 16px; padding: 24px 16px; background: #fff; border: 2px dashed #DCDFE6; border-radius: 12px; text-align: center; }
+.upload-zone.has-file { border-style: solid; border-color: var(--success); background: #F0FFF4; }
+.upload-zone .icon { font-size: 40px; color: #C0C4CC; margin-bottom: 8px; }
+.upload-zone.has-file .icon { color: var(--success); }
+.upload-zone .file-name { font-size: 13px; color: var(--text-primary); font-weight: 600; margin-top: 6px; }
+.upload-zone .file-meta { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+.empty-state { margin: 16px; padding: 32px 16px; background: #FFF7E6; border-radius: 12px; text-align: center; }
+.empty-state .icon { font-size: 48px; color: var(--warning); }
+.empty-state .title { font-size: 15px; font-weight: 600; color: var(--text-primary); margin-top: 8px; }
+.empty-state .desc { font-size: 12px; color: var(--text-secondary); margin-top: 4px; line-height: 1.5; }
+.preview-wrap { margin: 0 16px 16px; background: #fff; border-radius: 12px; overflow: hidden; }
+.preview-head { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--divider); }
+.preview-head h4 { font-size: 14px; font-weight: 600; color: var(--text-primary); margin: 0; }
+.preview-head .stats { font-size: 11px; color: var(--text-secondary); }
+.preview-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.preview-table th { background: #F7F7F7; color: var(--text-secondary); font-weight: 600; padding: 8px 6px; text-align: left; }
+.preview-table td { padding: 8px 6px; border-top: 1px solid var(--divider); color: var(--text-primary); }
+.dorm-tag { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+.dorm-tag.d1 { background: #FFF7E6; color: #C2700A; }
+.dorm-tag.d2 { background: #F0F9FF; color: #0369A1; }
+.section-h { padding: 12px 20px 6px; font-size: 12px; color: var(--text-secondary); font-weight: 600; }
+.tip-card { margin: 0 16px 16px; padding: 12px; background: #F7F7F7; border-radius: 8px; font-size: 11px; color: var(--text-regular); line-height: 1.7; }
+.tip-card .h { color: var(--text-primary); font-weight: 600; margin-bottom: 4px; }
+.action-bar { background: #fff; padding: 12px 16px 20px; display: flex; gap: 12px; flex-shrink: 0; border-top: 1px solid var(--divider); }
+.btn { flex: 1; height: 44px; border-radius: 22px; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; text-decoration: none; }
+.btn.primary { background: var(--color-primary); color: #fff; }
+.btn.secondary { background: #F2F3F5; color: var(--text-regular); }
+.btn:disabled { background: #C0C4CC; color: #fff; }
+.home-indicator { height: 34px; background: #fff; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 8px; flex-shrink: 0; }
+.home-indicator .bar { width: 134px; height: 5px; border-radius: 3px; background: #000; opacity: 0.85; }
+</style>
+</head>
+<body>
+<div class="phone-shell">
+<div class="status-bar">
+  <span>12:20</span>
+  <div class="flex gap-1.5 text-[#000]">
+    <iconify-icon icon="mingcute:signal-fill"></iconify-icon>
+    <iconify-icon icon="mingcute:wifi-fill"></iconify-icon>
+    <iconify-icon icon="mingcute:battery-fill"></iconify-icon>
+  </div>
+</div>
+<div class="nav-bar">
+  <a class="p-2 -ml-2" href="counselor_imports.html"><iconify-icon class="text-xl" icon="solar:alt-arrow-left-linear"></iconify-icon></a>
+  <h1 class="flex-1 text-center text-base font-bold text-gray-900">导入学生-宿舍</h1>
+  <span class="p-2 -mr-2 w-8"></span>
+</div>
+
+<div class="steps">
+  <div class="step done"><div class="num">1</div><span class="label">选文件</span></div>
+  <div class="step-line done"></div>
+  <div class="step active"><div class="num">2</div><span class="label">预览校验</span></div>
+  <div class="step-line"></div>
+  <div class="step"><div class="num">3</div><span class="label">确认入库</span></div>
+</div>
+
+<div class="content">
+  <div class="empty-state">
+    <iconify-icon class="icon" icon="solar:home-smile-angle-bold-duotone"></iconify-icon>
+    <div class="title">宿舍数据待补充</div>
+    <div class="desc">当前暂无学生-宿舍对应表的真实数据。<br/>下方为模拟示例,实际数据请待学工处下发后导入。</div>
+  </div>
+
+  <div class="upload-zone has-file">
+    <iconify-icon class="icon" icon="solar:file-check-bold"></iconify-icon>
+    <div class="file-name">学生-宿舍对应表_示例.xlsx</div>
+    <div class="file-meta">10 行 · 示例数据 · 3.8 KB</div>
+  </div>
+
+  <div class="section-h">宿舍归属预览(示例)</div>
+  <div class="preview-wrap">
+    <div class="preview-head">
+      <h4>6号楼 · 3 间</h4>
+      <span class="stats">6 名学生</span>
+    </div>
+    <table class="preview-table">
+      <thead><tr><th>学号</th><th>姓名</th><th>楼栋</th><th>房间</th><th>床位</th><th>宿舍长</th></tr></thead>
+      <tbody>
+        <tr><td>2024001</td><td>张三</td><td><span class="dorm-tag d1">6号楼</span></td><td>302</td><td>1号床</td><td>✓</td></tr>
+        <tr><td>2024002</td><td>李四</td><td><span class="dorm-tag d1">6号楼</span></td><td>302</td><td>2号床</td><td>—</td></tr>
+        <tr><td>2024003</td><td>王五</td><td><span class="dorm-tag d1">6号楼</span></td><td>302</td><td>3号床</td><td>—</td></tr>
+        <tr><td>2024004</td><td>赵六</td><td><span class="dorm-tag d1">6号楼</span></td><td>305</td><td>1号床</td><td>✓</td></tr>
+        <tr><td>2024005</td><td>钱七</td><td><span class="dorm-tag d1">6号楼</span></td><td>305</td><td>2号床</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="preview-wrap">
+    <div class="preview-head">
+      <h4>7号楼 · 2 间</h4>
+      <span class="stats">4 名学生</span>
+    </div>
+    <table class="preview-table">
+      <thead><tr><th>学号</th><th>姓名</th><th>楼栋</th><th>房间</th><th>床位</th><th>宿舍长</th></tr></thead>
+      <tbody>
+        <tr><td>2024006</td><td>孙八</td><td><span class="dorm-tag d2">7号楼</span></td><td>201</td><td>1号床</td><td>✓</td></tr>
+        <tr><td>2024007</td><td>周九</td><td><span class="dorm-tag d2">7号楼</span></td><td>201</td><td>2号床</td><td>—</td></tr>
+        <tr><td>2024008</td><td>吴十</td><td><span class="dorm-tag d2">7号楼</span></td><td>408</td><td>1号床</td><td>✓</td></tr>
+        <tr><td>2024009</td><td>郑十一</td><td><span class="dorm-tag d2">7号楼</span></td><td>408</td><td>2号床</td><td>—</td></tr>
+        <tr><td>2024010</td><td>王十二</td><td><span class="dorm-tag d2">7号楼</span></td><td>408</td><td>3号床</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tip-card">
+    <div class="h">字段映射说明</div>
+    必需列:学号 / 姓名 / 楼栋 / 房间号 / 床位号<br/>
+    可选列:宿舍长(是/否)、联系电话、入住时间<br/>
+    <div class="mt-2">💡 导入后可在「学生详情」中查看宿舍,支持查寝联动、晚归定位舍友等场景。</div>
+  </div>
+</div>
+
+<div class="action-bar">
+  <a class="btn secondary" href="counselor_imports.html">上一步</a>
+  <button class="btn" style="background:#C0C4CC;color:#fff;" disabled>数据待补充</button>
+</div>
+<div class="home-indicator"><div class="bar"></div></div>
+</div>
+</body>
+</html>

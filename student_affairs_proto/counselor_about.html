@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<!--
+  API Contract:
+  GET /api/system/info
+  Response 200: {
+    "app_name": "string",
+    "version": "string",
+    "build": "string",
+    "release_date": "YYYY-MM-DD",
+    "min_supported_version": "string",
+    "update_url": "string|null"
+  }
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>关于学工助手 - 学工助手</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+:root { --color-primary:#1E5AE6; --success:#07C160; --bg-page:#F7F7F7; --bg-card:#FFFFFF; --divider:#F0F0F0; --text-primary:#191919; --text-regular:#444; --text-secondary:#888; }
+body { background-color:#1a1a1a; display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0; font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; }
+.phone-shell { width:375px; height:812px; background:var(--bg-page); border-radius:40px; overflow:hidden; position:relative; display:flex; flex-direction:column; }
+.status-bar { height:44px; padding:0 20px; display:flex; justify-content:space-between; align-items:center; font-size:14px; color:#000; flex-shrink:0; }
+.nav-bar { height:44px; display:flex; align-items:center; padding:0 16px; background:#fff; flex-shrink:0; }
+.content { flex:1; overflow-y:auto; }
+.hero { padding:36px 24px 28px; text-align:center; }
+.hero .logo { width:72px; height:72px; margin:0 auto 14px; border-radius:18px; background:linear-gradient(135deg,#1E5AE6,#4080FF); color:#fff; display:flex; align-items:center; justify-content:center; font-size:34px; box-shadow:0 8px 20px rgba(30,90,230,0.25); }
+.hero .name { font-size:18px; font-weight:700; color:var(--text-primary); }
+.hero .sub { font-size:12px; color:var(--text-secondary); margin-top:4px; }
+.hero .ver { display:inline-block; margin-top:10px; padding:3px 10px; background:#EFF6FF; color:var(--color-primary); font-size:11px; border-radius:10px; font-weight:600; }
+.card { background:#fff; margin:0 16px 12px; border-radius:12px; overflow:hidden; }
+.cell { display:flex; align-items:center; padding:14px 16px; gap:12px; }
+.cell + .cell { border-top:1px solid var(--divider); }
+.cell .k { font-size:14px; color:var(--text-primary); flex:1; }
+.cell .v { font-size:13px; color:var(--text-secondary); }
+.section-h { padding:14px 20px 6px; font-size:12px; color:var(--text-secondary); font-weight:600; }
+.thanks { padding:24px 32px 16px; text-align:center; color:var(--text-secondary); font-size:11px; line-height:1.8; }
+.thanks .h { color:var(--text-primary); font-weight:600; margin-bottom:4px; }
+.home-indicator { height:34px; background:#fff; display:flex; justify-content:center; align-items:flex-end; padding-bottom:8px; flex-shrink:0; }
+.home-indicator .bar { width:134px; height:5px; border-radius:3px; background:#000; opacity:0.85; }
+</style>
+</head>
+<body>
+<div class="phone-shell">
+<script type="application/json" id="page-data">
+{
+  "app_name": "学工助手",
+  "version": "1.0.0",
+  "build": "20260630.1",
+  "release_date": "2026-06-30",
+  "min_supported_version": "0.9.0",
+  "update_url": null
+}
+</script>
+<div class="status-bar">
+  <span>12:20</span>
+  <div class="flex gap-1.5 text-[#000]">
+    <iconify-icon icon="mingcute:signal-fill"></iconify-icon>
+    <iconify-icon icon="mingcute:wifi-fill"></iconify-icon>
+    <iconify-icon icon="mingcute:battery-fill"></iconify-icon>
+  </div>
+</div>
+<div class="nav-bar">
+  <a class="p-2 -ml-2" href="counselor_settings.html"><iconify-icon class="text-xl" icon="solar:alt-arrow-left-linear"></iconify-icon></a>
+  <h1 class="flex-1 text-center text-base font-bold text-gray-900">关于</h1>
+  <span class="p-2 -mr-2 w-8"></span>
+</div>
+<div class="content">
+  <div class="hero">
+    <div class="logo"><iconify-icon icon="material-symbols:school-outline"></iconify-icon></div>
+    <div class="name">学工助手</div>
+    <div class="sub">智能技术学部 · 学生工作移动平台</div>
+    <div class="ver">v1.0.0 · build 20260630.1</div>
+  </div>
+
+  <div class="section-h">版本信息</div>
+  <div class="card">
+    <div class="cell"><span class="k">当前版本</span><span class="v">1.0.0</span></div>
+    <div class="cell"><span class="k">发布日期</span><span class="v">2026-06-30</span></div>
+    <div class="cell"><span class="k">最低支持版本</span><span class="v">0.9.0</span></div>
+    <div class="cell"><span class="k">最新状态</span><span class="v" style="color:var(--success);">已是最新</span></div>
+  </div>
+
+  <div class="section-h">研发信息</div>
+  <div class="card">
+    <div class="cell"><span class="k">开发团队</span><span class="v">智能技术学部学生开发组</span></div>
+    <div class="cell"><span class="k">指导教师</span><span class="v">卫聚金</span></div>
+    <div class="cell"><span class="k">建设单位</span><span class="v">上海应用技术大学</span></div>
+    <div class="cell"><span class="k">联系邮箱</span><span class="v">xgz@stu.edu.cn</span></div>
+  </div>
+
+  <div class="thanks">
+    <div class="h">特别致谢</div>
+    本项目由智能技术学部学生开发团队在教师指导下完成<br/>
+    感谢所有辅导员的反馈与支持
+  </div>
+</div>
+<div class="home-indicator"><div class="bar"></div></div>
+</div>
+</body>
+</html>

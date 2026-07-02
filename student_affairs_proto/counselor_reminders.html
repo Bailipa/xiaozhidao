@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>提醒管理 - 学工助手</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+        :root { --color-primary: #1E5AE6; --color-bg-page: #F5F6F8; }
+        body { background-color: #1a1a1a; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+        .phone-shell { width: 375px; height: 812px; background: var(--color-bg-page); border-radius: 40px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+        .status-bar { height: 44px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #000; flex-shrink: 0; }
+        .nav-bar { height: 44px; display: flex; align-items: center; padding: 0 16px; background: #fff; border-bottom: 1px solid #F3F4F6; flex-shrink: 0; }
+        .content { flex: 1; overflow-y: auto; padding-bottom: 100px; }
+        .reminder-card { background: #fff; border-radius: 16px; margin: 12px 16px; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
+    </style>
+</head>
+<body>
+<div class="phone-shell">
+<div class="status-bar">
+<span>12:20</span>
+<div class="flex gap-1.5 text-[#000]">
+<iconify-icon icon="mingcute:signal-fill"></iconify-icon>
+<iconify-icon icon="mingcute:wifi-fill"></iconify-icon>
+<iconify-icon icon="mingcute:battery-fill"></iconify-icon>
+</div>
+</div>
+<div class="nav-bar">
+<a class="p-2 -ml-2" href="counselor_workbench.html">
+<iconify-icon class="text-xl" icon="solar:alt-arrow-left-linear"></iconify-icon>
+</a>
+<h1 class="flex-1 text-center text-base font-bold text-gray-900">提醒管理</h1>
+<a class="p-2 -mr-2 text-blue-600" href="counselor_reminder_logs.html" title="提醒日志"><iconify-icon class="text-xl" icon="solar:document-text-bold-duotone"></iconify-icon></a>
+</div>
+<div class="content">
+<a class="reminder-card block" href="counselor_reminder_detail.html">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-bold text-gray-900">明早 8:00 班会通知</h3>
+<span class="text-[10px] text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded">已送达</span>
+</div>
+<div class="text-xs text-gray-500 mb-4">设定时间：2026-06-30 18:00</div>
+<div class="flex items-center gap-2 mb-4">
+<iconify-icon class="text-blue-600" icon="solar:users-group-rounded-bold-duotone"></iconify-icon>
+<span class="text-xs text-gray-700">关联学生：全班学生 (45人)</span>
+</div>
+<div class="flex justify-end gap-3 pt-3 border-t border-gray-50">
+<button class="text-[11px] text-gray-400" onclick="event.preventDefault();delReminder('明早 8:00 班会通知')">删除</button>
+<span class="text-[11px] text-blue-600 font-bold flex items-center gap-1" onclick="event.preventDefault();resend('明早 8:00 班会通知', '全班学生 (45人)')">
+<iconify-icon icon="solar:refresh-linear"></iconify-icon> 再次发送
+                    </span>
+</div>
+</a>
+<a class="reminder-card border-l-4 border-red-500 block" href="counselor_reminder_detail.html">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-bold text-gray-900 text-red-600">离校信息统计填报</h3>
+<span class="text-[10px] text-red-600 font-bold bg-red-50 px-2 py-0.5 rounded">未送达</span>
+</div>
+<div class="text-xs text-gray-500 mb-4">设定时间：2026-06-30 12:00</div>
+<div class="flex items-center gap-2 mb-4">
+<iconify-icon class="text-red-500" icon="solar:users-group-rounded-bold-duotone"></iconify-icon>
+<span class="text-xs text-gray-700">关联学生：部分未填报学生 (12人)</span>
+</div>
+<div class="flex justify-end gap-3 pt-3 border-t border-gray-50">
+<button class="text-[11px] text-gray-400" onclick="event.preventDefault();delReminder('离校信息统计填报')">删除</button>
+<span class="text-[11px] text-blue-600 font-bold flex items-center gap-1" onclick="event.preventDefault();resend('离校信息统计填报', '部分未填报学生 (12人)')">
+<iconify-icon icon="solar:refresh-linear"></iconify-icon> 手动重发
+                    </span>
+</div>
+</a>
+<a class="reminder-card opacity-60 block" href="counselor_reminder_detail.html">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-bold text-gray-900">奖学金申报截止提醒</h3>
+<span class="text-[10px] text-gray-400 font-bold bg-gray-50 px-2 py-0.5 rounded">已送达</span>
+</div>
+<div class="text-xs text-gray-500 mb-4">设定时间：2026-06-25 09:00</div>
+<div class="flex items-center gap-2 mb-4">
+<iconify-icon class="text-gray-400" icon="solar:users-group-rounded-bold-duotone"></iconify-icon>
+<span class="text-xs text-gray-700">关联学生：全院学生</span>
+</div>
+</a>
+</div>
+<a class="fixed bottom-12 left-6 right-6 h-14 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-xl z-20 font-bold gap-2" href="counselor_reminder_create.html">
+<iconify-icon class="text-xl" icon="solar:add-circle-bold"></iconify-icon>
+            新建提醒
+        </a>
+<div class="h-[34px] bg-white flex justify-center items-end pb-2 flex-shrink-0">
+<div class="w-32 h-1 bg-gray-200 rounded-full"></div>
+</div>
+</div>
+<script>
+function showConfirm(o) {
+  var m = document.createElement('div');
+  m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99;display:flex;align-items:center;justify-content:center;padding:0 32px;';
+  m.innerHTML = '<div style="background:#fff;border-radius:14px;width:100%;overflow:hidden;">'
+    + '<div style="padding:24px 20px;text-align:center;">'
+    + '<iconify-icon style="font-size:32px;color:' + (o.danger?'#DC2626':'#1E5AE6') + ';" icon="' + (o.danger?'solar:trash-bin-trash-bold':'solar:shield-warning-bold') + '"></iconify-icon>'
+    + '<div style="font-size:16px;font-weight:700;color:#191919;margin-top:10px;">' + o.title + '</div>'
+    + '<div style="font-size:12px;color:#888;margin-top:6px;line-height:1.6;">' + o.desc + '</div>'
+    + '</div>'
+    + '<div style="display:flex;border-top:1px solid #F0F0F0;">'
+    + '<button data-cancel style="flex:1;height:48px;background:#fff;color:#888;font-size:15px;border:none;border-right:1px solid #F0F0F0;cursor:pointer;">取消</button>'
+    + '<button data-ok style="flex:1;height:48px;background:#fff;color:' + (o.danger?'#DC2626':'#1E5AE6') + ';font-size:15px;font-weight:600;border:none;cursor:pointer;">确认</button>'
+    + '</div></div>';
+  document.body.appendChild(m);
+  m.querySelector('[data-cancel]').onclick = function() { m.remove(); };
+  m.querySelector('[data-ok]').onclick = function() { m.remove(); o.onConfirm && o.onConfirm(); };
+}
+function toast(msg) {
+  var t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;left:50%;bottom:120px;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:#fff;padding:8px 16px;border-radius:8px;font-size:13px;z-index:999;';
+  document.body.appendChild(t);
+  setTimeout(function() { t.remove(); }, 1800);
+}
+function delReminder(name) {
+  showConfirm({
+    title: '确认删除这条提醒?',
+    desc: '提醒「' + name + '」删除后将无法恢复,此操作将记入审计日志。',
+    danger: true,
+    onConfirm: function() { toast('已删除'); }
+  });
+}
+function resend(name, target) {
+  showConfirm({
+    title: '确认再次发送提醒?',
+    desc: '将向「' + target + '」重新发送提醒「' + name + '」。',
+    onConfirm: function() { toast('已重新发送'); }
+  });
+}
+</script>
+</body>
+</html>

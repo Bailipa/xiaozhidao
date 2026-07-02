@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<!--
+  API Contract:
+  GET /api/reminders/{reminder_id}
+  Response 200: {
+    "reminder_id":"string",
+    "title":"string",
+    "content":"string",
+    "remind_at":"ISO-8601",
+    "created_at":"ISO-8601",
+    "created_by":"string",
+    "lead_minutes": int,
+    "linked": { "type":"student|class", "ids":["string"] },
+    "status": "pending|sent|delivered|failed",
+    "delivery": {
+      "wechat": { "subscribed_count":int, "delivered_count":int, "failed_count":int, "read_count":int },
+      "sms_fallback": { "sent_count":int, "delivered_count":int, "failed_count":int }
+    }
+  }
+  POST /api/reminders/{reminder_id}/resend
+  Response 200: { "message":"string", "resent_at":"ISO-8601" }
+  GET /api/reminders/{reminder_id}/logs
+  Response 200: { "logs": [ { "log_id":"string", "channel":"wechat|sms", "recipient":"string", "status":"string", "sent_at":"ISO-8601", "error":"string|null" } ] }
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>提醒详情 - 学工助手</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+:root { --color-primary:#1E5AE6; --success:#07C160; --warning:#FA9D3B; --danger:#FA5151; --bg-page:#F7F7F7; --bg-card:#FFFFFF; --divider:#F0F0F0; --text-primary:#191919; --text-secondary:#888; }
+body { background-color:#1a1a1a; display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0; font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; }
+.phone-shell { width:375px; height:812px; background:var(--bg-page); border-radius:40px; overflow:hidden; position:relative; display:flex; flex-direction:column; }
+.status-bar { height:44px; padding:0 20px; display:flex; justify-content:space-between; align-items:center; font-size:14px; color:#000; flex-shrink:0; }
+.nav-bar { height:44px; display:flex; align-items:center; padding:0 16px; background:#fff; flex-shrink:0; }
+.content { flex:1; overflow-y:auto; }
+.reminder-card { margin:16px; padding:18px; background:#fff; border-radius:12px; }
+.reminder-card .type { font-size:11px; color:var(--color-primary); font-weight:600; padding:2px 8px; background:#EFF6FF; border-radius:4px; display:inline-block; }
+.reminder-card .title { font-size:18px; font-weight:700; color:var(--text-primary); margin-top:8px; }
+.reminder-card .meta { font-size:12px; color:var(--text-secondary); margin-top:4px; }
+.reminder-card .content { font-size:13px; color:var(--text-primary); line-height:1.7; margin-top:12px; padding-top:12px; border-top:1px solid var(--divider); }
+.section-h { padding:12px 20px 6px; font-size:12px; color:var(--text-secondary); font-weight:600; }
+.deliver-card { background:#fff; margin:0 16px 12px; border-radius:12px; padding:14px 16px; }
+.deliver-card .ch-title { font-size:13px; font-weight:600; color:var(--text-primary); display:flex; align-items:center; gap:6px; margin-bottom:10px; }
+.deliver-card .stat-row { display:flex; justify-content:space-between; padding:4px 0; font-size:12px; }
+.deliver-card .stat-row .k { color:var(--text-secondary); }
+.deliver-card .stat-row .v { color:var(--text-primary); font-weight:600; }
+.deliver-card .stat-row .v.success { color:var(--success); }
+.deliver-card .stat-row .v.warn { color:var(--warning); }
+.deliver-card .stat-row .v.danger { color:var(--danger); }
+.log-card { background:#fff; margin:0 16px 12px; border-radius:12px; overflow:hidden; }
+.log-row { display:flex; align-items:center; padding:10px 16px; gap:10px; }
+.log-row + .log-row { border-top:1px solid var(--divider); }
+.log-row .ch { font-size:10px; padding:1px 6px; border-radius:4px; }
+.log-row .ch.wechat { background:#ECFDF5; color:var(--success); }
+.log-row .ch.sms { background:#EFF6FF; color:var(--color-primary); }
+.log-row .info { flex:1; min-width:0; font-size:12px; }
+.log-row .name { color:var(--text-primary); }
+.log-row .sub { color:var(--text-secondary); font-size:10px; margin-top:1px; }
+.log-row .status { font-size:10px; }
+.log-row .status.ok { color:var(--success); }
+.log-row .status.fail { color:var(--danger); }
+.action-bar { background:#fff; padding:12px 16px 20px; display:flex; gap:12px; flex-shrink:0; border-top:1px solid var(--divider); }
+.btn { flex:1; height:44px; border-radius:22px; font-size:14px; font-weight:600; display:flex; align-items:center; justify-content:center; border:none; cursor:pointer; gap:6px; }
+.btn.primary { background:var(--color-primary); color:#fff; }
+.btn.secondary { background:#F2F3F5; color:#444; }
+.toast { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.78); color:#fff; padding:14px 20px; border-radius:12px; font-size:14px; z-index:50; display:none; align-items:center; gap:8px; }
+.toast.show { display:flex; animation: fadeOut 1.8s forwards; }
+@keyframes fadeOut { 0%{opacity:1;} 70%{opacity:1;} 100%{opacity:0;} }
+.home-indicator { height:34px; background:#fff; display:flex; justify-content:center; align-items:flex-end; padding-bottom:8px; flex-shrink:0; }
+.home-indicator .bar { width:134px; height:5px; border-radius:3px; background:#000; opacity:0.85; }
+</style>
+</head>
+<body>
+<div class="phone-shell">
+<script type="application/json" id="page-data">
+{
+  "reminder_id": "R2026063001",
+  "title": "下午班会提醒",
+  "content": "今天下午 3 点在 6 号楼 302 召开班会,讨论期末复习安排。请全体同学准时参加。",
+  "remind_at": "2026-06-30T14:30:00+08:00",
+  "created_at": "2026-06-30T09:00:00+08:00",
+  "created_by": "wangjy@sit.edu.cn",
+  "lead_minutes": 30,
+  "linked": { "type": "class", "ids": ["计科1班"] },
+  "status": "delivered",
+  "delivery": {
+    "wechat": { "subscribed_count": 32, "delivered_count": 30, "failed_count": 2, "read_count": 18 },
+    "sms_fallback": { "sent_count": 2, "delivered_count": 2, "failed_count": 0 }
+  },
+  "logs": [
+    { "log_id":"L001", "channel":"wechat", "recipient":"张三", "status":"read", "sent_at":"2026-06-30T14:00:12+08:00", "error":null },
+    { "log_id":"L002", "channel":"wechat", "recipient":"李四", "status":"read", "sent_at":"2026-06-30T14:00:12+08:00", "error":null },
+    { "log_id":"L003", "channel":"wechat", "recipient":"王五", "status":"delivered", "sent_at":"2026-06-30T14:00:12+08:00", "error":null },
+    { "log_id":"L004", "channel":"sms", "recipient":"赵六(139****5678)", "status":"delivered", "sent_at":"2026-06-30T14:00:25+08:00", "error":null },
+    { "log_id":"L005", "channel":"sms", "recipient":"钱七(138****9012)", "status":"delivered", "sent_at":"2026-06-30T14:00:25+08:00", "error":null }
+  ]
+}
+</script>
+<div class="status-bar">
+  <span>12:20</span>
+  <div class="flex gap-1.5 text-[#000]">
+    <iconify-icon icon="mingcute:signal-fill"></iconify-icon>
+    <iconify-icon icon="mingcute:wifi-fill"></iconify-icon>
+    <iconify-icon icon="mingcute:battery-fill"></iconify-icon>
+  </div>
+</div>
+<div class="nav-bar">
+  <a class="p-2 -ml-2" href="counselor_reminders.html"><iconify-icon class="text-xl" icon="solar:alt-arrow-left-linear"></iconify-icon></a>
+<h1 class="flex-1 text-center text-base font-bold text-gray-900">提醒详情</h1>
+<a class="p-2 -mr-2 text-blue-600" href="counselor_reminder_logs.html"><iconify-icon class="text-xl" icon="solar:document-text-bold-duotone"></iconify-icon></a>
+</div>
+<div class="content">
+  <div class="reminder-card">
+    <span class="type">事务提醒 · 提前 30 分钟</span>
+    <div class="title">下午班会提醒</div>
+    <div class="meta">触发时间:2026-06-30 14:30 · 创建:王辅导员 · 状态:已送达</div>
+    <div class="content">今天下午 3 点在 6 号楼 302 召开班会,讨论期末复习安排。请全体同学准时参加。</div>
+  </div>
+
+  <div class="section-h">送达情况</div>
+  <div class="deliver-card">
+    <div class="ch-title"><iconify-icon class="text-green-500" icon="solar:chat-round-dots-bold"></iconify-icon> 微信订阅消息</div>
+    <div class="stat-row"><span class="k">订阅数</span><span class="v">32</span></div>
+    <div class="stat-row"><span class="k">送达</span><span class="v success">30</span></div>
+    <div class="stat-row"><span class="k">失败</span><span class="v danger">2</span></div>
+    <div class="stat-row"><span class="k">已读</span><span class="v">18 / 30</span></div>
+  </div>
+  <div class="deliver-card">
+    <div class="ch-title"><iconify-icon class="text-blue-500" icon="solar:smartphone-bold"></iconify-icon> 短信兜底</div>
+    <div class="stat-row"><span class="k">发送</span><span class="v">2</span></div>
+    <div class="stat-row"><span class="k">送达</span><span class="v success">2</span></div>
+    <div class="stat-row"><span class="k">失败</span><span class="v">0</span></div>
+  </div>
+
+  <div class="section-h">发送日志 (近 5 条)</div>
+  <div class="log-card">
+    <div class="log-row">
+      <span class="ch wechat">微信</span>
+      <div class="info">
+        <div class="name">张三</div>
+        <div class="sub">14:00:12</div>
+      </div>
+      <span class="status ok">已读</span>
+    </div>
+    <div class="log-row">
+      <span class="ch wechat">微信</span>
+      <div class="info">
+        <div class="name">李四</div>
+        <div class="sub">14:00:12</div>
+      </div>
+      <span class="status ok">已读</span>
+    </div>
+    <div class="log-row">
+      <span class="ch wechat">微信</span>
+      <div class="info">
+        <div class="name">王五</div>
+        <div class="sub">14:00:12</div>
+      </div>
+      <span class="status ok">已送达</span>
+    </div>
+    <div class="log-row">
+      <span class="ch sms">短信</span>
+      <div class="info">
+        <div class="name">赵六(139****5678)</div>
+        <div class="sub">14:00:25 · 微信失败兜底</div>
+      </div>
+      <span class="status ok">已送达</span>
+    </div>
+    <div class="log-row">
+      <span class="ch sms">短信</span>
+      <div class="info">
+        <div class="name">钱七(138****9012)</div>
+        <div class="sub">14:00:25 · 微信失败兜底</div>
+      </div>
+      <span class="status ok">已送达</span>
+    </div>
+  </div>
+</div>
+<div class="action-bar">
+  <a class="btn secondary" href="counselor_reminder_create.html">编辑</a>
+  <button class="btn primary" onclick="resendReminder()">
+    <iconify-icon icon="solar:refresh-circle-bold"></iconify-icon>
+    重新发送
+  </button>
+</div>
+<div class="toast" id="toast">
+  <iconify-icon icon="solar:check-circle-bold"></iconify-icon>
+  <span id="toastText">已重新发送</span>
+</div>
+<div class="home-indicator"><div class="bar"></div></div>
+</div>
+<script>
+function resendReminder() {
+  var t = document.getElementById('toast');
+  document.getElementById('toastText').textContent = '已重新发送';
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 1800);
+}
+// 如果 URL 带 ?resent=true 自动提示
+(function(){
+  var p = new URLSearchParams(window.location.search);
+  if (p.get('resent') === 'true') {
+    setTimeout(resendReminder, 300);
+  }
+})();
+</script>
+</body>
+</html>

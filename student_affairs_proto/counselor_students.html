@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>学生管理 - 学工助手</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+        :root { --color-primary: #1E5AE6; --color-bg-page: #F5F6F8; }
+        body { background-color: #1a1a1a; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+        .phone-shell { width: 375px; height: 812px; background: var(--color-bg-page); border-radius: 40px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+        .status-bar { height: 44px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #000; flex-shrink: 0; }
+        .nav-bar { height: 44px; display: flex; align-items: center; padding: 0 16px; background: #fff; border-bottom: 1px solid #F3F4F6; }
+        .content { flex: 1; overflow-y: auto; }
+        .tab-bar { height: 84px; background: #fff; border-top: 1px solid #E5E7EB; display: flex; justify-content: space-around; align-items: center; padding-bottom: 20px; flex-shrink: 0; }
+        .tab-item { display: flex; flex-direction: column; align-items: center; text-align: center; color: #9CA3AF; text-decoration: none; }
+        .tab-item.active { color: var(--color-primary); }
+        .tab-item iconify-icon { font-size: 24px; margin-bottom: 4px; }
+        .tab-item span { font-size: 11px; }
+        .plus-tab { width: 52px; height: 52px; background: var(--color-primary); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #fff; position: absolute; top: -16px; left: 50%; transform: translateX(-50%); box-shadow: 0 4px 12px rgba(30, 90, 230, 0.4); border: 2px solid #fff; }
+        .search-box { background: #fff; padding: 12px 16px; }
+        .student-item { background: #fff; border-radius: 12px; margin: 8px 16px; padding: 12px; display: flex; align-items: center; gap: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
+    </style>
+</head>
+<body>
+<div class="phone-shell">
+<div class="status-bar">
+<span>12:20</span>
+<div class="flex gap-1.5 text-[#000]">
+<iconify-icon icon="mingcute:signal-fill"></iconify-icon>
+<iconify-icon icon="mingcute:wifi-fill"></iconify-icon>
+<iconify-icon icon="mingcute:battery-fill"></iconify-icon>
+</div>
+</div>
+<div class="nav-bar">
+<h1 class="text-base font-bold text-gray-900 mx-auto">学生管理</h1>
+</div>
+<div class="search-box">
+<div class="bg-gray-100 rounded-full px-4 py-2 flex items-center gap-2">
+<iconify-icon class="text-gray-400" icon="solar:magnifer-linear"></iconify-icon>
+<input class="bg-transparent text-sm w-full outline-none text-gray-700" placeholder="搜索学生姓名、学号或班级" type="text"/>
+</div>
+<div class="flex gap-2 mt-3">
+<div class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-medium border border-blue-100 flex items-center gap-1">
+                    全部班级 <iconify-icon icon="solar:alt-arrow-down-linear"></iconify-icon>
+</div>
+<div class="px-3 py-1 bg-gray-50 text-gray-600 rounded-full text-xs font-medium border border-gray-100 flex items-center gap-1">
+                    风险等级 <iconify-icon icon="solar:alt-arrow-down-linear"></iconify-icon>
+</div>
+<div class="px-3 py-1 bg-gray-50 text-gray-600 rounded-full text-xs font-medium border border-gray-100 flex items-center gap-1">
+                    宿舍楼 <iconify-icon icon="solar:alt-arrow-down-linear"></iconify-icon>
+</div>
+</div>
+</div>
+<div class="content pt-2" id="studentList">
+<!-- 学生列表项 -->
+<a class="student-item block" href="counselor_student_detail.html">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+<img alt="Student" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=张&background=1E5AE6&color=fff&size=128&bold=true&font-size=0.5" title="Male student avatar"/>
+</div>
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<span class="font-bold text-gray-900">张晓明</span>
+<span class="px-2 py-0.5 bg-red-50 text-red-600 text-[10px] rounded font-bold">红档风险</span>
+</div>
+<div class="text-[11px] text-gray-500 mt-1">计算机系 2024级(3)班 · 2024001</div>
+</div>
+<iconify-icon class="text-gray-300" icon="solar:alt-arrow-right-linear"></iconify-icon>
+</div>
+</a>
+<a class="student-item block" href="counselor_student_detail.html">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+<img alt="Student" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=李&background=1E5AE6&color=fff&size=128&bold=true&font-size=0.5" title="Female student avatar"/>
+</div>
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<span class="font-bold text-gray-900">李华</span>
+<span class="px-2 py-0.5 bg-gray-100 text-gray-500 text-[10px] rounded font-bold">无风险</span>
+</div>
+<div class="text-[11px] text-gray-500 mt-1">计算机系 2024级(3)班 · 2024002</div>
+</div>
+<iconify-icon class="text-gray-300" icon="solar:alt-arrow-right-linear"></iconify-icon>
+</div>
+</a>
+<a class="student-item block" href="counselor_student_detail.html">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+<img alt="Student" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=赵&background=1E5AE6&color=fff&size=128&bold=true&font-size=0.5" title="Student avatar"/>
+</div>
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<span class="font-bold text-gray-900">赵子涵</span>
+<span class="px-2 py-0.5 bg-yellow-50 text-yellow-600 text-[10px] rounded font-bold">黄档风险</span>
+</div>
+<div class="text-[11px] text-gray-500 mt-1">计算机系 2024级(3)班 · 2024005</div>
+</div>
+<iconify-icon class="text-gray-300" icon="solar:alt-arrow-right-linear"></iconify-icon>
+</div>
+</a>
+<a class="student-item block" href="counselor_student_detail.html">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+<img alt="Student" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=孙&background=1E5AE6&color=fff&size=128&bold=true&font-size=0.5" title="Student avatar"/>
+</div>
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<span class="font-bold text-gray-900">孙宇轩</span>
+<span class="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] rounded font-bold">蓝档风险</span>
+</div>
+<div class="text-[11px] text-gray-500 mt-1">计算机系 2024级(3)班 · 2024009</div>
+</div>
+<iconify-icon class="text-gray-300" icon="solar:alt-arrow-right-linear"></iconify-icon>
+</div>
+</a>
+<div class="mt-8 mb-8 text-center px-10" id="emptyState" style="display: none;">
+<div class="w-32 h-32 bg-gray-50 rounded-full mx-auto flex items-center justify-center mb-4 border-2 border-dashed border-gray-200">
+<iconify-icon class="text-5xl text-gray-200" icon="solar:user-rounded-bold-duotone"></iconify-icon>
+</div>
+<h3 class="text-base font-bold text-gray-900">暂无学生数据</h3>
+<p class="text-xs text-gray-400 mt-2">请先导入学生花名册或联系系统管理员</p>
+<a class="block mt-6 w-full py-3 text-white rounded-xl font-bold shadow-lg text-center" style="background:#1E5AE6;box-shadow:0 4px 12px rgba(30,90,230,0.3);" href="counselor_import_students.html">导入学生花名册</a>
+</div>
+</div>
+<div class="tab-bar relative">
+  <a class="tab-item" href="counselor_workbench.html">
+    <iconify-icon icon="solar:home-2-linear"></iconify-icon>
+    <span>工作台</span>
+  </a>
+  <a class="tab-item active" href="counselor_students.html">
+    <iconify-icon icon="solar:users-group-rounded-bold"></iconify-icon>
+    <span>学生</span>
+  </a>
+  <a class="plus-tab" href="counselor_log_edit.html">
+    <iconify-icon icon="solar:add-square-bold" style="font-size:30px;"></iconify-icon>
+  </a>
+  <div class="w-12"></div>
+  <a class="tab-item" href="counselor_anomalies.html">
+    <iconify-icon icon="solar:danger-linear"></iconify-icon>
+    <span>异常</span>
+  </a>
+  <a class="tab-item" href="counselor_profile.html">
+    <iconify-icon icon="solar:user-circle-linear"></iconify-icon>
+    <span>我的</span>
+  </a>
+</div>
+<div class="h-[34px] bg-white flex justify-center items-end pb-2 flex-shrink-0">
+<div class="w-32 h-1 bg-gray-200 rounded-full"></div>
+</div>
+</div>
+</body>
+</html>

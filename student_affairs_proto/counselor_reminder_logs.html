@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>提醒日志 - 学工助手</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+:root { --color-primary:#1E5AE6; --success:#07C160; --warning:#FA9D3B; --danger:#DC2626; --bg-page:#F7F7F7; --divider:#F0F0F0; --text-primary:#191919; --text-secondary:#888; }
+body { background-color:#1a1a1a; display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0; font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; }
+.phone-shell { width:375px; height:812px; background:var(--bg-page); border-radius:40px; overflow:hidden; position:relative; display:flex; flex-direction:column; box-shadow:0 0 50px rgba(0,0,0,0.5); border:8px solid #333; }
+.status-bar { height:44px; padding:0 20px; display:flex; justify-content:space-between; align-items:center; font-size:14px; color:#000; flex-shrink:0; }
+.nav-bar { height:44px; display:flex; align-items:center; padding:0 16px; background:#fff; flex-shrink:0; }
+.content { flex:1; overflow-y:auto; padding-bottom:100px; }
+.home-indicator { height:34px; background:#fff; display:flex; justify-content:center; align-items:flex-end; padding-bottom:8px; flex-shrink:0; }
+.home-indicator .bar { width:134px; height:5px; border-radius:3px; background:#000; opacity:0.85; }
+.tab-bar { height:84px; background:#fff; border-top:1px solid #E5E7EB; display:flex; justify-content:space-around; align-items:center; padding-bottom:20px; flex-shrink:0; }
+.tab-item { display:flex; flex-direction:column; align-items:center; text-align:center; color:#9CA3AF; text-decoration:none; }
+.tab-item.active { color:var(--color-primary); }
+.tab-item iconify-icon { font-size:24px; margin-bottom:4px; }
+.tab-item span { font-size:11px; }
+
+.filter-tabs { display:flex; gap:8px; padding:12px 16px 4px; flex-wrap:wrap; }
+.filter-tabs span { padding:5px 12px; background:#fff; border-radius:14px; font-size:12px; color:var(--text-secondary); cursor:pointer; border:1px solid var(--divider); }
+.filter-tabs span.on { background:var(--color-primary); color:#fff; border-color:var(--color-primary); font-weight:600; }
+.filter-tabs .count { display:inline-block; margin-left:4px; padding:1px 6px; background:rgba(0,0,0,0.06); border-radius:8px; font-size:10px; }
+.filter-tabs span.on .count { background:rgba(255,255,255,0.25); }
+
+.summary-card { background:#fff; margin:12px 16px 0; padding:14px 16px; border-radius:12px; display:flex; justify-content:space-between; }
+.summary-card .item { text-align:center; flex:1; }
+.summary-card .num { font-size:18px; font-weight:700; }
+.summary-card .label { font-size:10px; color:var(--text-secondary); margin-top:2px; }
+.summary-card .item.green .num { color:var(--success); }
+.summary-card .item.red .num { color:var(--danger); }
+.summary-card .item.yellow .num { color:var(--warning); }
+.summary-card .item.blue .num { color:var(--color-primary); }
+
+.log-card { background:#fff; margin:12px 16px 0; border-radius:12px; overflow:hidden; }
+.log-card .h { padding:10px 16px; font-size:11px; color:var(--text-secondary); font-weight:600; border-bottom:1px solid var(--divider); background:#FAFAFA; }
+.log-row { display:flex; align-items:center; padding:12px 16px; gap:10px; border-bottom:1px solid var(--divider); font-size:12px; }
+.log-row:last-child { border-bottom:0; }
+.log-row .avatar { width:32px; height:32px; border-radius:50%; overflow:hidden; flex-shrink:0; background:#F3F4F6; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:600; color:#6B7280; }
+.log-row .avatar img { width:100%; height:100%; object-fit:cover; }
+.log-row .body { flex:1; min-width:0; }
+.log-row .top { display:flex; align-items:center; gap:6px; }
+.log-row .name { font-size:13px; font-weight:600; color:var(--text-primary); }
+.log-row .time { font-size:10px; color:var(--text-secondary); }
+.log-row .detail { font-size:11px; color:var(--text-secondary); margin-top:2px; }
+.ch { display:inline-flex; align-items:center; gap:3px; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:600; flex-shrink:0; }
+.ch.delivered { background:#D1FAE5; color:#047857; }
+.ch.read { background:#DBEAFE; color:#1E5AE6; }
+.ch.failed { background:#FEE2E2; color:#DC2626; }
+.ch.pending { background:#FEF3C7; color:#B45309; }
+.ch.wechat { background:#E8F0FE; color:#1E5AE6; }
+.ch.sms { background:#F3E8FF; color:#7C3AED; }
+
+.fab { position:absolute; left:16px; right:16px; bottom:80px; height:48px; border-radius:24px; background:var(--color-primary); color:#fff; font-size:14px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px; text-decoration:none; box-shadow:0 4px 16px rgba(30,90,230,0.4); }
+</style>
+</head>
+<body>
+<div class="phone-shell">
+<div class="status-bar">
+<span>12:20</span>
+<div class="flex gap-1.5">
+<iconify-icon icon="mingcute:signal-fill"></iconify-icon>
+<iconify-icon icon="mingcute:wifi-fill"></iconify-icon>
+<iconify-icon icon="mingcute:battery-fill"></iconify-icon>
+</div>
+</div>
+<div class="nav-bar">
+<a class="p-2 -ml-2" href="counselor_reminders.html"><iconify-icon class="text-xl" icon="solar:alt-arrow-left-linear"></iconify-icon></a>
+<h1 class="flex-1 text-center text-base font-bold text-gray-900">提醒日志</h1>
+</div>
+
+<div class="content">
+<div class="filter-tabs">
+<span class="on">全部 <span class="count">128</span></span>
+<span>已送达 <span class="count">102</span></span>
+<span>已读 <span class="count">86</span></span>
+<span>未送达 <span class="count">14</span></span>
+<span>失败 <span class="count">6</span></span>
+</div>
+
+<div class="summary-card">
+<div class="item green"><div class="num">102</div><div class="label">已送达</div></div>
+<div class="item red"><div class="num">6</div><div class="label">失败</div></div>
+<div class="item yellow"><div class="num">14</div><div class="label">未送达</div></div>
+<div class="item blue"><div class="num">80%</div><div class="label">触达率</div></div>
+</div>
+
+<div class="log-card">
+<div class="h">2026-06-30 · 12:20 当天</div>
+<div class="log-row">
+<div class="avatar">王</div>
+<div class="body">
+<div class="top"><span class="name">王辅导员</span><span class="ch delivered">已送达</span><span class="ch wechat">微信</span></div>
+<div class="detail">明早 8:00 班会通知 · 45 人 · 12:20 推送</div>
+</div>
+<span class="time">12:20</span>
+</div>
+<div class="log-row">
+<div class="avatar">王</div>
+<div class="body">
+<div class="top"><span class="name">王辅导员</span><span class="ch failed">失败</span><span class="ch sms">短信</span></div>
+<div class="detail">离校信息统计填报 · 12 人 · 失败原因:用户退订</div>
+</div>
+<span class="time">12:00</span>
+</div>
+<div class="log-row">
+<div class="avatar">王</div>
+<div class="body">
+<div class="top"><span class="name">王辅导员</span><span class="ch delivered">已送达</span><span class="ch wechat">微信</span></div>
+<div class="detail">心理关注学生回访提醒 · 3 人 · 11:30 推送</div>
+</div>
+<span class="time">11:30</span>
+</div>
+<div class="log-row">
+<div class="avatar">王</div>
+<div class="body">
+<div class="top"><span class="name">王辅导员</span><span class="ch delivered">已送达</span><span class="ch wechat">微信</span></div>
+<div class="detail">党员谈话提醒 · 1 人 · 10:15 推送</div>
+</div>
+<span class="time">10:15</span>
+</div>
+</div>
+
+<div class="log-card">
+<div class="h">2026-06-29 · 昨日</div>
+<div class="log-row">
+<div class="avatar">王</div>
+<div class="body">
+<div class="top"><span class="name">王辅导员</span><span class="ch read">已读</span><span class="ch wechat">微信</span></div>
+<div class="detail">奖学金申报截止提醒 · 全院学生 · 38/45 已读</div>
+</div>
+<span class="time">09:00</span>
+</div>
+<div class="log-row">
+<div class="avatar">王</div>
+<div class="body">
+<div class="top"><span class="name">王辅导员</span><span class="ch delivered">已送达</span><span class="ch wechat">微信</span></div>
+<div class="detail">本周班会主题确认 · 32 人</div>
+</div>
+<span class="time">14:20</span>
+</div>
+<div class="log-row">
+<div class="avatar">李</div>
+<div class="body">
+<div class="top"><span class="name">李辅导员</span><span class="ch failed">失败</span><span class="ch sms">短信</span></div>
+<div class="detail">宿舍卫生复查通知 · 18 人 · 失败原因:号码空号</div>
+</div>
+<span class="time">11:08</span>
+</div>
+</div>
+
+<div class="log-card">
+<div class="h">2026-06-28 及更早</div>
+<div class="log-row">
+<div class="avatar">王</div>
+<div class="body">
+<div class="top"><span class="name">王辅导员</span><span class="ch delivered">已送达</span><span class="ch wechat">微信</span></div>
+<div class="detail">周末离校登记提醒 · 45 人</div>
+</div>
+<span class="time">06-28 18:00</span>
+</div>
+<div class="log-row">
+<div class="avatar">王</div>
+<div class="body">
+<div class="top"><span class="name">王辅导员</span><span class="ch read">已读</span><span class="ch wechat">微信</span></div>
+<div class="detail">班级安全教育通知 · 33/33 已读</div>
+</div>
+<span class="time">06-25 19:30</span>
+</div>
+<div class="log-row">
+<div class="avatar">王</div>
+<div class="body">
+<div class="top"><span class="name">王辅导员</span><span class="ch pending">未送达</span><span class="ch wechat">微信</span></div>
+<div class="detail">实习登记提醒 · 5 人 · 用户未授权订阅消息</div>
+</div>
+<span class="time">06-20 14:00</span>
+</div>
+</div>
+
+<div style="padding:14px;text-align:center;font-size:11px;color:var(--text-secondary);">展示前 10 条 · 共 128 条记录</div>
+</div>
+
+<a class="fab" href="counselor_reminder_create.html"><iconify-icon icon="solar:add-circle-bold"></iconify-icon>新建提醒</a>
+
+<div class="tab-bar">
+<a class="tab-item" href="counselor_workbench.html"><iconify-icon icon="solar:home-2-linear"></iconify-icon><span>工作台</span></a>
+<a class="tab-item" href="counselor_students.html"><iconify-icon icon="solar:users-group-rounded-linear"></iconify-icon><span>学生</span></a>
+<a class="plus-tab" style="width:52px;height:52px;background:var(--color-primary);border-radius:16px;display:flex;align-items:center;justify-content:center;color:#fff;position:absolute;top:-16px;left:50%;transform:translateX(-50%);box-shadow:0 4px 12px rgba(30,90,230,0.4);border:2px solid #fff;" href="counselor_log_edit.html"><iconify-icon icon="solar:add-square-bold" style="font-size:30px;"></iconify-icon></a>
+<div class="w-12"></div>
+<a class="tab-item" href="counselor_anomalies.html"><iconify-icon icon="solar:danger-linear"></iconify-icon><span>异常</span></a>
+<a class="tab-item active" href="counselor_profile.html"><iconify-icon icon="solar:user-circle-bold"></iconify-icon><span>我的</span></a>
+</div>
+<div class="home-indicator"><div class="bar"></div></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>异常详情 - 学工助手</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+:root { --color-primary:#1E5AE6; --color-bg-page:#F5F6F8; --color-text-primary:#111827; --color-text-secondary:#6B7280; }
+body { background-color:#1a1a1a; display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0; font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; }
+.phone-shell { width:375px; height:812px; background:var(--color-bg-page); border-radius:40px; overflow:hidden; position:relative; display:flex; flex-direction:column; box-shadow:0 0 50px rgba(0,0,0,0.5); border:8px solid #333; }
+.status-bar { height:44px; padding:0 20px; display:flex; justify-content:space-between; align-items:center; font-size:14px; color:#000; flex-shrink:0; }
+.nav-bar { height:44px; display:flex; align-items:center; padding:0 16px; background:#fff; flex-shrink:0; }
+.content { flex:1; overflow-y:auto; }
+.card { background:#fff; border-radius:16px; margin:12px 16px; padding:16px; box-shadow:0 1px 2px rgba(0,0,0,0.02); }
+.timeline-vertical { position:relative; padding-left:20px; margin-left:10px; border-left:1px solid #E5E7EB; }
+.timeline-vertical-item { position:relative; padding-bottom:24px; }
+.timeline-vertical-item::before { content:''; position:absolute; left:-24px; top:0; width:8px; height:8px; border-radius:50%; background:#1E5AE6; border:2px solid #fff; box-shadow:0 0 0 2px #E8F0FE; }
+.timeline-vertical-item.gray::before { background:#9CA3AF; box-shadow:0 0 0 2px #E5E7EB; }
+.timeline-vertical-item.green::before { background:#07C160; box-shadow:0 0 0 2px #D1FAE5; }
+.action-bar { height:80px; background:#fff; border-top:1px solid #F3F4F6; display:flex; align-items:center; padding:0 16px 20px; flex-shrink:0; }
+.status-chip { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:600; }
+.status-chip.attention { background:#FFF7E6; color:#FA9D3B; }
+.status-chip.talked { background:#E8F0FE; color:#1E5AE6; }
+.status-chip.closed { background:#D1FAE5; color:#07C160; }
+</style>
+</head>
+<body>
+<div class="phone-shell">
+<div class="status-bar">
+<span>12:20</span>
+<div class="flex gap-1.5 text-[#000]">
+<iconify-icon icon="mingcute:signal-fill"></iconify-icon>
+<iconify-icon icon="mingcute:wifi-fill"></iconify-icon>
+<iconify-icon icon="mingcute:battery-fill"></iconify-icon>
+</div>
+</div>
+<div class="nav-bar">
+<a class="p-2 -ml-2" href="counselor_anomalies.html"><iconify-icon class="text-xl" icon="solar:alt-arrow-left-linear"></iconify-icon></a>
+<h1 class="flex-1 text-center text-base font-bold text-gray-900">异常详情</h1>
+</div>
+<div class="content pb-10">
+<div class="card bg-red-50 border border-red-100 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<iconify-icon class="text-2xl text-red-600" icon="solar:danger-bold"></iconify-icon>
+<span class="font-bold text-red-600 text-sm" id="riskTitle">红档风险</span>
+<span class="status-chip" id="currentStatus">已关注</span>
+</div>
+<span class="text-[10px] text-red-400">流水号: AN2026063001</span>
+</div>
+
+<div class="card flex items-center gap-4">
+<div class="w-12 h-12 rounded-full overflow-hidden">
+<img alt="Student" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=张&background=1E5AE6&color=fff&size=128&bold=true&font-size=0.5"/>
+</div>
+<div class="flex-1">
+<div class="font-bold text-gray-900">张晓明</div>
+<div class="text-xs text-gray-500 mt-0.5">计算机系 2024级(3)班 · 2024001</div>
+</div>
+<a class="text-[10px] font-medium" style="color:#1E5AE6;" href="counselor_student_detail.html">查看档案 &gt;</a>
+</div>
+
+<div class="card">
+<h3 class="text-xs font-bold text-gray-400 mb-3 uppercase">异常描述</h3>
+<div class="space-y-4">
+<div>
+<div class="text-xs text-gray-400 mb-1">异常类型</div>
+<div class="text-sm text-gray-900 font-medium">学业警示 · 旷课异常</div>
+</div>
+<div>
+<div class="text-xs text-gray-400 mb-1">发生时间</div>
+<div class="text-sm text-gray-900 font-medium">2026-06-30 08:30</div>
+</div>
+<div>
+<div class="text-xs text-gray-400 mb-1">内容详情</div>
+<div class="text-sm text-gray-700 leading-relaxed">系统监控到该学生未在指定教学楼打卡,且任课老师反馈《高等数学》课堂未见该生,已旷课1次。</div>
+</div>
+</div>
+</div>
+
+<div class="px-5 mt-4 mb-3 flex items-center justify-between">
+<h3 class="font-bold text-gray-900">跟进记录</h3>
+<span class="text-[10px] text-gray-400">共 <span id="followCount">3</span> 条</span>
+</div>
+<div class="card">
+<div class="timeline-vertical" id="timeline">
+<div class="timeline-vertical-item gray">
+<div class="text-xs font-bold text-gray-900">系统自动报送</div>
+<div class="text-[10px] text-gray-400 mt-0.5">2026-06-30 08:35</div>
+<div class="text-xs text-gray-500 mt-2 bg-gray-50 p-2 rounded-lg">触发学业红档警示规则:核心课程旷课。</div>
+</div>
+<div class="timeline-vertical-item green">
+<div class="text-xs font-bold text-gray-900">王辅导员 标记为「已关注」</div>
+<div class="text-[10px] text-gray-400 mt-0.5">2026-06-30 09:12</div>
+<div class="text-xs text-gray-500 mt-2 bg-gray-50 p-2 rounded-lg">已查看异常详情,准备联系学生本人核实情况。</div>
+</div>
+<div class="timeline-vertical-item pb-0">
+<div class="text-xs font-bold text-gray-900">王辅导员 约谈完成</div>
+<div class="text-[10px] text-gray-400 mt-0.5">2026-06-30 11:40</div>
+<div class="text-xs text-gray-500 mt-2 bg-gray-50 p-2 rounded-lg">学生已承认旷课,承诺补交《高等数学》作业并参加下周一补课。</div>
+</div>
+</div>
+</div>
+</div>
+<div class="action-bar">
+<button class="w-full py-3 text-white rounded-xl font-bold" style="background:#1E5AE6;box-shadow:0 4px 12px rgba(30,90,230,0.3);" onclick="showFollowUp()">继续跟进</button>
+</div>
+
+<div class="hidden fixed inset-0 z-50 flex items-end" id="followUpModal">
+<div class="absolute inset-0 bg-black/50" onclick="hideFollowUp()"></div>
+<div class="bg-white rounded-t-3xl w-full p-6 relative z-10" style="max-height:80%;overflow-y:auto;">
+<div class="w-12 h-1 bg-gray-200 rounded-full mx-auto mb-6"></div>
+<h3 class="text-lg font-bold text-gray-900 mb-6">更新跟进状态</h3>
+<div class="space-y-6">
+<div>
+<label class="text-xs text-gray-400 mb-2 block">处理状态 <span class="text-gray-300">(单选)</span></label>
+<div class="flex gap-3">
+<div class="flex-1 py-3 border rounded-xl text-center text-sm font-bold cursor-pointer" data-status="已关注" onclick="pickStatus(this)">已关注</div>
+<div class="flex-1 py-3 border rounded-xl text-center text-sm font-bold cursor-pointer" data-status="已约谈" onclick="pickStatus(this)">已约谈</div>
+<div class="flex-1 py-3 border rounded-xl text-center text-sm font-bold cursor-pointer" data-status="已结案" onclick="pickStatus(this)">已结案</div>
+</div>
+</div>
+<div>
+<label class="text-xs text-gray-400 mb-2 block">跟进说明</label>
+<textarea class="w-full bg-gray-50 p-4 h-32 rounded-2xl text-sm outline-none" placeholder="请记录您的处理细节,如谈话内容、干预措施、后续观察..."></textarea>
+</div>
+<div class="flex items-center text-[10px] text-gray-400">
+<iconify-icon icon="solar:shield-keyhole-bold" class="mr-1"></iconify-icon>
+跟进记录将记入审计日志,留存 365 天。
+</div>
+<button class="w-full py-4 text-white rounded-xl font-bold" style="background:#1E5AE6;" onclick="submitFollowUp()">提交记录</button>
+</div>
+</div>
+</div>
+</div>
+<script>
+let picked = '已关注';
+function showFollowUp() { document.getElementById('followUpModal').classList.remove('hidden'); }
+function hideFollowUp() { document.getElementById('followUpModal').classList.add('hidden'); }
+
+function pickStatus(el) {
+  picked = el.dataset.status;
+  document.querySelectorAll('[data-status]').forEach(x => {
+    x.style.background = '#F9FAFB';
+    x.style.color = '#9CA3AF';
+    x.style.borderColor = '#F3F4F6';
+  });
+  el.style.background = 'rgba(30,90,230,0.08)';
+  el.style.color = '#1E5AE6';
+  el.style.borderColor = '#1E5AE6';
+}
+document.querySelector('[data-status="已关注"]').click();
+
+function submitFollowUp() {
+  const ta = document.querySelector('textarea').value.trim();
+  if (!ta) { alert('请填写跟进说明'); return; }
+  const now = new Date();
+  const stamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const tl = document.getElementById('timeline');
+  const dot = picked === '已结案' ? 'green' : '';
+  const newItem = document.createElement('div');
+  newItem.className = `timeline-vertical-item ${dot} pb-0`;
+  newItem.innerHTML = `
+    <div class="text-xs font-bold text-gray-900">王辅导员 更新为「${picked}」</div>
+    <div class="text-[10px] text-gray-400 mt-0.5">${stamp}</div>
+    <div class="text-xs text-gray-500 mt-2 bg-gray-50 p-2 rounded-lg">${ta.replace(/</g,'&lt;')}</div>
+  `;
+  tl.appendChild(newItem);
+  const statusChip = document.getElementById('currentStatus');
+  statusChip.textContent = picked;
+  statusChip.className = `status-chip ${picked === '已关注' ? 'attention' : picked === '已约谈' ? 'talked' : 'closed'}`;
+  document.getElementById('followCount').textContent = tl.children.length;
+  document.querySelector('textarea').value = '';
+  hideFollowUp();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>辅导员工作台 - 学工助手</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+        :root {
+            --color-primary: #1E5AE6;
+            --color-bg-page: #F5F6F8;
+            --fs-h2: 32rpx;
+        }
+        body { background-color: #1a1a1a; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+        .phone-shell { width: 375px; height: 812px; background: var(--color-bg-page); border-radius: 40px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+        .status-bar { height: 44px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #000; flex-shrink: 0; }
+        .content { flex: 1; overflow-y: auto; padding-bottom: 20px; }
+        .tab-bar { height: 84px; background: #fff; border-top: 1px solid #E5E7EB; display: flex; justify-content: space-around; align-items: center; padding-bottom: 20px; position: relative; flex-shrink: 0; }
+        .tab-item { display: flex; flex-direction: column; align-items: center; text-align: center; color: #9CA3AF; text-decoration: none; }
+        .tab-item.active { color: var(--color-primary); }
+        .tab-item iconify-icon { font-size: 24px; margin-bottom: 4px; }
+        .tab-item span { font-size: 11px; }
+        .plus-tab { width: 52px; height: 52px; background: var(--color-primary); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #fff; position: absolute; top: -16px; left: 50%; transform: translateX(-50%); box-shadow: 0 4px 12px rgba(30, 90, 230, 0.4); border: 2px solid #fff; }
+        .card { background: #fff; border-radius: 16px; margin: 12px 16px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .risk-red { color: #DC2626; }
+        .risk-yellow { color: #F59E0B; }
+        .risk-blue { color: #6B7280; }
+        .home-indicator { height:34px; background:#fff; display:flex; justify-content:center; align-items:flex-end; padding-bottom:8px; flex-shrink:0; }
+        .home-indicator .bar { width:134px; height:5px; border-radius:3px; background:#000; opacity:0.85; }
+    </style>
+</head>
+<body>
+<div class="phone-shell">
+<div class="status-bar">
+<span>12:20</span>
+<div class="flex gap-1.5 text-[#000]">
+<iconify-icon icon="mingcute:signal-fill"></iconify-icon>
+<iconify-icon icon="mingcute:wifi-fill"></iconify-icon>
+<iconify-icon icon="mingcute:battery-fill"></iconify-icon>
+</div>
+</div>
+<div class="content">
+<!-- 顶部个人信息 -->
+<div class="px-5 pt-4 pb-2 flex justify-between items-center">
+<div>
+<h2 class="text-xl font-bold text-gray-900">王辅导员，下午好</h2>
+<p class="text-sm text-gray-500 mt-1">计算机系 2024级(3)班 / 6月30日</p>
+</div>
+<div class="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm">
+<img alt="Avatar" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=王&background=1E5AE6&color=fff&size=128&bold=true&font-size=0.5"/>
+</div>
+</div>
+<!-- 今日概览 -->
+<div class="card bg-blue-600 text-white">
+<div class="flex justify-between items-center mb-4">
+<span class="text-sm opacity-90 font-medium text-white">今日概览</span>
+</div>
+<div class="grid grid-cols-3 gap-2">
+<div class="text-center">
+<div class="text-2xl font-bold text-white">4</div>
+<div class="text-[10px] opacity-80 text-white">管理班级</div>
+</div>
+<div class="text-center border-x border-white/20">
+<div class="text-2xl font-bold text-white">128</div>
+<div class="text-[10px] opacity-80 text-white">学生总数</div>
+</div>
+<div class="text-center">
+<div class="text-2xl font-bold text-white">3</div>
+<div class="text-[10px] opacity-80 text-white">今日异常</div>
+</div>
+</div>
+</div>
+<!-- 快捷入口 -->
+<div class="grid grid-cols-4 gap-2 px-4 mb-4">
+<a class="flex flex-col items-center gap-2" href="counselor_log_edit.html">
+<div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-blue-600 shadow-sm border border-gray-50">
+<iconify-icon class="text-2xl" icon="solar:pen-new-square-bold-duotone"></iconify-icon>
+</div>
+<span class="text-xs font-medium text-gray-700">写日志</span>
+</a>
+<a class="flex flex-col items-center gap-2" href="counselor_students.html">
+<div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-green-600 shadow-sm border border-gray-50">
+<iconify-icon class="text-2xl" icon="solar:users-group-two-rounded-bold-duotone"></iconify-icon>
+</div>
+<span class="text-xs font-medium text-gray-700">学生管理</span>
+</a>
+<a class="flex flex-col items-center gap-2" href="counselor_anomalies.html">
+<div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-red-500 shadow-sm border border-gray-50">
+<iconify-icon class="text-2xl" icon="solar:danger-bold-duotone"></iconify-icon>
+</div>
+<span class="text-xs font-medium text-gray-700">异常跟进</span>
+</a>
+<a class="flex flex-col items-center gap-2" href="counselor_reminders.html">
+<div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-orange-500 shadow-sm border border-gray-50">
+<iconify-icon class="text-2xl" icon="solar:bell-bing-bold-duotone"></iconify-icon>
+</div>
+<span class="text-xs font-medium text-gray-700">新建提醒</span>
+</a>
+</div>
+<!-- 第二行快捷入口:晚归 / 导入 -->
+<div class="grid grid-cols-4 gap-2 px-4 mb-4">
+<a class="flex flex-col items-center gap-2" href="counselor_late_returns.html">
+<div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-blue-600 shadow-sm border border-gray-50">
+<iconify-icon class="text-2xl" icon="solar:login-3-bold-duotone"></iconify-icon>
+</div>
+<span class="text-xs font-medium text-gray-700">晚归专项</span>
+</a>
+<a class="flex flex-col items-center gap-2" href="counselor_imports.html">
+<div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-cyan-600 shadow-sm border border-gray-50">
+<iconify-icon class="text-2xl" icon="solar:upload-square-bold-duotone"></iconify-icon>
+</div>
+<span class="text-xs font-medium text-gray-700">数据导入</span>
+</a>
+<a class="flex flex-col items-center gap-2" href="counselor_student_dorm.html">
+<div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-rose-600 shadow-sm border border-gray-50">
+<iconify-icon class="text-2xl" icon="solar:home-smile-angle-bold-duotone"></iconify-icon>
+</div>
+<span class="text-xs font-medium text-gray-700">宿舍</span>
+</a>
+<a class="flex flex-col items-center gap-2" href="counselor_statistics.html">
+<div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-amber-600 shadow-sm border border-gray-50">
+<iconify-icon class="text-2xl" icon="solar:chart-square-bold-duotone"></iconify-icon>
+</div>
+<span class="text-xs font-medium text-gray-700">统计</span>
+</a>
+</div>
+<!-- 第三行快捷入口:自定义模块 -->
+<div class="grid grid-cols-4 gap-2 px-4 mb-4">
+<a class="flex flex-col items-center gap-2" href="counselor_custom_modules.html">
+<div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-violet-600 shadow-sm border border-gray-50">
+<iconify-icon class="text-2xl" icon="solar:clipboard-list-bold-duotone"></iconify-icon>
+</div>
+<span class="text-xs font-medium text-gray-700">自定义模块</span>
+</a>
+<a class="flex flex-col items-center gap-2" href="counselor_logs.html">
+<div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-blue-500 shadow-sm border border-gray-50">
+<iconify-icon class="text-2xl" icon="solar:document-text-bold-duotone"></iconify-icon>
+</div>
+<span class="text-xs font-medium text-gray-700">我的日志</span>
+</a>
+<a class="flex flex-col items-center gap-2" href="counselor_class_anomaly_board.html">
+<div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-pink-500 shadow-sm border border-gray-50">
+<iconify-icon class="text-2xl" icon="solar:graph-new-up-bold-duotone"></iconify-icon>
+</div>
+<span class="text-xs font-medium text-gray-700">数据看板</span>
+</a>
+<a class="flex flex-col items-center gap-2" href="counselor_profile.html">
+<div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-slate-600 shadow-sm border border-gray-50">
+<iconify-icon class="text-2xl" icon="solar:settings-bold-duotone"></iconify-icon>
+</div>
+<span class="text-xs font-medium text-gray-700">设置</span>
+</a>
+</div>
+<!-- 待办事项 -->
+<div class="px-5 mt-6 mb-3 flex justify-between items-center">
+<h3 class="font-bold text-gray-900">待办事项</h3>
+<span class="text-xs text-blue-600">查看全部</span>
+</div>
+<div class="card mt-0 py-2">
+<div class="flex items-center gap-4 py-3 border-b border-gray-50 last:border-0">
+<div class="w-2 h-2 rounded-full bg-red-500"></div>
+<div class="flex-1">
+<div class="text-sm font-bold text-gray-800">异常跟进：张晓明</div>
+<div class="text-xs text-gray-500 mt-0.5 text-ellipsis overflow-hidden whitespace-nowrap w-[200px]">学生连续2天无故缺勤，需电话联系家长。</div>
+</div>
+<a class="px-3 py-1 bg-blue-50 text-blue-600 text-[10px] rounded-full font-bold" href="counselor_anomaly_detail.html">去处理</a>
+</div>
+<div class="flex items-center gap-4 py-3 border-b border-gray-50 last:border-0">
+<div class="w-2 h-2 rounded-full bg-orange-500"></div>
+<div class="flex-1">
+<div class="text-sm font-bold text-gray-800">提醒重发：查寝通知</div>
+<div class="text-xs text-gray-500 mt-0.5">32名学生未读，点击一键重发。</div>
+</div>
+<a class="px-3 py-1 bg-orange-50 text-orange-600 text-[10px] rounded-full font-bold" href="counselor_reminders.html">重发</a>
+</div>
+<div class="flex items-center gap-4 py-3 border-b border-gray-50 last:border-0">
+<div class="w-2 h-2 rounded-full bg-blue-500"></div>
+<div class="flex-1">
+<div class="text-sm font-bold text-gray-800">周报提交</div>
+<div class="text-xs text-gray-500 mt-0.5">请在周五18:00前提交本周工作日志。</div>
+</div>
+<span class="text-[10px] text-gray-400">已截止</span>
+</div>
+</div>
+</div>
+<!-- 底部导航栏 -->
+<div class="tab-bar">
+  <a class="tab-item active" href="counselor_workbench.html">
+    <iconify-icon icon="solar:home-2-bold"></iconify-icon>
+    <span>工作台</span>
+  </a>
+  <a class="tab-item" href="counselor_students.html">
+    <iconify-icon icon="solar:users-group-rounded-linear"></iconify-icon>
+    <span>学生</span>
+  </a>
+  <a class="plus-tab" href="counselor_log_edit.html">
+    <iconify-icon icon="solar:add-square-bold" style="font-size:30px;"></iconify-icon>
+  </a>
+  <div class="w-12"></div>
+  <a class="tab-item" href="counselor_anomalies.html">
+    <iconify-icon icon="solar:danger-linear"></iconify-icon>
+    <span>异常</span>
+  </a>
+  <a class="tab-item" href="counselor_profile.html">
+    <iconify-icon icon="solar:user-circle-linear"></iconify-icon>
+    <span>我的</span>
+  </a>
+</div>
+<div class="home-indicator"><div class="bar"></div></div>
+</div>
+</body>
+</html>

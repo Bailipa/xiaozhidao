@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>工作日志 - 学工助手</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+:root { --color-primary:#1E5AE6; --color-bg-page:#F5F6F8; }
+body { background-color:#1a1a1a; display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0; font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; }
+.phone-shell { width:375px; height:812px; background:var(--color-bg-page); border-radius:40px; overflow:hidden; position:relative; display:flex; flex-direction:column; }
+.status-bar { height:44px; padding:0 20px; display:flex; justify-content:space-between; align-items:center; font-size:14px; color:#000; flex-shrink:0; }
+.nav-bar { height:44px; display:flex; align-items:center; padding:0 16px; background:#fff; border-bottom:1px solid #F3F4F6; flex-shrink:0; }
+.content { flex:1; overflow-y:auto; }
+.tab-bar { height:84px; background:#fff; border-top:1px solid #E5E7EB; display:flex; justify-content:space-around; align-items:center; padding-bottom:20px; position:relative; flex-shrink:0; }
+.tab-item { display:flex; flex-direction:column; align-items:center; text-align:center; color:#9CA3AF; text-decoration:none; }
+.tab-item.active { color:var(--color-primary); }
+.tab-item iconify-icon { font-size:24px; margin-bottom:4px; }
+.tab-item span { font-size:11px; }
+.plus-tab { width:52px; height:52px; background:var(--color-primary); border-radius:16px; display:flex; align-items:center; justify-content:center; color:#fff; position:absolute; top:-16px; left:50%; transform:translateX(-50%); box-shadow:0 4px 12px rgba(37,99,235,0.4); border:2px solid #fff; }
+
+/* 顶部一级 tab(系统日志 / 自定义记录) */
+.source-tabs { display:flex; background:#fff; padding:0 16px; border-bottom:1px solid #F3F4F6; flex-shrink:0; }
+.source-tab { flex:1; text-align:center; padding:14px 0; font-size:14px; color:#6B7280; position:relative; }
+.source-tab.active { color:var(--color-primary); font-weight:600; }
+.source-tab.active::after { content:''; position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:32px; height:3px; background:var(--color-primary); border-radius:2px; }
+.source-tab .count { font-size:10px; background:#F3F4F6; color:#888; padding:1px 6px; border-radius:8px; margin-left:4px; font-weight:400; }
+.source-tab.active .count { background:#EFF6FF; color:var(--color-primary); }
+
+/* 二级 chip 筛选 */
+.chip-row { display:flex; gap:8px; padding:10px 16px; overflow-x:auto; flex-shrink:0; background:#fff; }
+.chip-row.no-border { border-top:1px solid #F3F4F6; }
+.chip { padding:4px 12px; background:#F5F5F5; color:#444; border-radius:14px; font-size:12px; white-space:nowrap; cursor:pointer; flex-shrink:0; }
+.chip.on { background:#EFF6FF; color:var(--color-primary); font-weight:600; }
+.chip.cat-1 { background:#EFF6FF; color:#1E5AE6; }
+.chip.cat-2 { background:#FFF7E6; color:#C2700A; }
+.chip.cat-3 { background:#ECFEFF; color:#0E7490; }
+.chip.cat-4 { background:#ECFDF5; color:#16A34A; }
+.chip.cat-5 { background:#F5F3FF; color:#7C3AED; }
+
+.log-card { background:#fff; border-radius:12px; margin:8px 16px; padding:14px; position:relative; box-shadow:0 1px 2px rgba(0,0,0,0.02); }
+.log-card .head { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; }
+.log-card .left .tag-row { display:flex; align-items:center; gap:6px; }
+.log-card .cat-tag { font-size:10px; padding:2px 8px; border-radius:4px; font-weight:600; }
+.log-card .cat-tag.c1 { background:#EFF6FF; color:#1E5AE6; }
+.log-card .cat-tag.c2 { background:#FFF7E6; color:#C2700A; }
+.log-card .cat-tag.c3 { background:#ECFEFF; color:#0E7490; }
+.log-card .cat-tag.c4 { background:#ECFDF5; color:#16A34A; }
+.log-card .cat-tag.c5 { background:#F5F3FF; color:#7C3AED; }
+.log-card .time { font-size:11px; color:#9CA3AF; }
+.log-card .status { font-size:10px; padding:2px 6px; border-radius:4px; font-weight:600; }
+.log-card .status.submitted { background:#ECFDF5; color:#16A34A; }
+.log-card .status.draft { background:#F3F4F6; color:#888; }
+.log-card .title { font-size:15px; font-weight:600; color:#111827; margin:4px 0 6px; }
+.log-card .body { font-size:13px; color:#6B7280; line-height:1.6; }
+.log-card .foot { display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding-top:10px; border-top:1px solid #F5F5F5; }
+.log-card .left-meta { display:flex; align-items:center; gap:10px; font-size:11px; color:#9CA3AF; }
+.log-card .left-meta .v { color:#111827; font-weight:600; }
+.log-card .actions { display:flex; gap:12px; }
+.log-card .actions a { font-size:12px; }
+.log-card .actions .edit { color:var(--color-primary); font-weight:600; }
+.log-card .actions .view { color:#9CA3AF; }
+.log-card .actions .del { color:#FA5151; }
+.log-card .opacity-80 { opacity:0.85; border-left:3px solid #E5E7EB; }
+
+.fab { position:fixed; bottom:100px; right:30px; width:54px; height:54px; background:var(--color-primary); color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 16px rgba(37,99,235,0.4); z-index:20; }
+
+.empty { text-align:center; padding:60px 20px; color:#9CA3AF; font-size:13px; }
+.empty .icon { font-size:48px; color:#D1D5DB; margin-bottom:12px; }
+.empty .btn { display:inline-block; margin-top:16px; padding:10px 24px; background:var(--color-primary); color:#fff; border-radius:20px; font-size:13px; font-weight:600; }
+
+.tab-pane { display:none; }
+.tab-pane.active { display:flex; flex-direction:column; flex:1; overflow-y:auto; }
+
+.home-indicator { height:34px; background:#fff; display:flex; justify-content:center; align-items:flex-end; padding-bottom:8px; flex-shrink:0; }
+.home-indicator .bar { width:134px; height:5px; border-radius:3px; background:#000; opacity:0.85; }
+</style>
+</head>
+<body>
+<div class="phone-shell">
+<script type="application/json" id="page-data">
+{
+  "categories": [
+    { "code":"c1", "name":"谈心谈话", "color":"#1E5AE6" },
+    { "code":"c2", "name":"进宿舍",   "color":"#C2700A" },
+    { "code":"c3", "name":"进课堂",   "color":"#0E7490" },
+    { "code":"c4", "name":"组织班会", "color":"#16A34A" },
+    { "code":"c5", "name":"班干会议", "color":"#7C3AED" }
+  ],
+  "systemLogs": [
+    { "log_id":"L001", "category":"c1", "category_name":"谈心谈话", "title":"关于张晓明缺勤问题的谈话", "body":"与张晓明同学进行了长达 40 分钟的深入交谈,主要针对近期频繁缺勤的原因进行了了解,发现其家庭出现了一些突发情况…", "time":"2026-06-30 10:30", "status":"submitted", "linked_student":"张晓明" },
+    { "log_id":"L002", "category":"c2", "category_name":"进宿舍", "title":"6 号楼 302 宿舍卫生抽查", "body":"常规寝室检查,该寝室卫生状况良好,无违章电器,学生均在寝室,表现优异,已记录在案。", "time":"2026-06-29 22:15", "status":"submitted", "linked_student":"302 宿舍" },
+    { "log_id":"L003", "category":"c3", "category_name":"进课堂", "title":"高数课堂巡查", "body":"今日高数课巡查,应到 32 人,实到 30 人,2 人请假(已核实假条)。课堂纪律良好,学生专注度高。", "time":"2026-06-29 14:00", "status":"submitted", "linked_student":"计科1班" },
+    { "log_id":"L004", "category":"c4", "category_name":"班会", "title":"职业规划主题班会", "body":"邀请 3 位大四优秀学长进行经验分享,同学们反馈积极,问答环节气氛热烈。", "time":"2026-06-28 15:00", "status":"submitted", "linked_student":"计科1班" },
+    { "log_id":"L005", "category":"c5", "category_name":"班干会议", "title":"6 月班委工作例会", "body":"部署暑期社会实践动员、党员发展、期末复习安排,班委分工明确。", "time":"2026-06-27 19:00", "status":"submitted", "linked_student":"班委" },
+    { "log_id":"L006", "category":"c1", "category_name":"谈心谈话", "title":"关于王五情绪波动的谈话", "body":"注意到王五近期情绪低落,主动约谈。初步判断因家庭原因,后续安排心理咨询师介入。", "time":"2026-06-26 16:00", "status":"draft", "linked_student":"王五" }
+  ],
+  "customRecords": [
+    { "record_id":"R001-1", "module_id":"M001", "module_name":"我今天的工作心得", "content":"今天和王五谈了一个小时,主要聊他最近和室友关系紧张的问题。他愿意主动找辅导员说明情况,说明信任度提升了。", "time":"2026-06-30 18:00", "visibility":"shared" },
+    { "record_id":"R002-1", "module_id":"M002", "module_name":"班会反思", "content":"职业规划班会反思:邀请了 3 位大四学长分享,学生反馈积极。但形式上太单向,下次可以加入小组讨论环节。", "time":"2026-06-28 17:00", "visibility":"private" },
+    { "record_id":"R003-1", "module_id":"M003", "module_name":"重点学生观察", "content":"张晓明:本周情绪稳定,愿意参与班级活动。但仍需关注晚归问题,家长配合度有所提升。", "time":"2026-06-28 11:20", "visibility":"shared" },
+    { "record_id":"R001-2", "module_id":"M001", "module_name":"我今天的工作心得", "content":"今天处理了张晓明的家长来访,家长对孩子晚归很焦虑。我建议家长多用正向沟通,不要只盯着成绩,孩子反应明显。", "time":"2026-06-29 19:30", "visibility":"shared" },
+    { "record_id":"R003-2", "module_id":"M003", "module_name":"重点学生观察", "content":"李四:近期与室友关系有缓和迹象,主动邀请室友一起吃饭。建议保持观察。", "time":"2026-06-25 10:00", "visibility":"shared" },
+    { "record_id":"R002-2", "module_id":"M002", "module_name":"班会反思", "content":"心理健康主题班会:准备材料花了 2 天,实际效果不错。后续可以做成模板复用。", "time":"2026-06-22 16:30", "visibility":"private" },
+    { "record_id":"R003-3", "module_id":"M003", "module_name":"重点学生观察", "content":"王五:心理测评结果好转,定期与心理咨询师沟通。本周无异常行为。", "time":"2026-06-22 14:30", "visibility":"shared" }
+  ]
+}
+</script>
+
+<div class="status-bar">
+  <span>12:20</span>
+  <div class="flex gap-1.5 text-[#000]">
+    <iconify-icon icon="mingcute:signal-fill"></iconify-icon>
+    <iconify-icon icon="mingcute:wifi-fill"></iconify-icon>
+    <iconify-icon icon="mingcute:battery-fill"></iconify-icon>
+  </div>
+</div>
+<div class="nav-bar">
+  <h1 class="flex-1 text-center text-base font-bold text-gray-900">工作日志</h1>
+  <a class="px-3 py-1.5 text-xs text-blue-600 font-bold flex items-center gap-1" href="counselor_work_log_export.html">
+    <iconify-icon icon="solar:export-bold-duotone"></iconify-icon> 导出
+  </a>
+</div>
+
+<!-- 一级 tab:来源 -->
+<div class="source-tabs">
+  <div class="source-tab active" data-source="system" onclick="switchSource('system')">系统日志 <span class="count" id="sysCount">0</span></div>
+  <div class="source-tab" data-source="custom" onclick="switchSource('custom')">自定义记录 <span class="count" id="cusCount">0</span></div>
+</div>
+
+<!-- 系统日志面板 -->
+<div class="tab-pane active" id="pane-system">
+  <div class="chip-row">
+    <div class="chip on" data-cat="" onclick="filterCat('')">全部</div>
+    <div class="chip cat-1" data-cat="c1" onclick="filterCat('c1')">谈心谈话</div>
+    <div class="chip cat-2" data-cat="c2" onclick="filterCat('c2')">进宿舍</div>
+    <div class="chip cat-3" data-cat="c3" onclick="filterCat('c3')">进课堂</div>
+    <div class="chip cat-4" data-cat="c4" onclick="filterCat('c4')">组织班会</div>
+    <div class="chip cat-5" data-cat="c5" onclick="filterCat('c5')">班干会议</div>
+  </div>
+  <div class="chip-row chip-row no-border" style="padding-top:0;">
+    <div class="chip on" data-st="" onclick="filterStatus('')">全部状态</div>
+    <div class="chip" data-st="submitted" onclick="filterStatus('submitted')">已提交</div>
+    <div class="chip" data-st="draft" onclick="filterStatus('draft')">草稿箱</div>
+  </div>
+  <div id="systemList"></div>
+  <a class="fab" href="counselor_log_edit.html"><iconify-icon class="text-2xl" icon="solar:pen-bold"></iconify-icon></a>
+</div>
+
+<!-- 自定义记录面板 -->
+<div class="tab-pane" id="pane-custom">
+  <div class="chip-row">
+    <div class="chip on" data-mod="" onclick="filterMod('')">全部模块</div>
+    <div class="chip" data-mod="M001" onclick="filterMod('M001')">工作心得</div>
+    <div class="chip" data-mod="M002" onclick="filterMod('M002')">班会反思</div>
+    <div class="chip" data-mod="M003" onclick="filterMod('M003')">重点观察</div>
+  </div>
+  <div id="customList"></div>
+  <a class="fab" href="counselor_custom_modules.html"><iconify-icon class="text-2xl" icon="solar:clipboard-list-bold"></iconify-icon></a>
+</div>
+
+<div class="tab-bar">
+  <a class="tab-item" href="counselor_workbench.html">
+    <iconify-icon icon="solar:home-2-linear"></iconify-icon>
+    <span>工作台</span>
+  </a>
+  <a class="tab-item" href="counselor_students.html">
+    <iconify-icon icon="solar:users-group-rounded-linear"></iconify-icon>
+    <span>学生</span>
+  </a>
+  <a class="plus-tab" href="counselor_log_edit.html">
+    <iconify-icon icon="solar:add-square-bold" style="font-size:30px;"></iconify-icon>
+  </a>
+  <div class="w-12"></div>
+  <a class="tab-item" href="counselor_anomalies.html">
+    <iconify-icon icon="solar:danger-linear"></iconify-icon>
+    <span>异常</span>
+  </a>
+  <a class="tab-item" href="counselor_profile.html">
+    <iconify-icon icon="solar:user-circle-linear"></iconify-icon>
+    <span>我的</span>
+  </a>
+</div>
+<div class="home-indicator"><div class="bar"></div></div>
+</div>
+
+<script>
+var DATA = null;
+var filters = { cat: '', status: '', mod: '' };
+(function() {
+  try { DATA = JSON.parse(document.getElementById('page-data').textContent); } catch(e) { return; }
+  document.getElementById('sysCount').textContent = DATA.systemLogs.length;
+  document.getElementById('cusCount').textContent = DATA.customRecords.length;
+  renderSystem();
+  renderCustom();
+})();
+
+function switchSource(s) {
+  document.querySelectorAll('.source-tab').forEach(function(t) {
+    t.classList.toggle('active', t.dataset.source === s);
+  });
+  document.querySelectorAll('.tab-pane').forEach(function(p) {
+    p.classList.toggle('active', p.id === 'pane-' + s);
+  });
+}
+function filterCat(c) {
+  filters.cat = c;
+  document.querySelectorAll('#pane-system .chip-row:first-of-type .chip').forEach(function(el) {
+    el.classList.toggle('on', el.dataset.cat === c);
+  });
+  renderSystem();
+}
+function filterStatus(s) {
+  filters.status = s;
+  document.querySelectorAll('#pane-system .chip-row.no-border .chip').forEach(function(el) {
+    el.classList.toggle('on', el.dataset.st === s);
+  });
+  renderSystem();
+}
+function filterMod(m) {
+  filters.mod = m;
+  document.querySelectorAll('#pane-custom .chip').forEach(function(el) {
+    el.classList.toggle('on', el.dataset.mod === m);
+  });
+  renderCustom();
+}
+function renderSystem() {
+  var list = document.getElementById('systemList');
+  var logs = DATA.systemLogs.filter(function(l) {
+    if (filters.cat && l.category !== filters.cat) return false;
+    if (filters.status && l.status !== filters.status) return false;
+    return true;
+  });
+  if (logs.length === 0) {
+    list.innerHTML = '<div class="empty"><div class="icon"><iconify-icon icon="solar:document-text-bold-duotone"></iconify-icon></div>该筛选条件下暂无日志</div>';
+    return;
+  }
+  var html = '';
+  logs.forEach(function(l) {
+    var draftCls = l.status === 'draft' ? ' opacity-80' : '';
+    var editHref = l.status === 'draft' ? 'counselor_log_edit.html' : 'counselor_log_edit.html';
+    var editLabel = l.status === 'draft' ? '继续填写' : '编辑';
+    html += '<div class="log-card' + draftCls + '">'
+      + '<div class="head">'
+      + '<div class="left"><div class="tag-row">'
+      + '<span class="cat-tag ' + l.category + '">' + l.category_name + '</span>'
+      + '<span class="time">' + l.time + '</span>'
+      + '</div></div>'
+      + '<span class="status ' + l.status + '">' + (l.status === 'submitted' ? '已提交' : '草稿') + '</span>'
+      + '</div>'
+      + '<div class="title">' + l.title + '</div>'
+      + '<div class="body">' + l.body + '</div>'
+      + '<div class="foot">'
+      + '<div class="left-meta">关联:<span class="v">' + l.linked_student + '</span></div>'
+      + '<div class="actions">'
+      + (l.status === 'draft' ? '<a class="del" href="#" onclick="delLog(\'' + l.id + '\'); return false;">删除</a>' : '<a class="view" href="#" onclick="return false;">查看详情</a>')
+      + '<a class="edit" href="' + editHref + '">' + editLabel + '</a>'
+      + '</div></div></div>';
+  });
+  list.innerHTML = html;
+}
+function delLog(id) {
+  showConfirm({
+    title: '确认删除这条日志?',
+    desc: '草稿删除后无法恢复,此操作将记入审计日志。',
+    danger: true,
+    onConfirm: () => { toast('已删除 ' + id); }
+  });
+}
+function showConfirm(o) {
+  var m = document.createElement('div');
+  m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99;display:flex;align-items:center;justify-content:center;padding:0 32px;';
+  m.innerHTML = '<div style="background:#fff;border-radius:14px;width:100%;overflow:hidden;">'
+    + '<div style="padding:24px 20px;text-align:center;">'
+    + '<iconify-icon style="font-size:32px;color:' + (o.danger?'#DC2626':'#1E5AE6') + ';" icon="' + (o.danger?'solar:trash-bin-trash-bold':'solar:shield-warning-bold') + '"></iconify-icon>'
+    + '<div style="font-size:16px;font-weight:700;color:#191919;margin-top:10px;">' + o.title + '</div>'
+    + '<div style="font-size:12px;color:#888;margin-top:6px;line-height:1.6;">' + o.desc + '</div>'
+    + '</div>'
+    + '<div style="display:flex;border-top:1px solid #F0F0F0;">'
+    + '<button data-cancel style="flex:1;height:48px;background:#fff;color:#888;font-size:15px;border:none;border-right:1px solid #F0F0F0;cursor:pointer;">取消</button>'
+    + '<button data-ok style="flex:1;height:48px;background:#fff;color:' + (o.danger?'#DC2626':'#1E5AE6') + ';font-size:15px;font-weight:600;border:none;cursor:pointer;">确认</button>'
+    + '</div></div>';
+  document.body.appendChild(m);
+  m.querySelector('[data-cancel]').onclick = function() { m.remove(); };
+  m.querySelector('[data-ok]').onclick = function() { m.remove(); o.onConfirm && o.onConfirm(); };
+}
+function toast(msg) {
+  var t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;left:50%;bottom:80px;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:#fff;padding:8px 16px;border-radius:8px;font-size:13px;z-index:999;';
+  document.body.appendChild(t);
+  setTimeout(function() { t.remove(); }, 1800);
+}
+function renderCustom() {
+  var list = document.getElementById('customList');
+  var recs = DATA.customRecords.filter(function(r) {
+    if (filters.mod && r.module_id !== filters.mod) return false;
+    return true;
+  });
+  if (recs.length === 0) {
+    list.innerHTML = '<div class="empty"><div class="icon"><iconify-icon icon="solar:clipboard-list-bold-duotone"></iconify-icon></div>该模块暂无记录<br/><a class="btn" href="counselor_custom_modules.html">去创建模块</a></div>';
+    return;
+  }
+  var html = '';
+  recs.forEach(function(r) {
+    var visLabel = r.visibility === 'shared' ? '已授权' : '仅自己';
+    var visCls = r.visibility;
+    html += '<div class="log-card">'
+      + '<div class="head">'
+      + '<div class="left"><div class="tag-row">'
+      + '<span class="cat-tag c5">' + r.module_name + '</span>'
+      + '<span class="time">' + r.time + '</span>'
+      + '</div></div>'
+      + '<span class="status ' + (r.visibility === 'shared' ? 'submitted' : 'draft') + '">' + visLabel + '</span>'
+      + '</div>'
+      + '<div class="body">' + r.content + '</div>'
+      + '<div class="foot">'
+      + '<div class="left-meta">模块:<span class="v">' + r.module_name + '</span></div>'
+      + '<div class="actions">'
+      + '<a class="edit" href="counselor_custom_record_edit.html?mid=' + r.module_id + '&rid=' + r.record_id + '">编辑</a>'
+      + '</div></div></div>';
+  });
+  list.innerHTML = html;
+}
+</script>
+</body>
+</html>

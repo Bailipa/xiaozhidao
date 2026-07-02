@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<!--
+  API Contract:
+  GET /api/me/wechat
+  Response 200: {
+    "bound": bool,
+    "wechat": null | { "nickname":"string", "avatar_url":"string", "bound_at":"ISO-8601", "last_active":"ISO-8601" },
+    "services": [
+      { "code":"anomaly_alert", "name":"异常提醒", "subscribed":bool, "description":"string" },
+      { "code":"reminder_push", "name":"事务提醒", "subscribed":bool, "description":"string" }
+    ]
+  }
+  POST /api/me/wechat/unbind
+  Response 200: { "message":"string" }
+  POST /api/me/wechat/bind
+  Request: { "scan_code":"string", "confirm":bool }
+  Response 200: { "wechat": {...} }
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>微信绑定 - 学工助手</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+:root { --color-primary:#1E5AE6; --success:#07C160; --warning:#FA9D3B; --danger:#FA5151; --bg-page:#F7F7F7; --bg-card:#FFFFFF; --divider:#F0F0F0; --text-primary:#191919; --text-regular:#444; --text-secondary:#888; }
+body { background-color:#1a1a1a; display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0; font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; }
+.phone-shell { width:375px; height:812px; background:var(--bg-page); border-radius:40px; overflow:hidden; position:relative; display:flex; flex-direction:column; box-shadow:0 0 50px rgba(0,0,0,0.5); border:8px solid #333; }
+.status-bar { height:44px; padding:0 20px; display:flex; justify-content:space-between; align-items:center; font-size:14px; color:#000; flex-shrink:0; }
+.nav-bar { height:44px; display:flex; align-items:center; padding:0 16px; background:#fff; flex-shrink:0; }
+.content { flex:1; overflow-y:auto; }
+.wechat-card { margin:16px; padding:18px; background:#fff; border-radius:12px; display:flex; align-items:center; gap:14px; }
+.wechat-card .avatar { width:56px; height:56px; border-radius:50%; background:#07C160; color:#fff; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:600; flex-shrink:0; }
+.wechat-card .info { flex:1; }
+.wechat-card .nick { font-size:16px; font-weight:600; color:var(--text-primary); }
+.wechat-card .meta { font-size:12px; color:var(--text-secondary); margin-top:4px; }
+.wechat-card .status { font-size:10px; padding:2px 8px; border-radius:10px; background:#F0FDF4; color:var(--success); font-weight:600; }
+.wechat-card .status.unbound { background:#FEF2F2; color:var(--danger); }
+.section-h { padding:14px 20px 6px; font-size:12px; color:var(--text-secondary); font-weight:600; }
+.card { background:#fff; margin:0 16px 12px; border-radius:12px; overflow:hidden; }
+.service-cell { display:flex; align-items:center; padding:14px 16px; gap:12px; }
+.service-cell + .service-cell { border-top:1px solid var(--divider); }
+.service-cell .icon { width:36px; height:36px; border-radius:8px; background:#F0FDF4; color:var(--success); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.service-cell .info { flex:1; min-width:0; }
+.service-cell .name { font-size:14px; font-weight:600; color:var(--text-primary); }
+.service-cell .desc { font-size:11px; color:var(--text-secondary); margin-top:2px; }
+.service-cell .toggle { width:44px; height:24px; border-radius:12px; background:var(--success); position:relative; flex-shrink:0; cursor:pointer; transition:background 0.2s; }
+.service-cell .toggle::after { content:''; position:absolute; top:2px; right:2px; width:20px; height:20px; background:#fff; border-radius:50%; box-shadow:0 1px 2px rgba(0,0,0,0.2); transition:right 0.2s; }
+.service-cell.off .toggle { background:#E5E7EB; }
+.service-cell.off .toggle::after { right:auto; left:2px; }
+.tip { margin:0 16px 12px; padding:12px; background:#FEF3C7; border-radius:8px; font-size:11px; color:#92400E; line-height:1.6; display:flex; gap:8px; }
+.tip iconify-icon { color:var(--warning); flex-shrink:0; font-size:16px; }
+.danger-cell { padding:14px 16px; text-align:center; color:var(--danger); font-size:14px; font-weight:600; cursor:pointer; }
+.home-indicator { height:34px; background:#fff; display:flex; justify-content:center; align-items:flex-end; padding-bottom:8px; flex-shrink:0; }
+.home-indicator .bar { width:134px; height:5px; border-radius:3px; background:#000; opacity:0.85; }
+
+.unbound-hero { margin:24px 16px 16px; padding:24px 20px; background:linear-gradient(135deg,#E8F0FE,#fff); border:1px solid #C7DBFB; border-radius:16px; text-align:center; }
+.unbound-hero .ic { width:64px; height:64px; border-radius:18px; background:rgba(30,90,230,0.12); color:var(--color-primary); display:inline-flex; align-items:center; justify-content:center; font-size:30px; margin-bottom:14px; }
+.unbound-hero .t1 { font-size:18px; font-weight:700; color:var(--text-primary); }
+.unbound-hero .t2 { font-size:12px; color:var(--text-secondary); margin-top:6px; line-height:1.6; }
+.qr-mock { width:160px; height:160px; margin:18px auto 14px; padding:12px; background:#fff; border:1px solid var(--divider); border-radius:12px; position:relative; }
+.qr-mock::before { content:''; position:absolute; inset:12px; background:repeating-linear-gradient(0deg,#000 0 4px,transparent 4px 8px),repeating-linear-gradient(90deg,#000 0 4px,transparent 4px 8px); background-blend-mode:multiply; opacity:0.85; }
+.qr-mock::after { content:''; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:32px; height:32px; background:#07C160; border:4px solid #fff; border-radius:6px; }
+.qr-hint { font-size:12px; color:var(--text-regular); }
+.qr-hint .accent { color:var(--color-primary); font-weight:600; }
+.steps { margin:0 16px 16px; padding:18px 16px; background:#fff; border-radius:12px; }
+.steps .h { font-size:13px; font-weight:600; color:var(--text-primary); margin-bottom:12px; }
+.steps li { display:flex; gap:10px; align-items:flex-start; font-size:12px; color:var(--text-regular); line-height:1.6; margin-bottom:8px; }
+.steps li:last-child { margin-bottom:0; }
+.steps li .n { width:20px; height:20px; border-radius:50%; background:rgba(30,90,230,0.1); color:var(--color-primary); font-size:11px; font-weight:700; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
+.btn-primary { width:calc(100% - 32px); margin:8px 16px 16px; height:48px; border-radius:24px; background:var(--color-primary); color:#fff; font-size:15px; font-weight:600; border:none; cursor:pointer; box-shadow:0 4px 12px rgba(30,90,230,0.3); }
+.btn-secondary { width:calc(100% - 32px); margin:0 16px 16px; height:44px; border-radius:22px; background:#fff; color:var(--color-primary); font-size:14px; font-weight:600; border:1px solid var(--color-primary); cursor:pointer; }
+</style>
+</head>
+<body>
+<div class="phone-shell">
+<div class="status-bar">
+<span>12:20</span>
+<div class="flex gap-1.5 text-[#000]">
+<iconify-icon icon="mingcute:signal-fill"></iconify-icon>
+<iconify-icon icon="mingcute:wifi-fill"></iconify-icon>
+<iconify-icon icon="mingcute:battery-fill"></iconify-icon>
+</div>
+</div>
+<div class="nav-bar">
+<a class="p-2 -ml-2" href="counselor_profile.html"><iconify-icon class="text-xl" icon="solar:alt-arrow-left-linear"></iconify-icon></a>
+<h1 class="flex-1 text-center text-base font-bold text-gray-900" id="navTitle">微信通知</h1>
+<span class="p-2 -mr-2 w-8"></span>
+</div>
+<div class="content" id="content">
+</div>
+<div class="home-indicator"><div class="bar"></div></div>
+</div>
+<script>
+const url = new URLSearchParams(location.search);
+const isFirstBind = url.get('bound') === '0';
+const state = {
+  bound: !isFirstBind,
+  wechat: isFirstBind ? null : { nickname:"王辅导员", bound_at:"2024-09-05T10:30:00+08:00", last_active:"2026-06-30T12:20:00+08:00" },
+  services: [
+    { code:"anomaly_alert", name:"异常实时提醒", subscribed:true, description:"学生发生异常时立即推送微信通知" },
+    { code:"reminder_push", name:"事务提醒推送", subscribed:true, description:"班会、查寝等提前 30 分钟提醒" },
+    { code:"daily_report", name:"每日工作日报", subscribed:false, description:"每天 18:00 推送当天工作汇总" }
+  ]
+};
+
+function render() {
+  const root = document.getElementById('content');
+  document.getElementById('navTitle').textContent = state.bound ? '微信通知' : '微信绑定';
+  if (!state.bound) {
+    root.innerHTML = `
+      <div class="unbound-hero">
+        <div class="ic"><iconify-icon icon="solar:chat-square-bold"></iconify-icon></div>
+        <div class="t1">绑定微信,接收工作通知</div>
+        <div class="t2">绑定后可启用微信订阅消息,异常提醒与事务提醒将直达您的微信</div>
+        <div class="qr-mock"></div>
+        <div class="qr-hint">请使用<span class="accent">微信扫一扫</span>完成绑定</div>
+      </div>
+      <div class="steps">
+        <div class="h">绑定步骤</div>
+        <ol style="list-style:none;padding:0;margin:0;">
+          <li><span class="n">1</span><span>打开手机微信扫一扫,扫描上方二维码</span></li>
+          <li><span class="n">2</span><span>在微信中点击"同意"授权登录</span></li>
+          <li><span class="n">3</span><span>绑定成功后返回小程序,即可接收工作通知</span></li>
+        </ol>
+      </div>
+      <button class="btn-primary" id="bindBtn">立即绑定微信</button>
+      <button class="btn-secondary" id="skipBtn">暂不绑定,稍后再说</button>
+    `;
+    document.getElementById('bindBtn').addEventListener('click', () => {
+      const btn = document.getElementById('bindBtn');
+      btn.disabled = true; btn.textContent = '授权中…';
+      setTimeout(() => {
+        state.bound = true;
+        state.wechat = { nickname:"王辅导员", bound_at:new Date().toISOString(), last_active:new Date().toISOString() };
+        render();
+        if (isFirstBind) {
+          setTimeout(() => { window.location.href = 'counselor_workbench.html'; }, 800);
+        }
+      }, 1200);
+    });
+    document.getElementById('skipBtn').addEventListener('click', () => {
+      if (isFirstBind) {
+        window.location.href = 'counselor_workbench.html';
+      } else {
+        history.back();
+      }
+    });
+  } else {
+    const w = state.wechat;
+    const lastChar = w.nickname.slice(-1);
+    root.innerHTML = `
+      <div class="wechat-card">
+        <div class="avatar">${lastChar}</div>
+        <div class="info">
+          <div class="nick">${w.nickname} <span class="status ml-1">已绑定</span></div>
+          <div class="meta">绑定于 ${w.bound_at.slice(0,10)}</div>
+          <div class="meta">今日活跃 ${w.last_active.slice(11,16)}</div>
+        </div>
+      </div>
+      <div class="section-h">通知服务</div>
+      <div class="card">
+        ${state.services.map(s => `
+          <div class="service-cell ${s.subscribed?'':'off'}" data-code="${s.code}">
+            <div class="icon"><iconify-icon icon="${s.code==='anomaly_alert'?'solar:bell-bing-bold':s.code==='reminder_push'?'solar:calendar-mark-bold':'solar:document-text-bold'}"></iconify-icon></div>
+            <div class="info">
+              <div class="name">${s.name}</div>
+              <div class="desc">${s.description}</div>
+            </div>
+            <div class="toggle"></div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="tip">
+        <iconify-icon icon="solar:info-circle-linear"></iconify-icon>
+        <div>解绑微信后,所有推送通知将失效。如需继续接收提醒,请确保微信服务通知处于开启状态。</div>
+      </div>
+      <div class="card">
+        <a class="danger-cell" id="unbindBtn">解绑当前微信</a>
+      </div>
+    `;
+    root.querySelectorAll('.service-cell').forEach(cell => {
+      cell.querySelector('.toggle').addEventListener('click', () => {
+        cell.classList.toggle('off');
+        const code = cell.dataset.code;
+        const s = state.services.find(x => x.code === code);
+        s.subscribed = !cell.classList.contains('off');
+      });
+    });
+    document.getElementById('unbindBtn').addEventListener('click', () => {
+      const modal = document.createElement('div');
+      modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99;display:flex;align-items:center;justify-content:center;padding:0 32px;';
+      modal.innerHTML = `
+        <div style="background:#fff;border-radius:14px;width:100%;overflow:hidden;">
+          <div style="padding:24px 20px;text-align:center;">
+            <iconify-icon style="font-size:32px;color:#DC2626;" icon="solar:trash-bin-trash-bold"></iconify-icon>
+            <div style="font-size:16px;font-weight:700;color:#191919;margin-top:10px;">确认解绑微信?</div>
+            <div style="font-size:12px;color:#888;margin-top:6px;line-height:1.6;">解绑后将无法接收异常提醒与事务推送。此操作可在"我的-微信通知"中重新绑定。</div>
+          </div>
+          <div style="display:flex;border-top:1px solid #F0F0F0;">
+            <button id="cancel" style="flex:1;height:48px;background:#fff;color:#888;font-size:15px;border:none;border-right:1px solid #F0F0F0;cursor:pointer;">取消</button>
+            <button id="confirm" style="flex:1;height:48px;background:#fff;color:#DC2626;font-size:15px;font-weight:600;border:none;cursor:pointer;">确认解绑</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      modal.querySelector('#cancel').onclick = () => modal.remove();
+      modal.querySelector('#confirm').onclick = () => {
+        state.bound = false; state.wechat = null;
+        modal.remove(); render();
+      };
+    });
+  }
+}
+
+render();
+</script>
+</body>
+</html>

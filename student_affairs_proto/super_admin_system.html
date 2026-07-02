@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<!--
+  角色:super_admin(技术员 / 李工)
+  说明:服务监控。展示 API 网关 / 数据库 / 对象存储 / 微信订阅消息 /
+       短信网关等核心依赖的实时状态,以及备份、配额、版本等运维信息。
+  依据:申报书 4.2 非功能要求 + 5.1 软硬件资源 + 6.3 数据安全
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>服务监控 - 学工助手</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+:root {
+  --color-primary:#1E5AE6;
+  --color-success:#07C160;
+  --color-warning:#FA9D3B;
+  --color-danger:#DC2626;
+  --bg-page:#F5F6F8;
+  --bg-card:#FFFFFF;
+  --divider:#F3F4F6;
+  --text-primary:#191919;
+  --text-regular:#444;
+  --text-secondary:#6B7280;
+}
+body { background-color:#1a1a1a; display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0; font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; }
+.phone-shell { width:375px; height:812px; background:var(--bg-page); border-radius:40px; overflow:hidden; position:relative; display:flex; flex-direction:column; box-shadow:0 0 50px rgba(0,0,0,0.5); border:8px solid #333; }
+.status-bar { height:44px; padding:0 20px; display:flex; justify-content:space-between; align-items:center; font-size:14px; color:#000; flex-shrink:0; }
+.nav-bar { height:44px; display:flex; align-items:center; padding:0 16px; background:#fff; border-bottom:1px solid var(--divider); flex-shrink:0; }
+.content { flex:1; overflow-y:auto; padding-bottom:20px; }
+.tab-bar { height:84px; background:#fff; border-top:1px solid var(--divider); display:flex; justify-content:space-around; align-items:center; padding-bottom:20px; flex-shrink:0; }
+.tab-item { display:flex; flex-direction:column; align-items:center; text-align:center; color:#9CA3AF; text-decoration:none; }
+.tab-item.active { color:var(--color-primary); }
+.tab-item iconify-icon { font-size:24px; margin-bottom:4px; }
+.tab-item span { font-size:11px; }
+.home-indicator { height:34px; background:#fff; display:flex; justify-content:center; align-items:flex-end; padding-bottom:8px; flex-shrink:0; }
+.home-indicator .bar { width:134px; height:5px; border-radius:3px; background:#000; opacity:0.85; }
+
+.section-title { padding:14px 16px 4px; font-size:12px; color:var(--text-secondary); font-weight:600; }
+
+.card { background:#fff; margin:8px 16px 0; border-radius:12px; padding:14px 16px; box-shadow:0 1px 2px rgba(0,0,0,0.02); }
+.card .h { font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; }
+.card .h .pill { font-size:10px; padding:2px 8px; border-radius:10px; background:#D1FAE5; color:#047857; font-weight:600; }
+.card .h .pill.warn { background:#FEF3C7; color:#B45309; }
+.card .h .pill.danger { background:#FEE2E2; color:var(--color-danger); }
+
+.metric { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--divider); font-size:12px; }
+.metric:last-child { border-bottom:0; }
+.metric .k { color:var(--text-regular); }
+.metric .v { color:var(--text-primary); font-weight:600; font-family:ui-monospace,"SF Mono",monospace; font-size:12px; }
+.metric .v.warn { color:#B45309; }
+.metric .v.danger { color:var(--color-danger); }
+.metric .v.ok { color:#047857; }
+
+.bar { width:100%; height:6px; background:#F3F4F6; border-radius:3px; overflow:hidden; margin-top:6px; }
+.bar > span { display:block; height:100%; background:linear-gradient(90deg,#1E5AE6,#4080FF); border-radius:3px; }
+.bar > span.warn { background:linear-gradient(90deg,#F59E0B,#FBBF24); }
+.bar > span.danger { background:linear-gradient(90deg,#DC2626,#F87171); }
+
+.spark { display:flex; align-items:flex-end; gap:3px; height:30px; }
+.spark .b { flex:1; background:#1E5AE6; border-radius:1px; min-height:2px; opacity:0.7; }
+
+.sub-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+.sub-card { background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:10px; }
+.sub-card .label { font-size:10px; color:var(--text-secondary); }
+.sub-card .num { font-size:16px; font-weight:700; color:var(--text-primary); margin-top:2px; }
+.sub-card .delta { font-size:9px; margin-top:2px; font-weight:600; }
+.sub-card .delta.up { color:#047857; }
+.sub-card .delta.down { color:var(--color-danger); }
+</style>
+</head>
+<body>
+<div class="phone-shell">
+<div class="status-bar">
+<span>12:20</span>
+<div class="flex gap-1.5 text-[#000]">
+<iconify-icon icon="mingcute:signal-fill"></iconify-icon>
+<iconify-icon icon="mingcute:wifi-fill"></iconify-icon>
+<iconify-icon icon="mingcute:battery-fill"></iconify-icon>
+</div>
+</div>
+
+<div class="nav-bar">
+<h1 class="flex-1 text-center text-base font-bold text-gray-900">服务监控</h1>
+<span class="p-2 -mr-2 text-[10px] text-gray-400">实时 · 30s</span>
+</div>
+
+<div class="content">
+<!-- 整体健康度 -->
+<div class="card">
+<div class="h">平台整体健康度 <span class="pill">运行中</span></div>
+<div class="sub-grid">
+<div class="sub-card">
+<div class="label">在线服务</div>
+<div class="num">8 / 8</div>
+<div class="delta up">全部正常</div>
+</div>
+<div class="sub-card">
+<div class="label">API 可用率(7日)</div>
+<div class="num">99.97%</div>
+<div class="delta up">↑ 0.02%</div>
+</div>
+<div class="sub-card">
+<div class="label">P95 响应时间</div>
+<div class="num">156<span style="font-size:10px;font-weight:400;color:var(--text-secondary);">ms</span></div>
+<div class="delta down">↓ 12ms</div>
+</div>
+<div class="sub-card">
+<div class="label">错误率(今日)</div>
+<div class="num">0.04%</div>
+<div class="delta up">健康</div>
+</div>
+</div>
+</div>
+
+<!-- API 网关 -->
+<div class="section-title">核心依赖</div>
+
+<div class="card">
+<div class="h">API 网关 (FastAPI · Python 3.10)</div>
+<div class="metric"><span class="k">状态</span><span class="v ok">● 运行中</span></div>
+<div class="metric"><span class="k">健康检查</span><span class="v">/health → 200 OK</span></div>
+<div class="metric"><span class="k">QPS(当前)</span><span class="v">42.6</span></div>
+<div class="metric"><span class="k">P50 / P95</span><span class="v">42ms / 156ms</span></div>
+<div class="metric"><span class="k">错误率</span><span class="v">0.04%</span></div>
+<div class="metric"><span class="k">实例数</span><span class="v">2 / 2</span></div>
+<div class="metric"><span class="k">最近发布</span><span class="v">v1.0.0 · 2026-06-25</span></div>
+</div>
+
+<div class="card">
+<div class="h">MySQL 主库 <span class="pill">正常</span></div>
+<div class="metric"><span class="k">连接数</span><span class="v">28 / 100</span></div>
+<div class="metric"><span class="k">慢查询(24h)</span><span class="v">2</span></div>
+<div class="metric"><span class="k">主从延迟</span><span class="v">12ms</span></div>
+<div class="metric"><span class="k">数据大小</span><span class="v">412 MB</span></div>
+<div class="metric"><span class="k">今日全量备份</span><span class="v ok">✓ 03:00 完成</span></div>
+<div style="font-size:10px;color:var(--text-secondary);margin-top:8px;">备份文件保留 30 天,每日 03:00 自动执行</div>
+</div>
+
+<div class="card">
+<div class="h">对象存储(图片附件)</div>
+<div class="metric"><span class="k">已用容量</span><span class="v">12.4 GB / 50 GB</span></div>
+<div class="bar"><span style="width:24.8%;"></span></div>
+<div class="metric"><span class="k">本月上传</span><span class="v">3,128 个文件</span></div>
+<div class="metric"><span class="k">本月下载</span><span class="v">8,742 次</span></div>
+<div class="metric"><span class="k">CDN 命中率</span><span class="v">96.4%</span></div>
+</div>
+
+<div class="card">
+<div class="h">微信订阅消息 <span class="pill warn">配额预警</span></div>
+<div class="metric"><span class="k">本月已发送</span><span class="v warn">38,920 / 50,000</span></div>
+<div class="bar"><span class="warn" style="width:78%;"></span></div>
+<div class="metric"><span class="k">失败率</span><span class="v">0.8%</span></div>
+<div class="metric"><span class="k">剩余配额</span><span class="v warn">11,080 条</span></div>
+<div class="metric"><span class="k">预计耗尽</span><span class="v warn">7 月 7 日</span></div>
+<div style="font-size:10px;color:var(--color-warning);margin-top:8px;display:flex;gap:6px;">
+<iconify-icon icon="solar:info-circle-bold"></iconify-icon>
+建议提前扩容或优化通知策略
+</div>
+</div>
+
+<div class="card">
+<div class="h">短信网关(兜底通道)</div>
+<div class="metric"><span class="k">本月已发送</span><span class="v">412 / 5,000</span></div>
+<div class="bar"><span style="width:8.2%;"></span></div>
+<div class="metric"><span class="k">送达率</span><span class="v">99.5%</span></div>
+<div class="metric"><span class="k">平均延迟</span><span class="v">2.3 秒</span></div>
+<div class="metric"><span class="k">套餐余量</span><span class="v ok">4,588 条</span></div>
+</div>
+
+<div class="card">
+<div class="h">云函数(微信云开发)</div>
+<div class="metric"><span class="k">今日调用</span><span class="v">128,492 次</span></div>
+<div class="metric"><span class="k">错误率</span><span class="v">0.02%</span></div>
+<div class="metric"><span class="k">P95 耗时</span><span class="v">86ms</span></div>
+<div class="metric"><span class="k">本月费用</span><span class="v">¥182 / ¥300</span></div>
+<div class="bar"><span style="width:60.7%;"></span></div>
+</div>
+
+<div class="section-title">今日请求量趋势</div>
+
+<div class="card">
+<div class="spark">
+<div class="b" style="height:30%;"></div>
+<div class="b" style="height:25%;"></div>
+<div class="b" style="height:40%;"></div>
+<div class="b" style="height:35%;"></div>
+<div class="b" style="height:50%;"></div>
+<div class="b" style="height:60%;"></div>
+<div class="b" style="height:55%;"></div>
+<div class="b" style="height:70%;"></div>
+<div class="b" style="height:85%;"></div>
+<div class="b" style="height:90%;"></div>
+<div class="b" style="height:75%;"></div>
+<div class="b" style="height:65%;"></div>
+</div>
+<div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text-secondary);margin-top:6px;">
+<span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span>
+</div>
+</div>
+
+<div class="section-title">最近发布</div>
+
+<div class="card">
+<div class="metric"><span class="k">v1.0.0</span><span class="v">2026-06-25 · 当前</span></div>
+<div class="metric"><span class="k">v0.9.0-beta</span><span class="v">2026-06-15 · 灰度</span></div>
+<div class="metric"><span class="k">v0.8.0-alpha</span><span class="v">2026-06-01 · 归档</span></div>
+<div style="font-size:10px;color:var(--text-secondary);margin-top:8px;">Git: main · 最新提交 c3d4e5f by 李工</div>
+</div>
+</div>
+
+<div class="tab-bar">
+<a class="tab-item" href="super_admin_workbench.html">
+<iconify-icon icon="solar:widget-2-linear"></iconify-icon>
+<span>平台</span>
+</a>
+<a class="tab-item" href="super_admin_accounts.html">
+<iconify-icon icon="solar:users-group-rounded-linear"></iconify-icon>
+<span>账号</span>
+</a>
+<a class="tab-item" href="super_admin_audit_logs.html">
+<iconify-icon icon="solar:document-text-linear"></iconify-icon>
+<span>审计</span>
+</a>
+<a class="tab-item active" href="super_admin_system.html">
+<iconify-icon icon="solar:pulse-bold"></iconify-icon>
+<span>系统</span>
+</a>
+<a class="tab-item" href="#">
+<iconify-icon icon="solar:user-circle-linear"></iconify-icon>
+<span>我的</span>
+</a>
+</div>
+<div class="home-indicator"><div class="bar"></div></div>
+</div>
+</body>
+</html>
