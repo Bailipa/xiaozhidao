@@ -99,7 +99,7 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
     { "log_id":"L001", "category":"c1", "category_name":"谈心谈话", "title":"关于张晓明缺勤问题的谈话", "body":"与张晓明同学进行了长达 40 分钟的深入交谈,主要针对近期频繁缺勤的原因进行了了解,发现其家庭出现了一些突发情况…", "time":"2026-06-30 10:30", "status":"submitted", "linked_student":"张晓明" },
     { "log_id":"L002", "category":"c2", "category_name":"进宿舍", "title":"6 号楼 302 宿舍卫生抽查", "body":"常规寝室检查,该寝室卫生状况良好,无违章电器,学生均在寝室,表现优异,已记录在案。", "time":"2026-06-29 22:15", "status":"submitted", "linked_student":"302 宿舍" },
     { "log_id":"L003", "category":"c3", "category_name":"进课堂", "title":"高数课堂巡查", "body":"今日高数课巡查,应到 32 人,实到 30 人,2 人请假(已核实假条)。课堂纪律良好,学生专注度高。", "time":"2026-06-29 14:00", "status":"submitted", "linked_student":"计科1班" },
-    { "log_id":"L004", "category":"c4", "category_name":"班会", "title":"职业规划主题班会", "body":"邀请 3 位大四优秀学长进行经验分享,同学们反馈积极,问答环节气氛热烈。", "time":"2026-06-28 15:00", "status":"submitted", "linked_student":"计科1班" },
+    { "log_id":"L004", "category":"c4", "category_name":"组织班会", "title":"职业规划主题班会", "body":"邀请 3 位大四优秀学长进行经验分享,同学们反馈积极,问答环节气氛热烈。", "time":"2026-06-28 15:00", "status":"submitted", "linked_student":"计科1班" },
     { "log_id":"L005", "category":"c5", "category_name":"班干会议", "title":"6 月班委工作例会", "body":"部署暑期社会实践动员、党员发展、期末复习安排,班委分工明确。", "time":"2026-06-27 19:00", "status":"submitted", "linked_student":"班委" },
     { "log_id":"L006", "category":"c1", "category_name":"谈心谈话", "title":"关于王五情绪波动的谈话", "body":"注意到王五近期情绪低落,主动约谈。初步判断因家庭原因,后续安排心理咨询师介入。", "time":"2026-06-26 16:00", "status":"draft", "linked_student":"王五" }
   ],
@@ -246,7 +246,7 @@ function renderSystem() {
   var html = '';
   logs.forEach(function(l) {
     var draftCls = l.status === 'draft' ? ' opacity-80' : '';
-    var editHref = l.status === 'draft' ? 'counselor_log_edit.html' : 'counselor_log_edit.html';
+    var editHref = 'counselor_log_edit.html';
     var editLabel = l.status === 'draft' ? '继续填写' : '编辑';
     html += '<div class="log-card' + draftCls + '">'
       + '<div class="head">'

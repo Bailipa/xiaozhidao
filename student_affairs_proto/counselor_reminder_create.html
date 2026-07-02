@@ -89,14 +89,15 @@
 <h1 class="flex-1 text-center text-base font-bold text-gray-900">新建提醒</h1>
 </div>
 <div class="content">
+<form id="xzdForm" onsubmit="event.preventDefault();" novalidate autocomplete="on">
 <div class="form-group">
 <div class="input-row">
 <label>提醒标题</label>
-<input placeholder="如：明天班会通知" type="text"/>
+<input id="reminderTitle" name="reminderTitle" placeholder="如：明天班会通知" type="text"/>
 </div>
 <div class="input-row">
 <label>提醒时间</label>
-<input type="datetime-local" value="2026-06-30T18:00"/>
+<input type="datetime-local" id="reminderTime" name="reminderTime" value="2026-06-30T18:00"/>
 </div>
 </div>
 <div class="form-group">
@@ -109,14 +110,14 @@
 </div>
 <div class="input-row">
 <label>提前提醒</label>
-<select>
+<select id="reminderLead" name="reminderLead">
 <option>30分钟</option>
 <option>1小时</option>
 </select>
 </div>
 </div>
 <div class="form-group">
-<textarea class="w-full p-0 py-4 h-32 outline-none text-sm text-gray-800 placeholder-gray-400" placeholder="请输入具体的提醒内容，将通过微信通知实时推送给学生..."></textarea>
+<textarea id="reminderContent" name="reminderContent" class="w-full p-0 py-4 h-32 outline-none text-sm text-gray-800 placeholder-gray-400" placeholder="请输入具体的提醒内容，将通过微信通知实时推送给学生..."></textarea>
 </div>
 </div>
 <div class="action-bar">
@@ -308,6 +309,7 @@
             display.textContent = '自定义 (' + classStudents.size + ' 人)';
           }
         }
-    </script>
+    </script></form>
+
 </body>
 </html>

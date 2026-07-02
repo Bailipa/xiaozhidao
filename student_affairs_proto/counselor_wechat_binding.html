@@ -156,10 +156,10 @@ function render() {
     });
   } else {
     const w = state.wechat;
-    const lastChar = w.nickname.slice(-1);
+    const initialChar = [...w.nickname][0] || '?';  // 取首字符(中文取姓,emoji 安全)
     root.innerHTML = `
       <div class="wechat-card">
-        <div class="avatar">${lastChar}</div>
+        <div class="avatar">${initialChar}</div>
         <div class="info">
           <div class="nick">${w.nickname} <span class="status ml-1">已绑定</span></div>
           <div class="meta">绑定于 ${w.bound_at.slice(0,10)}</div>

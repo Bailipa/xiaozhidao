@@ -130,6 +130,7 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 </div>
 
 <div class="content" id="content">
+<form id="xzdForm" onsubmit="event.preventDefault();" novalidate autocomplete="on">
 <div id="paneUpload">
 <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
 <div class="icon"><iconify-icon icon="solar:upload-square-bold-duotone"></iconify-icon></div>
@@ -209,7 +210,8 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 <div class="action-bar" id="actionBar">
 <button class="btn secondary" onclick="cancelImport()">取消</button>
 <button class="btn primary" id="primaryBtn" onclick="nextStep()">下一步</button>
-</div>
+</div></form>
+
 <div class="home-indicator"><div class="bar"></div></div>
 </div>
 <script>

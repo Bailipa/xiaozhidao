@@ -76,7 +76,7 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 <div class="brand-name">学工助手</div>
 <div class="brand-sub">智能技术学部 · 智慧学工小程序</div>
 </div>
-<div class="form">
+<form class="form" id="xzdForm" onsubmit="event.preventDefault();" novalidate autocomplete="on">
 <div class="locked-banner" id="lockedBanner">账号已被锁定,请于 <span id="lockedUntil">30 分钟后</span> 再试,或联系学工书记重置密码。</div>
 <div class="role-tabs" id="roleTabs">
 <span data-role="counselor" class="on">辅导员</span>
@@ -98,7 +98,7 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 <a href="counselor_password_reset.html">忘记密码?</a>
 <span class="helper-tip">首次登录请使用单位下发账号</span>
 </div>
-</div>
+</form>
 <div class="footer-text">
 登录即表示已阅读并同意<br/>
 <a href="privacy_policy.html">《用户协议与隐私政策》</a>

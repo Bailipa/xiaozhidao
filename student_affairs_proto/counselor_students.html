@@ -65,7 +65,7 @@
 <div class="search-box">
 <div class="bg-gray-100 rounded-full px-4 py-2 flex items-center gap-2">
 <iconify-icon class="text-gray-400" icon="solar:magnifer-linear"></iconify-icon>
-<input class="bg-transparent text-sm w-full outline-none text-gray-700" placeholder="搜索学生姓名、学号或班级" type="text"/>
+<input id="studentSearch" name="studentSearch" class="bg-transparent text-sm w-full outline-none text-gray-700" placeholder="搜索学生姓名、学号或班级" type="text"/>
 </div>
 <div class="flex gap-2 mt-3">
 <div class="filter-chip px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-medium border border-blue-100 flex items-center gap-1 bg-blue-50 text-blue-600" data-type="class" onclick="openFilter('class', this, '全部班级')">全部班级 <iconify-icon icon="solar:alt-arrow-down-linear"></iconify-icon>
@@ -77,6 +77,7 @@
 </div>
 </div>
 <div class="content pt-2" id="studentList">
+<form id="xzdForm" onsubmit="event.preventDefault();" novalidate autocomplete="on">
 <!-- 学生列表项 -->
 <a class="student-item block" href="counselor_student_detail.html">
 <div class="flex items-center gap-3">
@@ -225,7 +226,8 @@ function showToast(msg) {
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 1500);
 }
-</script>
+</script></form>
+
 
 </body>
 </html>

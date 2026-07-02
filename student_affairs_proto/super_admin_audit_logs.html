@@ -103,9 +103,10 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 </div>
 
 <div class="content">
+<form id="xzdForm" onsubmit="event.preventDefault();" novalidate autocomplete="on">
 <div class="search-box">
 <div class="row">
-<input placeholder="🔍 操作人 / 操作对象 / IP" value=""/>
+<input id="auditSearch" name="auditSearch" placeholder="🔍 操作人 / 操作对象 / IP" value=""/>
 <a class="text-[11px] text-blue-600 font-bold" href="#" onclick="alert('高级筛选(演示)'); return false;">筛选</a>
 </div>
 </div>
@@ -282,7 +283,8 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 <iconify-icon icon="solar:user-circle-linear"></iconify-icon>
 <span>我的</span>
 </a>
-</div>
+</div></form>
+
 <div class="home-indicator"><div class="bar"></div></div>
 </div>
 </body>

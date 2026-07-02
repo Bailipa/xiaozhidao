@@ -87,11 +87,12 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 </div>
 
 <div class="content">
+<form id="xzdForm" onsubmit="event.preventDefault();" novalidate autocomplete="on">
 <div class="section">
 <div class="h">时间范围</div>
 <div class="range-row">
-<div class="field"><div class="label">开始</div><div class="value">2026-06-01</div></div>
-<div class="field"><div class="label">结束</div><div class="value">2026-06-30</div></div>
+<div class="field"><div class="label">开始</div><input class="value-input" type="date" id="startDate" name="startDate" value="2026-06-01"/></div>
+<div class="field"><div class="label">结束</div><input class="value-input" type="date" id="endDate" name="endDate" value="2026-06-30"/></div>
 </div>
 </div>
 
@@ -132,7 +133,8 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 <iconify-icon icon="solar:download-square-bold"></iconify-icon>
 立即导出
 </button>
-</div>
+</div></form>
+
 <div class="home-indicator"><div class="bar"></div></div>
 </div>
 <script>
