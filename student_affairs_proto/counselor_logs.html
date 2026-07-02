@@ -130,6 +130,21 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
   </a>
 </div>
 
+<style>
+.student-filter-bar { display:none; align-items:center; gap:8px; padding:8px 16px; background:#EFF6FF; border-bottom:1px solid #DBEAFE; flex-shrink:0; }
+.student-filter-bar.show { display:flex; }
+.student-filter-bar .label { font-size:11px; color:#1E5AE6; font-weight:600; }
+.student-filter-bar .name { font-size:13px; font-weight:700; color:#191919; }
+.student-filter-bar .clear { margin-left:auto; color:#1E5AE6; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:2px; }
+</style>
+
+<div class="student-filter-bar" id="studentFilterBar">
+  <iconify-icon icon="solar:user-circle-bold" style="color:#1E5AE6;font-size:16px;"></iconify-icon>
+  <span class="label">当前仅显示关联学生:</span>
+  <span class="name" id="studentFilterName"></span>
+  <a class="clear" onclick="clearStudentFilter()"><iconify-icon icon="solar:close-circle-bold"></iconify-icon>清除</a>
+</div>
+
 <!-- 一级 tab:来源 -->
 <div class="source-tabs">
   <div class="source-tab active" data-source="system" onclick="switchSource('system')">系统日志 <span class="count" id="sysCount">0</span></div>
@@ -194,13 +209,24 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 
 <script>
 var DATA = null;
-var filters = { cat: '', status: '', mod: '' };
+var filters = { cat: '', status: '', mod: '', student: '' };
 (function() {
   try { DATA = JSON.parse(document.getElementById('page-data').textContent); } catch(e) { return; }
   document.getElementById('sysCount').textContent = DATA.systemLogs.length;
   document.getElementById('cusCount').textContent = DATA.customRecords.length;
   // 把日志数据存到 localStorage,供 log_edit.html 的 ?lid= 回填使用
   try { localStorage.setItem('xzd_logs', JSON.stringify(DATA.systemLogs)); } catch(e) {}
+  // PR-G: URL 参数联动 (?student= ?cat=)
+  var p = new URLSearchParams(window.location.search);
+  if (p.get('student')) {
+    filters.student = p.get('student');
+    document.getElementById('studentFilterName').textContent = filters.student;
+    document.getElementById('studentFilterBar').classList.add('show');
+    switchSource('system');
+  }
+  if (p.get('cat')) {
+    filterCat(p.get('cat'));
+  }
   renderSystem();
   renderCustom();
   // 复用 log_edit.html 的横向滚动增强 (桌面端鼠标支持)
@@ -209,6 +235,11 @@ var filters = { cat: '', status: '', mod: '' };
     if (w) initHScroll(w);
   });
 })();
+function clearStudentFilter() {
+  filters.student = '';
+  document.getElementById('studentFilterBar').classList.remove('show');
+  renderSystem();
+}
 
 function switchSource(s) {
   document.querySelectorAll('.source-tab').forEach(function(t) {
@@ -244,6 +275,7 @@ function renderSystem() {
   var logs = DATA.systemLogs.filter(function(l) {
     if (filters.cat && l.category !== filters.cat) return false;
     if (filters.status && l.status !== filters.status) return false;
+    if (filters.student && (l.linked_student || '').indexOf(filters.student) < 0) return false;
     return true;
   });
   if (logs.length === 0) {

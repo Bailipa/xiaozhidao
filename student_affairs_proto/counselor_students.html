@@ -28,8 +28,19 @@
         .tab-item span { font-size: 11px; }
         .plus-tab { width: 52px; height: 52px; background: var(--color-primary); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #fff; position: absolute; top: -16px; left: 50%; transform: translateX(-50%); box-shadow: 0 4px 12px rgba(30, 90, 230, 0.4); border: 2px solid #fff; }
         .search-box { background: #fff; padding: 12px 16px; }
-        .student-item { background: #fff; border-radius: 12px; margin: 8px 16px; padding: 12px; display: flex; align-items: center; gap: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
+        .student-item { background: #fff; border-radius: 12px; margin: 8px 16px; padding: 12px; display: flex; align-items: center; gap: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); text-decoration: none; color: inherit; }
         .quick-tools { background: #fff; padding: 0 16px 12px; display: flex; gap: 8px; }
+        .dorm-shortcut { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 6px 4px; border-radius: 10px; background: #FFF7E6; color: #C2700A; min-width: 46px; cursor: pointer; flex-shrink: 0; transition: all 0.15s; }
+        .dorm-shortcut:hover { background: #FFE7B3; }
+        .dorm-shortcut iconify-icon { font-size: 18px; }
+        .dorm-shortcut .dorm-label { font-size: 10px; font-weight: 600; line-height: 1; }
+        .event-summary { display: flex; flex-wrap: wrap; gap: 6px; }
+        .es-chip { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 500; text-decoration: none; background: #F3F4F6; color: #6B7280; transition: all 0.15s; }
+        .es-chip:hover { transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
+        .es-chip.es-logs  { background: #EFF6FF; color: #1E5AE6; }
+        .es-chip.es-anom  { background: #FEF3C7; color: #B45309; }
+        .es-chip.es-talks { background: #ECFDF5; color: #047857; }
+        .es-chip.es-zero  { opacity: 0.45; }
         .quick-tool {
             display: flex; align-items: center; gap: 4px;
             padding: 6px 12px; border-radius: 16px;
@@ -76,7 +87,7 @@
 <div class="search-box">
 <div class="bg-gray-100 rounded-full px-4 py-2 flex items-center gap-2">
 <iconify-icon class="text-gray-400" icon="solar:magnifer-linear"></iconify-icon>
-<input id="studentSearch" name="studentSearch" class="bg-transparent text-sm w-full outline-none text-gray-700" placeholder="搜索学生姓名、学号或班级" type="text"/>
+<input id="studentSearch" name="studentSearch" class="bg-transparent text-sm w-full outline-none text-gray-700" placeholder="搜索学生姓名、学号、班级或事件" type="text"/>
 </div>
 <div class="flex gap-2 mt-3">
 <div class="filter-chip px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-medium border border-blue-100 flex items-center gap-1 bg-blue-50 text-blue-600" data-type="class" onclick="openFilter('class', this, '全部班级')">全部班级 <iconify-icon icon="solar:alt-arrow-down-linear"></iconify-icon>
@@ -100,7 +111,7 @@
 <div class="content pt-2" id="studentList">
 <form id="xzdForm" onsubmit="event.preventDefault();" novalidate autocomplete="on">
 <!-- 学生列表项 (按 chip 选项覆盖 4 班级 + 4 风险 + 4 宿舍) -->
-<a class="student-item block" href="counselor_student_detail.html?no=2024001" data-no="2024001" data-class="计科1班" data-risk="红档风险" data-dorm="3号楼" data-search="张晓明 2024001">
+<a class="student-item block" href="counselor_student_detail.html?no=2024001" data-no="2024001" data-name="张晓明" data-class="计科1班" data-risk="红档风险" data-dorm="3号楼" data-search="张晓明 2024001" data-events="旷课 学业下滑 谈话 宿舍人际关系 宿舍卫生">
 <div class="flex items-center gap-3">
 <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
 <img alt="Student" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=张&background=1E5AE6&color=fff&size=128&bold=true&font-size=0.5" title="Male student avatar"/>
@@ -115,7 +126,7 @@
 <iconify-icon class="text-gray-300" icon="solar:alt-arrow-right-linear"></iconify-icon>
 </div>
 </a>
-<a class="student-item block" href="counselor_student_detail.html?no=2024002" data-no="2024002" data-class="计科2班" data-risk="无风险" data-dorm="1号楼" data-search="李华 2024002">
+<a class="student-item block" href="counselor_student_detail.html?no=2024002" data-no="2024002" data-name="李华" data-class="计科2班" data-risk="无风险" data-dorm="1号楼" data-search="李华 2024002" data-events="学生会 考研 女生节">
 <div class="flex items-center gap-3">
 <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
 <img alt="Student" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=李&background=1E5AE6&color=fff&size=128&bold=true&font-size=0.5" title="Female student avatar"/>
@@ -130,7 +141,7 @@
 <iconify-icon class="text-gray-300" icon="solar:alt-arrow-right-linear"></iconify-icon>
 </div>
 </a>
-<a class="student-item block" href="counselor_student_detail.html?no=2024005" data-no="2024005" data-class="软工1班" data-risk="黄档风险" data-dorm="2号楼" data-search="赵子涵 2024005">
+<a class="student-item block" href="counselor_student_detail.html?no=2024005" data-no="2024005" data-name="赵子涵" data-class="软工1班" data-risk="黄档风险" data-dorm="2号楼" data-search="赵子涵 2024005" data-events="绩点下滑 转专业 社团">
 <div class="flex items-center gap-3">
 <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
 <img alt="Student" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=赵&background=1E5AE6&color=fff&size=128&bold=true&font-size=0.5" title="Student avatar"/>
@@ -145,7 +156,7 @@
 <iconify-icon class="text-gray-300" icon="solar:alt-arrow-right-linear"></iconify-icon>
 </div>
 </a>
-<a class="student-item block" href="counselor_student_detail.html?no=2024009" data-no="2024009" data-class="大数据1班" data-risk="蓝档风险" data-dorm="5号楼" data-search="孙宇轩 2024009">
+<a class="student-item block" href="counselor_student_detail.html?no=2024009" data-no="2024009" data-name="孙宇轩" data-class="大数据1班" data-risk="蓝档风险" data-dorm="5号楼" data-search="孙宇轩 2024009" data-events="晚归 课题组 期末复习">
 <div class="flex items-center gap-3">
 <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
 <img alt="Student" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=孙&background=1E5AE6&color=fff&size=128&bold=true&font-size=0.5" title="Student avatar"/>
@@ -160,7 +171,7 @@
 <iconify-icon class="text-gray-300" icon="solar:alt-arrow-right-linear"></iconify-icon>
 </div>
 </a>
-<a class="student-item block" href="counselor_student_detail.html?no=2024003" data-no="2024003" data-class="计科1班" data-risk="黄档风险" data-dorm="3号楼" data-search="王五 2024003">
+<a class="student-item block" href="counselor_student_detail.html?no=2024003" data-no="2024003" data-name="王五" data-class="计科1班" data-risk="黄档风险" data-dorm="3号楼" data-search="王五 2024003" data-events="情绪低落 心理咨询 晚归">
 <div class="flex items-center gap-3">
 <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
 <img alt="Student" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=王&background=1E5AE6&color=fff&size=128&bold=true&font-size=0.5" title="Student avatar"/>
@@ -175,7 +186,7 @@
 <iconify-icon class="text-gray-300" icon="solar:alt-arrow-right-linear"></iconify-icon>
 </div>
 </a>
-<a class="student-item block" href="counselor_student_detail.html?no=2024004" data-no="2024004" data-class="计科2班" data-risk="黄档风险" data-dorm="2号楼" data-search="赵六 2024004">
+<a class="student-item block" href="counselor_student_detail.html?no=2024004" data-no="2024004" data-name="赵六" data-class="计科2班" data-risk="黄档风险" data-dorm="2号楼" data-search="赵六 2024004" data-events="宿舍卫生 课堂">
 <div class="flex items-center gap-3">
 <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
 <img alt="Student" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=赵&background=1E5AE6&color=fff&size=128&bold=true&font-size=0.5" title="Student avatar"/>
@@ -190,7 +201,7 @@
 <iconify-icon class="text-gray-300" icon="solar:alt-arrow-right-linear"></iconify-icon>
 </div>
 </a>
-<a class="student-item block" href="counselor_student_detail.html?no=2024006" data-no="2024006" data-class="软工1班" data-risk="红档风险" data-dorm="2号楼" data-search="孙八 2024006">
+<a class="student-item block" href="counselor_student_detail.html?no=2024006" data-no="2024006" data-name="孙八" data-class="软工1班" data-risk="红档风险" data-dorm="2号楼" data-search="孙八 2024006" data-events="缺勤 学业预警 宿舍矛盾">
 <div class="flex items-center gap-3">
 <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
 <img alt="Student" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=孙&background=1E5AE6&color=fff&size=128&bold=true&font-size=0.5" title="Student avatar"/>
@@ -205,7 +216,7 @@
 <iconify-icon class="text-gray-300" icon="solar:alt-arrow-right-linear"></iconify-icon>
 </div>
 </a>
-<a class="student-item block" href="counselor_student_detail.html?no=2024007" data-no="2024007" data-class="大数据1班" data-risk="无风险" data-dorm="5号楼" data-search="周九 2024007">
+<a class="student-item block" href="counselor_student_detail.html?no=2024007" data-no="2024007" data-name="周九" data-class="大数据1班" data-risk="无风险" data-dorm="5号楼" data-search="周九 2024007" data-events="无事件">
 <div class="flex items-center gap-3">
 <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
 <img alt="Student" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=周&background=1E5AE6&color=fff&size=128&bold=true&font-size=0.5" title="Student avatar"/>
@@ -309,7 +320,10 @@ function applyAllFilters() {
     if (c && c !== '全部班级' && item.dataset.class !== c) show = false;
     if (r && r !== '全部风险' && item.dataset.risk !== r) show = false;
     if (d && d !== '全部宿舍' && item.dataset.dorm !== d) show = false;
-    if (q && (item.dataset.search || '').toLowerCase().indexOf(q) < 0) show = false;
+    if (q) {
+      var hay = ((item.dataset.search || '') + ' ' + (item.dataset.events || '')).toLowerCase();
+      if (hay.indexOf(q) < 0) show = false;
+    }
     item.style.display = show ? '' : 'none';
     if (show) visible++;
   });
@@ -345,6 +359,49 @@ document.getElementById('studentSearch').addEventListener('input', applyAllFilte
     }
   }
 })();
+
+/* PR-G: 学生事件摘要 + 宿舍快捷入口 */
+const EVENT_SUMMARY = {
+  '2024001': { talks:4, anomalies:3, logs:6 }, /* 张晓明 */
+  '2024002': { talks:2, anomalies:0, logs:3 }, /* 李华 */
+  '2024005': { talks:2, anomalies:2, logs:3 }, /* 赵子涵 */
+  '2024009': { talks:1, anomalies:1, logs:2 }, /* 孙宇轩 */
+  '2024003': { talks:1, anomalies:0, logs:1 }, /* 王五 */
+  '2024004': { talks:0, anomalies:1, logs:0 }, /* 赵六 */
+  '2024006': { talks:2, anomalies:2, logs:1 }, /* 孙八 */
+  '2024007': { talks:0, anomalies:0, logs:0 }  /* 周九 */
+};
+function renderEventSummary() {
+  document.querySelectorAll('.student-item').forEach(function(item) {
+    var no = item.dataset.no;
+    var name = item.dataset.name || '';
+    var e = EVENT_SUMMARY[no];
+    if (!e) return;
+    var flex1 = item.querySelector('.flex-1');
+    if (!flex1) return;
+    var summary = document.createElement('div');
+    summary.className = 'event-summary mt-2';
+    summary.innerHTML =
+      '<a class="es-chip es-logs' + (e.logs === 0 ? ' es-zero' : '') + '" href="counselor_logs.html?student=' + encodeURIComponent(name) + '"><iconify-icon icon="solar:document-text-bold" style="font-size:11px;"></iconify-icon>' + e.logs + ' 条日志</a>' +
+      '<a class="es-chip es-anom' + (e.anomalies === 0 ? ' es-zero' : '') + '" href="counselor_anomalies.html?student=' + encodeURIComponent(name) + '"><iconify-icon icon="solar:danger-triangle-bold" style="font-size:11px;"></iconify-icon>' + e.anomalies + ' 个异常</a>' +
+      '<a class="es-chip es-talks' + (e.talks === 0 ? ' es-zero' : '') + '" href="counselor_logs.html?student=' + encodeURIComponent(name) + '&cat=c1"><iconify-icon icon="solar:chat-round-dots-bold" style="font-size:11px;"></iconify-icon>' + e.talks + ' 次谈心谈话</a>';
+    flex1.appendChild(summary);
+
+    /* 宿舍快捷入口 */
+    var container = item.querySelector('.flex.items-center.gap-3') || item;
+    var dorm = document.createElement('div');
+    dorm.className = 'dorm-shortcut';
+    dorm.title = '查看 ' + (item.dataset.dorm || '宿舍') + ' 详情';
+    dorm.innerHTML = '<iconify-icon icon="solar:home-smile-angle-bold-duotone"></iconify-icon><div class="dorm-label">' + (item.dataset.dorm || '') + '</div>';
+    dorm.addEventListener('click', function(ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      window.location.href = 'counselor_student_dorm.html?no=' + encodeURIComponent(no);
+    });
+    container.appendChild(dorm);
+  });
+}
+renderEventSummary();
 </script></form>
 
 

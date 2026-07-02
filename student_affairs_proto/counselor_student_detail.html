@@ -64,6 +64,10 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 .cat-pill.c3 { background:#D1FAE5; color:#047857; }
 .cat-pill.c4 { background:#DCFCE7; color:#15803D; }
 .cat-pill.c5 { background:#FEE2E2; color:var(--color-danger); }
+
+.dorm-link { color:var(--color-primary); text-decoration:none; font-weight:500; display:inline-flex; align-items:center; gap:2px; }
+.dorm-link:hover { text-decoration:underline; }
+.dorm-link iconify-icon { font-size:12px; opacity:0.7; }
 </style>
 </head>
 <body>
@@ -112,7 +116,7 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 <span class="k">性别</span><span class="v" id="kvGender">男</span>
 <span class="k">政治面貌</span><span class="v">共青团员</span>
 <span class="k">班级</span><span class="v" id="kvClass">计算机系 计科1班</span>
-<span class="k">宿舍</span><span class="v" id="kvDorm">3 号楼 101 室</span>
+<span class="k">宿舍</span><a class="v dorm-link" id="kvDorm" href="counselor_student_dorm.html?no=2024001">3 号楼 101 室 <iconify-icon icon="solar:alt-arrow-right-linear"></iconify-icon></a>
 </div>
 </div>
 
@@ -144,79 +148,21 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 </div>
 
 <div id="tab2" style="display:none;">
-<div class="section-title">共 4 次谈心谈话 · 近 30 天 2 次</div>
-<div class="card">
-<div class="list-item">
-<div class="dot"></div>
-<div class="body">
-<div class="h">关于近期学业下滑的谈话</div>
-<div class="meta">2026-06-28 · 14:30 · 办公室</div>
-<div class="desc">学生反映高数学习压力大,已调整学习方法,建议跟进补课效果。</div>
-</div>
-</div>
-<div class="list-item">
-<div class="dot"></div>
-<div class="body">
-<div class="h">宿舍人际关系调解</div>
-<div class="meta">2026-06-15 · 19:00 · 宿舍楼下</div>
-<div class="desc">与室友作息冲突,经调解已达成共识,继续观察一周。</div>
-</div>
-</div>
-<div class="list-item">
-<div class="dot"></div>
-<div class="body">
-<div class="h">学期初心理状态访谈</div>
-<div class="meta">2026-03-10 · 10:00 · 谈话室</div>
-<div class="desc">学生情绪稳定,对新学期有明确规划,无明显压力源。</div>
-</div>
-</div>
-<div class="list-item">
-<div class="dot"></div>
-<div class="body">
-<div class="h">入学适应情况访谈</div>
-<div class="meta">2025-09-15 · 15:00 · 谈话室</div>
-<div class="desc">学生适应良好,班级融入顺利,已加入学生会学习部。</div>
-</div>
-</div>
-</div>
+<div class="section-title" id="titleTalks">暂无谈心谈话记录</div>
+<div class="card" id="listTalks"></div>
 </div>
 
 <div id="tab3" style="display:none;">
-<div class="section-title">共 3 条异常记录 · 当前红档 1 起</div>
-<div class="card">
-<div class="list-item">
-<div class="dot" style="background:var(--color-danger);"></div>
-<div class="body">
-<div class="h">学业警示 · 旷课异常 <span class="risk-tag high" style="margin-left:6px;">红档</span></div>
-<div class="meta">2026-06-30 · 今天 08:30</div>
-<div class="desc">《高等数学》旷课 1 次,辅导员回访电话未接通。状态:已关注 → 已约谈。</div>
-</div>
-</div>
-<div class="list-item">
-<div class="dot" style="background:var(--color-warning);"></div>
-<div class="body">
-<div class="h">学业警示 · 迟到 <span class="risk-tag mid" style="margin-left:6px;">黄档</span></div>
-<div class="meta">2026-05-22 · 08:55</div>
-<div class="desc">《大学英语》迟到 5 次(本月),已与任课老师沟通并提醒学生。状态:已结案。</div>
-</div>
-</div>
-<div class="list-item">
-<div class="dot" style="background:var(--color-risk-low);"></div>
-<div class="body">
-<div class="h">宿舍卫生 · 不合格 <span class="risk-tag low" style="margin-left:6px;">蓝档</span></div>
-<div class="meta">2026-04-08 · 21:00</div>
-<div class="desc">学院例行检查,3 号楼 101 室桌面物品摆放不符合规范,已现场整改。状态:已结案。</div>
-</div>
-</div>
-</div>
+<div class="section-title" id="titleAnomalies">暂无异常记录</div>
+<div class="card" id="listAnomalies"></div>
 </div>
 
 <div id="tab4" style="display:none;">
-<div class="section-title">当前风险等级 · 红档重点关注</div>
+<div class="section-title">当前风险等级 · <span id="riskLevelText">红档重点关注</span></div>
 <div class="card">
 <div class="flex items-center justify-between mb-3">
 <span class="text-sm text-gray-900 font-medium">风险评分</span>
-<span class="text-2xl font-bold" style="color:var(--color-danger);">78</span>
+<span class="text-2xl font-bold" id="riskScore" style="color:var(--color-danger);">78</span>
 </div>
 <div style="height:8px;background:#F3F4F6;border-radius:4px;overflow:hidden;display:flex;">
 <span style="display:block;height:100%;background:#FCA5A5;width:35%;"></span>
@@ -229,76 +175,13 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 
 <div class="card">
 <h3 class="text-xs font-bold text-gray-400 mb-3 uppercase">风险触发项</h3>
-<div class="list-item">
-<div class="dot" style="background:var(--color-danger);"></div>
-<div class="body">
-<div class="h">核心课程连续旷课 ≥ 1 次</div>
-<div class="meta">权重 40 · 触发于 2026-06-30</div>
-</div>
-</div>
-<div class="list-item">
-<div class="dot" style="background:var(--color-warning);"></div>
-<div class="body">
-<div class="h">近期心理健康测评压力值偏高</div>
-<div class="meta">权重 25 · 触发于 2026-06-15</div>
-</div>
-</div>
-<div class="list-item">
-<div class="dot" style="background:var(--color-warning);"></div>
-<div class="body">
-<div class="h">晚归次数 ≥ 3 次 / 月</div>
-<div class="meta">权重 13 · 触发于 2026-05-22</div>
-</div>
-</div>
+<div id="listRisk"></div>
 </div>
 </div>
 
 <div id="tab5" style="display:none;">
-<div class="section-title">共 6 条工作日志记录</div>
-<div class="card">
-<div class="list-item">
-<div class="dot"></div>
-<div class="body">
-<div class="h"><span class="cat-pill c1">谈心谈话</span>关于近期学业下滑的谈话</div>
-<div class="meta">2026-06-28 · 王辅导员</div>
-</div>
-</div>
-<div class="list-item">
-<div class="dot"></div>
-<div class="body">
-<div class="h"><span class="cat-pill c2">进宿舍</span>3 号楼 101 宿舍走访</div>
-<div class="meta">2026-06-20 · 王辅导员</div>
-</div>
-</div>
-<div class="list-item">
-<div class="dot"></div>
-<div class="body">
-<div class="h"><span class="cat-pill c3">进课堂</span>《高等数学》课堂巡查</div>
-<div class="meta">2026-06-18 · 王辅导员</div>
-</div>
-</div>
-<div class="list-item">
-<div class="dot"></div>
-<div class="body">
-<div class="h"><span class="cat-pill c4">组织班会</span>期末复习动员班会</div>
-<div class="meta">2026-06-10 · 王辅导员</div>
-</div>
-</div>
-<div class="list-item">
-<div class="dot"></div>
-<div class="body">
-<div class="h"><span class="cat-pill c5">班干会议</span>班委期末工作对接</div>
-<div class="meta">2026-06-05 · 王辅导员</div>
-</div>
-</div>
-<div class="list-item">
-<div class="dot"></div>
-<div class="body">
-<div class="h"><span class="cat-pill c1">谈心谈话</span>宿舍人际关系调解</div>
-<div class="meta">2026-06-15 · 王辅导员</div>
-</div>
-</div>
-</div>
+<div class="section-title" id="titleLogs">暂无工作日志</div>
+<div class="card" id="listLogs"></div>
 </div>
 
 </div>
@@ -312,6 +195,95 @@ const STU_DATA = {
   '2024005': { name:'赵子涵', surname:'赵', gender:'男', risk:'mid',  riskText:'黄档风险', no:'2024005', klass:'计算机系 软工1班', dorm:'2 号楼 308 室', phoneOwn:'135 6666 5005', phoneEmg:'134 3333 4444', emgRel:'母亲 · 赵美华' },
   '2024009': { name:'孙宇轩', surname:'孙', gender:'男', risk:'low',  riskText:'蓝档风险', no:'2024009', klass:'计算机系 大数据1班', dorm:'5 号楼 402 室', phoneOwn:'158 7777 9009', phoneEmg:'157 9999 8888', emgRel:'父亲 · 孙志强' }
 };
+
+/* 关联学生事件 mock (按姓名匹配;静态原型不走跨页数据源) */
+const STU_EVENTS = {
+  '张晓明': {
+    talks: [
+      { time:'2026-06-28 · 14:30 · 办公室', desc:'学生反映高数学习压力大,已调整学习方法,建议跟进补课效果。' },
+      { time:'2026-06-15 · 19:00 · 宿舍楼下', desc:'与室友作息冲突,经调解已达成共识,继续观察一周。' },
+      { time:'2026-03-10 · 10:00 · 谈话室', desc:'学生情绪稳定,对新学期有明确规划,无明显压力源。' },
+      { time:'2025-09-15 · 15:00 · 谈话室', desc:'学生适应良好,班级融入顺利,已加入学生会学习部。' }
+    ],
+    workLogs: [
+      { cat:'c1', name:'谈心谈话', title:'关于近期学业下滑的谈话', time:'2026-06-28', who:'王辅导员' },
+      { cat:'c2', name:'进宿舍',   title:'3 号楼 101 宿舍走访',       time:'2026-06-20', who:'王辅导员' },
+      { cat:'c3', name:'进课堂',   title:'《高等数学》课堂巡查',     time:'2026-06-18', who:'王辅导员' },
+      { cat:'c4', name:'组织班会', title:'期末复习动员班会',         time:'2026-06-10', who:'王辅导员' },
+      { cat:'c5', name:'班干会议', title:'班委期末工作对接',         time:'2026-06-05', who:'王辅导员' },
+      { cat:'c1', name:'谈心谈话', title:'宿舍人际关系调解',         time:'2026-06-15', who:'王辅导员' }
+    ],
+    anomalies: [
+      { type:'学业警示 · 旷课异常', risk:'high', time:'2026-06-30 · 今天 08:30', desc:'《高等数学》旷课 1 次,辅导员回访电话未接通。状态:已关注 → 已约谈。' },
+      { type:'学业警示 · 迟到', risk:'mid', time:'2026-05-22 · 08:55', desc:'《大学英语》迟到 5 次(本月),已与任课老师沟通并提醒学生。状态:已结案。' },
+      { type:'宿舍卫生 · 不合格', risk:'low', time:'2026-04-08 · 21:00', desc:'学院例行检查,3 号楼 101 室桌面物品摆放不符合规范,已现场整改。状态:已结案。' }
+    ],
+    risks: [
+      { level:'high', title:'核心课程连续旷课 ≥ 1 次', meta:'权重 40 · 触发于 2026-06-30' },
+      { level:'mid',  title:'近期心理健康测评压力值偏高', meta:'权重 25 · 触发于 2026-06-15' },
+      { level:'mid',  title:'晚归次数 ≥ 3 次 / 月', meta:'权重 13 · 触发于 2026-05-22' }
+    ],
+    riskScore: 78,
+    riskLevelText: '红档重点关注'
+  },
+  '李华': {
+    talks: [
+      { time:'2026-06-20 · 15:00 · 谈话室', desc:'学期末复习状态良好,目标考研方向明确,鼓励继续保持。' },
+      { time:'2026-04-12 · 10:30 · 办公室', desc:'学生会工作交接顺畅,新任部长已上手,无明显压力。' }
+    ],
+    workLogs: [
+      { cat:'c1', name:'谈心谈话', title:'学期末目标沟通', time:'2026-06-20', who:'王辅导员' },
+      { cat:'c3', name:'进课堂',   title:'《大学英语》课堂抽查', time:'2026-05-25', who:'王辅导员' },
+      { cat:'c4', name:'组织班会', title:'女生节主题班会',     time:'2026-03-08', who:'王辅导员' }
+    ],
+    anomalies: [],
+    risks: [
+      { level:'low', title:'近期无明显风险项', meta:'权重 0 · 最后评估 2026-06-20' }
+    ],
+    riskScore: 22,
+    riskLevelText: '低风险 · 关注即可'
+  },
+  '赵子涵': {
+    talks: [
+      { time:'2026-06-25 · 16:00 · 谈话室', desc:'成绩下滑原因排查:课余时间投入社团较多,已建议调整时间分配。' },
+      { time:'2026-05-30 · 11:00 · 办公室', desc:'家庭情况访谈,父母对转专业持开放态度。' }
+    ],
+    workLogs: [
+      { cat:'c1', name:'谈心谈话', title:'成绩下滑原因沟通', time:'2026-06-25', who:'王辅导员' },
+      { cat:'c1', name:'谈心谈话', title:'家庭情况访谈',     time:'2026-05-30', who:'王辅导员' },
+      { cat:'c3', name:'进课堂',   title:'《数据结构》课堂巡查', time:'2026-05-18', who:'王辅导员' }
+    ],
+    anomalies: [
+      { type:'学业预警 · 绩点下滑', risk:'mid', time:'2026-06-15 · 14:00', desc:'本学期平均绩点较上学期下降 0.6,建议约谈并跟踪一学期。状态:跟进中。' },
+      { type:'宿舍关系 · 同伴反馈', risk:'mid', time:'2026-04-22 · 21:30', desc:'舍友反映作息时间差异较大,已安排调解。状态:已结案。' }
+    ],
+    risks: [
+      { level:'mid', title:'本学期绩点连续下滑 ≥ 0.5', meta:'权重 28 · 触发于 2026-06-15' },
+      { level:'mid', title:'社团活动占用课余时间过多', meta:'权重 18 · 触发于 2026-05-30' }
+    ],
+    riskScore: 56,
+    riskLevelText: '黄档 · 持续关注'
+  },
+  '孙宇轩': {
+    talks: [
+      { time:'2026-06-18 · 14:00 · 谈话室', desc:'期末复习策略沟通,情绪稳定,学习方法得当。' }
+    ],
+    workLogs: [
+      { cat:'c1', name:'谈心谈话', title:'期末复习策略沟通', time:'2026-06-18', who:'王辅导员' },
+      { cat:'c2', name:'进宿舍',   title:'5 号楼 402 宿舍卫生检查', time:'2026-05-12', who:'王辅导员' }
+    ],
+    anomalies: [
+      { type:'宿舍晚归 · 单次', risk:'low', time:'2026-05-08 · 23:45', desc:'因课题组开会晚归 1 次,已报备并联系家长。状态:已结案。' }
+    ],
+    risks: [
+      { level:'low', title:'近 30 天晚归 1 次', meta:'权重 8 · 触发于 2026-05-08' }
+    ],
+    riskScore: 38,
+    riskLevelText: '蓝档 · 常规关注'
+  }
+};
+
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
 function maskPhone(p) { return p.replace(/(\d{3})\s?\d{4}\s?(\d{4})/, '$1****$2'); }
 function bindStudent(no) {
   var s = STU_DATA[no] || STU_DATA['2024001'];
@@ -326,11 +298,106 @@ function bindStudent(no) {
   document.getElementById('kvName').textContent = s.name;
   document.getElementById('kvGender').textContent = s.gender;
   document.getElementById('kvClass').textContent = s.klass;
-  document.getElementById('kvDorm').textContent = s.dorm;
+  document.getElementById('kvDorm').innerHTML = escapeHtml(s.dorm) + ' <iconify-icon icon="solar:alt-arrow-right-linear"></iconify-icon>';
+  document.getElementById('kvDorm').href = 'counselor_student_dorm.html?no=' + encodeURIComponent(s.no);
   document.getElementById('phoneOwn').textContent = maskPhone(s.phoneOwn);
   document.getElementById('phoneEmg').textContent = maskPhone(s.phoneEmg);
   window.__stu = s;
+  renderStudentEvents(s.name);
 }
+
+function renderStudentEvents(name) {
+  var ev = STU_EVENTS[name] || STU_EVENTS['张晓明'];
+
+  /* 谈心谈话 */
+  var tTitle = document.getElementById('titleTalks');
+  var tList = document.getElementById('listTalks');
+  if (ev.talks.length === 0) {
+    tTitle.textContent = '暂无谈心谈话记录';
+    tList.innerHTML = '<div class="empty"><iconify-icon icon="solar:chat-round-dots-bold-duotone"></iconify-icon>该学生尚无谈心谈话记录</div>';
+  } else {
+    tTitle.innerHTML = '共 <span style="color:var(--color-primary);">' + ev.talks.length + '</span> 次谈心谈话';
+    var html = '';
+    ev.talks.forEach(function(t) {
+      html += '<div class="list-item">'
+        + '<div class="dot"></div>'
+        + '<div class="body">'
+        + '<div class="h">谈心谈话记录</div>'
+        + '<div class="meta">' + escapeHtml(t.time) + '</div>'
+        + '<div class="desc">' + escapeHtml(t.desc) + '</div>'
+        + '</div></div>';
+    });
+    tList.innerHTML = html;
+  }
+
+  /* 异常记录 */
+  var aTitle = document.getElementById('titleAnomalies');
+  var aList = document.getElementById('listAnomalies');
+  var highCount = ev.anomalies.filter(function(a) { return a.risk === 'high'; }).length;
+  if (ev.anomalies.length === 0) {
+    aTitle.textContent = '暂无异常记录';
+    aList.innerHTML = '<div class="empty"><iconify-icon icon="solar:shield-check-bold-duotone"></iconify-icon>该学生暂无异常记录</div>';
+  } else {
+    aTitle.innerHTML = '共 <span style="color:var(--color-primary);">' + ev.anomalies.length + '</span> 条异常记录 · 当前 ' + (highCount > 0 ? '<span style="color:var(--color-danger);">' + highCount + ' 起红档</span>' : '无红档');
+    var riskColorMap = { high:'var(--color-danger)', mid:'var(--color-warning)', low:'var(--color-risk-low)' };
+    var riskLabelMap = { high:'红档', mid:'黄档', low:'蓝档' };
+    var html = '';
+    ev.anomalies.forEach(function(a) {
+      var dotColor = riskColorMap[a.risk] || 'var(--color-primary)';
+      var label = riskLabelMap[a.risk] || '蓝档';
+      html += '<div class="list-item">'
+        + '<div class="dot" style="background:' + dotColor + ';"></div>'
+        + '<div class="body">'
+        + '<div class="h">' + escapeHtml(a.type) + ' <span class="risk-tag ' + a.risk + '" style="margin-left:6px;">' + label + '</span></div>'
+        + '<div class="meta">' + escapeHtml(a.time) + '</div>'
+        + '<div class="desc">' + escapeHtml(a.desc) + '</div>'
+        + '</div></div>';
+    });
+    aList.innerHTML = html;
+  }
+
+  /* 风险评分 */
+  document.getElementById('riskScore').textContent = ev.riskScore;
+  document.getElementById('riskScore').style.color = ev.riskScore >= 75 ? 'var(--color-danger)' : (ev.riskScore >= 50 ? 'var(--color-warning)' : 'var(--color-risk-low)');
+  document.getElementById('riskLevelText').textContent = ev.riskLevelText;
+  var rList = document.getElementById('listRisk');
+  if (ev.risks.length === 0) {
+    rList.innerHTML = '<div class="empty">该学生暂无风险触发项</div>';
+  } else {
+    var html = '';
+    ev.risks.forEach(function(r) {
+      var dotColor = r.level === 'high' ? 'var(--color-danger)' : (r.level === 'mid' ? 'var(--color-warning)' : 'var(--color-risk-low)');
+      html += '<div class="list-item">'
+        + '<div class="dot" style="background:' + dotColor + ';"></div>'
+        + '<div class="body">'
+        + '<div class="h">' + escapeHtml(r.title) + '</div>'
+        + '<div class="meta">' + escapeHtml(r.meta) + '</div>'
+        + '</div></div>';
+    });
+    rList.innerHTML = html;
+  }
+
+  /* 工作日志 */
+  var lTitle = document.getElementById('titleLogs');
+  var lList = document.getElementById('listLogs');
+  if (ev.workLogs.length === 0) {
+    lTitle.textContent = '暂无工作日志';
+    lList.innerHTML = '<div class="empty"><iconify-icon icon="solar:document-text-bold-duotone"></iconify-icon>该学生尚无关联工作日志</div>';
+  } else {
+    lTitle.innerHTML = '共 <span style="color:var(--color-primary);">' + ev.workLogs.length + '</span> 条工作日志记录';
+    var html = '';
+    ev.workLogs.forEach(function(l) {
+      html += '<div class="list-item">'
+        + '<div class="dot"></div>'
+        + '<div class="body">'
+        + '<div class="h"><span class="cat-pill ' + l.cat + '">' + escapeHtml(l.name) + '</span>' + escapeHtml(l.title) + '</div>'
+        + '<div class="meta">' + escapeHtml(l.time) + ' · ' + escapeHtml(l.who) + '</div>'
+        + '</div></div>';
+    });
+    lList.innerHTML = html;
+  }
+}
+
 function showAudit(idx) {
   var s = window.__stu || STU_DATA['2024001'];
   var target = idx === 1 ? { label: '本人手机', val: s.phoneOwn } : { label: '紧急联系人', val: s.phoneEmg + ' (' + s.emgRel + ')' };
