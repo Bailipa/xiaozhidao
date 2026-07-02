@@ -82,7 +82,7 @@
 </a>
 <div class="content pt-2 pb-20">
 <!-- 异常项 -->
-<a class="anomaly-card block" data-filter-key="red,未跟进" href="counselor_anomaly_detail.html">
+<a class="anomaly-card block" data-risk="red" data-status="未跟进" href="counselor_anomaly_detail.html">
 <div class="flex justify-between items-start mb-3">
 <div class="flex items-center gap-1.5">
 <div class="w-2 h-2 rounded-full bg-red-500"></div>
@@ -107,7 +107,7 @@
 <span class="px-4 py-1.5 bg-blue-600 text-white text-xs rounded-lg font-bold">去跟进</span>
 </div>
 </a>
-<a class="anomaly-card block" data-filter-key="yellow,已约谈" href="counselor_anomaly_detail.html">
+<a class="anomaly-card block" data-risk="yellow" data-status="已约谈" href="counselor_anomaly_detail.html">
 <div class="flex justify-between items-start mb-3">
 <div class="flex items-center gap-1.5">
 <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
@@ -132,14 +132,33 @@
 <span class="px-4 py-1.5 border border-blue-600 text-blue-600 text-xs rounded-lg font-bold">查看记录</span>
 </div>
 </a>
-<!-- 空状态 -->
-<div class="mt-20 text-center px-10" id="emptyAnomalies" style="display: none;">
-<div class="w-20 h-20 bg-green-50 rounded-full mx-auto flex items-center justify-center mb-4">
-<iconify-icon class="text-5xl text-green-500" icon="solar:check-circle-bold-duotone"></iconify-icon>
+<a class="anomaly-card block" data-risk="yellow" data-status="已结案" href="counselor_anomaly_detail.html">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-full bg-gray-400"></div>
+<span class="text-xs font-bold text-gray-500">黄档 · 已结案</span>
 </div>
-<h3 class="text-base font-bold text-gray-900">太棒了！暂无异常</h3>
-<p class="text-xs text-gray-400 mt-2">目前所带班级学生状况良好，请继续保持关注</p>
+<span class="text-[10px] text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded">已结案</span>
 </div>
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 rounded-full bg-gray-100 overflow-hidden">
+<img alt="Student" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=陈&background=10B981&color=fff&size=128&bold=true&font-size=0.5"/>
+</div>
+<div>
+<div class="font-bold text-gray-900">陈思远 <span class="text-xs font-normal text-gray-400 ml-1">2024级(2)班</span></div>
+<div class="text-xs text-gray-500 mt-0.5">晚归异常 · 6/15 23:40</div>
+</div>
+</div>
+<div class="bg-gray-50 p-3 rounded-xl text-xs text-gray-600 leading-relaxed mb-4">
+晚归已与家长沟通,学生承诺调整作息。持续观察一周无再犯,结案归档。
+</div>
+<div class="flex justify-between items-center">
+<span class="text-[10px] text-gray-400">结案于 6/22 09:15</span>
+<span class="px-4 py-1.5 border border-gray-300 text-gray-500 text-xs rounded-lg font-bold">查看归档</span>
+</div>
+</a>
+<!-- 空状态 (filter 感知,JS 动态渲染) -->
+<div class="mt-20 text-center px-10" id="emptyAnomalies" style="display: none;"></div>
 </div>
 <div class="tab-bar">
   <a class="tab-item" href="counselor_workbench.html">
@@ -167,20 +186,49 @@
 </div>
 
 <script>
-document.querySelectorAll('.filter-tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+// 7 个 tab 的空状态映射 (filter 感知,避免"已结案"显示"太棒了"等矛盾文案)
+const EMPTY_MSG = {
+  'all':      { icon: 'solar:check-circle-bold-duotone',   iconBg: 'bg-green-50',  iconColor: 'text-green-500',  title: '太棒了！暂无异常',     sub: '目前所带班级学生状况良好,请继续保持关注' },
+  'red':      { icon: 'solar:shield-cross-bold-duotone',    iconBg: 'bg-red-50',    iconColor: 'text-red-500',    title: '暂无红档异常',         sub: '目前没有需要重点关注的学生' },
+  'yellow':   { icon: 'solar:shield-warning-bold-duotone',  iconBg: 'bg-yellow-50', iconColor: 'text-yellow-500', title: '暂无黄档异常',         sub: '目前没有需要一般关注的学生' },
+  'blue':     { icon: 'solar:info-circle-bold-duotone',     iconBg: 'bg-blue-50',   iconColor: 'text-blue-500',   title: '暂无蓝档提醒',         sub: '目前没有需要普通提醒的学生' },
+  '关注':     { icon: 'solar:eye-bold-duotone',             iconBg: 'bg-gray-100',  iconColor: 'text-gray-500',   title: '暂无已关注项',         sub: '对新异常点击"关注"后会显示在这里' },
+  '已约谈':   { icon: 'solar:chat-round-dots-bold-duotone', iconBg: 'bg-blue-50',   iconColor: 'text-blue-500',   title: '暂无已约谈记录',       sub: '完成首次约谈后会显示在这里' },
+  '已结案':   { icon: 'solar:check-circle-bold-duotone',    iconBg: 'bg-gray-100',  iconColor: 'text-gray-500',   title: '暂无已结案异常',       sub: '结案归档后会显示在这里,可在历史查看' }
+};
+
+function renderEmpty(key) {
+  var msg = EMPTY_MSG[key] || EMPTY_MSG.all;
+  var el = document.getElementById('emptyAnomalies');
+  if (!el) return;
+  el.innerHTML =
+    '<div class="w-20 h-20 ' + msg.iconBg + ' rounded-full mx-auto flex items-center justify-center mb-4">' +
+      '<iconify-icon class="text-5xl ' + msg.iconColor + '" icon="' + msg.icon + '"></iconify-icon>' +
+    '</div>' +
+    '<h3 class="text-base font-bold text-gray-900">' + msg.title + '</h3>' +
+    '<p class="text-xs text-gray-400 mt-2">' + msg.sub + '</p>';
+}
+
+document.querySelectorAll('.filter-tab').forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.filter-tab').forEach(function(t) { t.classList.remove('active'); });
     tab.classList.add('active');
-    const key = tab.dataset.filter;
-    let visible = 0;
-    document.querySelectorAll('[data-filter-key]').forEach(item => {
-      const itemKey = item.dataset.filterKey || '';
-      const show = (key === 'all' || itemKey === key || itemKey.indexOf(key) >= 0);
-      item.style.display = show ? '' : 'none';
+    var key = tab.dataset.filter;
+    var visible = 0;
+    document.querySelectorAll('.anomaly-card').forEach(function(card) {
+      var show = (key === 'all' || card.dataset.risk === key || card.dataset.status === key);
+      card.style.display = show ? '' : 'none';
       if (show) visible++;
     });
-    const empty = document.getElementById('emptyAnomalies');
-    if (empty) empty.style.display = visible === 0 ? '' : 'none';
+    var empty = document.getElementById('emptyAnomalies');
+    if (empty) {
+      if (visible === 0) {
+        renderEmpty(key);
+        empty.style.display = '';
+      } else {
+        empty.style.display = 'none';
+      }
+    }
   });
 });
 </script>
