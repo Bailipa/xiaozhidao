@@ -71,6 +71,30 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 .log-card .actions .del { color:#FA5151; }
 .log-card .opacity-80 { opacity:0.85; border-left:3px solid #E5E7EB; }
 
+/* PR-H+: 创建/修改时间戳(会议要求:工作记录需同时记录创建时间与修改时间) */
+.time-row { display:flex; align-items:center; gap:6px; margin-top:8px; padding-top:8px; border-top:1px dashed #F0F0F0; font-size:10px; color:#9CA3AF; flex-wrap:wrap; }
+.time-row .ts { display:inline-flex; align-items:center; gap:3px; }
+.time-row .ts iconify-icon { font-size:11px; }
+.time-row .ts.created { color:#6B7280; }
+.time-row .ts.updated { color:var(--color-primary); font-weight:600; }
+.time-row .ts .label { color:#9CA3AF; font-weight:400; margin-right:2px; }
+
+/* PR-H+: 修改历史时间线 (详情弹窗) */
+.history-timeline { margin-top:14px; padding:12px 14px; background:#F9FAFB; border-radius:10px; border-left:3px solid var(--color-primary); }
+.history-timeline .h-title { display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:#191919; margin-bottom:10px; }
+.history-timeline .h-title iconify-icon { font-size:14px; color:var(--color-primary); }
+.history-timeline ul { list-style:none; margin:0; padding:0; }
+.history-timeline li { position:relative; padding:0 0 10px 16px; font-size:11px; color:#444; line-height:1.5; }
+.history-timeline li:last-child { padding-bottom:0; }
+.history-timeline li::before { content:''; position:absolute; left:5px; top:5px; width:6px; height:6px; border-radius:50%; background:#D1D5DB; }
+.history-timeline li.created::before { background:var(--color-primary); }
+.history-timeline li.updated::before { background:var(--warning); }
+.history-timeline li .h-ts { color:#6B7280; font-family:ui-monospace, "SF Mono", monospace; font-size:10px; }
+.history-timeline li .h-action { display:inline-block; padding:0 5px; border-radius:3px; font-size:9px; font-weight:600; margin-left:4px; }
+.history-timeline li.created .h-action { background:#EFF6FF; color:var(--color-primary); }
+.history-timeline li.updated .h-action { background:#FFF7E6; color:#C2700A; }
+.history-timeline li .h-summary { color:#191919; }
+
 .fab { position:fixed; bottom:100px; right:30px; width:54px; height:54px; background:var(--color-primary); color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 16px rgba(37,99,235,0.4); z-index:20; }
 
 .empty { text-align:center; padding:60px 20px; color:#9CA3AF; font-size:13px; }
@@ -96,12 +120,12 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
     { "code":"c5", "name":"班干会议", "color":"#7C3AED" }
   ],
   "systemLogs": [
-    { "log_id":"L001", "category":"c1", "category_name":"谈心谈话", "title":"关于张晓明缺勤问题的谈话", "body":"与张晓明同学进行了长达 40 分钟的深入交谈,主要针对近期频繁缺勤的原因进行了了解,发现其家庭出现了一些突发情况…", "time":"2026-06-30 10:30", "status":"submitted", "linked_student":"张晓明" },
-    { "log_id":"L002", "category":"c2", "category_name":"进宿舍", "title":"6 号楼 302 宿舍卫生抽查", "body":"常规寝室检查,该寝室卫生状况良好,无违章电器,学生均在寝室,表现优异,已记录在案。", "time":"2026-06-29 22:15", "status":"submitted", "linked_student":"302 宿舍" },
-    { "log_id":"L003", "category":"c3", "category_name":"进课堂", "title":"高数课堂巡查", "body":"今日高数课巡查,应到 32 人,实到 30 人,2 人请假(已核实假条)。课堂纪律良好,学生专注度高。", "time":"2026-06-29 14:00", "status":"submitted", "linked_student":"计科1班" },
-    { "log_id":"L004", "category":"c4", "category_name":"组织班会", "title":"职业规划主题班会", "body":"邀请 3 位大四优秀学长进行经验分享,同学们反馈积极,问答环节气氛热烈。", "time":"2026-06-28 15:00", "status":"submitted", "linked_student":"计科1班" },
-    { "log_id":"L005", "category":"c5", "category_name":"班干会议", "title":"6 月班委工作例会", "body":"部署暑期社会实践动员、党员发展、期末复习安排,班委分工明确。", "time":"2026-06-27 19:00", "status":"submitted", "linked_student":"班委" },
-    { "log_id":"L006", "category":"c1", "category_name":"谈心谈话", "title":"关于王五情绪波动的谈话", "body":"注意到王五近期情绪低落,主动约谈。初步判断因家庭原因,后续安排心理咨询师介入。", "time":"2026-06-26 16:00", "status":"draft", "linked_student":"王五" }
+    { "log_id":"L001", "category":"c1", "category_name":"谈心谈话", "title":"关于张晓明缺勤问题的谈话", "body":"与张晓明同学进行了长达 40 分钟的深入交谈,主要针对近期频繁缺勤的原因进行了了解,发现其家庭出现了一些突发情况…", "time":"2026-06-30 10:30", "status":"submitted", "linked_student":"张晓明", "created_at":"2026-06-30 10:30", "updated_at":"2026-07-02 16:48", "history":[{"ts":"2026-06-30 10:30","action":"created","summary":"创建日志"},{"ts":"2026-07-01 09:20","action":"updated","summary":"补充家长沟通进展"},{"ts":"2026-07-02 16:48","action":"updated","summary":"追加后续跟进计划"}] },
+    { "log_id":"L002", "category":"c2", "category_name":"进宿舍", "title":"6 号楼 302 宿舍卫生抽查", "body":"常规寝室检查,该寝室卫生状况良好,无违章电器,学生均在寝室,表现优异,已记录在案。", "time":"2026-06-29 22:15", "status":"submitted", "linked_student":"302 宿舍", "created_at":"2026-06-29 22:15", "updated_at":"2026-06-29 22:15", "history":[{"ts":"2026-06-29 22:15","action":"created","summary":"创建日志"}] },
+    { "log_id":"L003", "category":"c3", "category_name":"进课堂", "title":"高数课堂巡查", "body":"今日高数课巡查,应到 32 人,实到 30 人,2 人请假(已核实假条)。课堂纪律良好,学生专注度高。", "time":"2026-06-29 14:00", "status":"submitted", "linked_student":"计科1班", "created_at":"2026-06-29 14:00", "updated_at":"2026-06-30 08:15", "history":[{"ts":"2026-06-29 14:00","action":"created","summary":"创建日志"},{"ts":"2026-06-30 08:15","action":"updated","summary":"补充请假条存档号"}] },
+    { "log_id":"L004", "category":"c4", "category_name":"组织班会", "title":"职业规划主题班会", "body":"邀请 3 位大四优秀学长进行经验分享,同学们反馈积极,问答环节气氛热烈。", "time":"2026-06-28 15:00", "status":"submitted", "linked_student":"计科1班", "created_at":"2026-06-28 15:00", "updated_at":"2026-06-28 15:00", "history":[{"ts":"2026-06-28 15:00","action":"created","summary":"创建日志"}] },
+    { "log_id":"L005", "category":"c5", "category_name":"班干会议", "title":"6 月班委工作例会", "body":"部署暑期社会实践动员、党员发展、期末复习安排,班委分工明确。", "time":"2026-06-27 19:00", "status":"submitted", "linked_student":"班委", "created_at":"2026-06-27 19:00", "updated_at":"2026-06-28 10:42", "history":[{"ts":"2026-06-27 19:00","action":"created","summary":"创建日志"},{"ts":"2026-06-28 10:42","action":"updated","summary":"补充党员发展名单"}] },
+    { "log_id":"L006", "category":"c1", "category_name":"谈心谈话", "title":"关于王五情绪波动的谈话", "body":"注意到王五近期情绪低落,主动约谈。初步判断因家庭原因,后续安排心理咨询师介入。", "time":"2026-06-26 16:00", "status":"draft", "linked_student":"王五", "created_at":"2026-06-26 16:00", "updated_at":"2026-06-26 18:30", "history":[{"ts":"2026-06-26 16:00","action":"created","summary":"创建草稿"},{"ts":"2026-06-26 18:30","action":"updated","summary":"补充家长反馈"}] }
   ],
   "customRecords": [
     { "record_id":"R001-1", "module_id":"M001", "module_name":"我今天的工作心得", "content":"今天和王五谈了一个小时,主要聊他最近和室友关系紧张的问题。他愿意主动找辅导员说明情况,说明信任度提升了。", "time":"2026-06-30 18:00", "visibility":"shared" },
@@ -214,8 +238,24 @@ var filters = { cat: '', status: '', mod: '', student: '' };
   try { DATA = JSON.parse(document.getElementById('page-data').textContent); } catch(e) { return; }
   document.getElementById('sysCount').textContent = DATA.systemLogs.length;
   document.getElementById('cusCount').textContent = DATA.customRecords.length;
-  // 把日志数据存到 localStorage,供 log_edit.html 的 ?lid= 回填使用
-  try { localStorage.setItem('xzd_logs', JSON.stringify(DATA.systemLogs)); } catch(e) {}
+  /* PR-H+: 把日志数据存到 localStorage,供 log_edit.html 的 ?lid= 回填使用;
+     合并本地的修改记录(updated_at + history)而不是覆盖 */
+  try {
+    var stored = JSON.parse(localStorage.getItem('xzd_logs') || '[]');
+    var byId = {};
+    stored.forEach(function(s) { byId[s.log_id] = s; });
+    DATA.systemLogs = DATA.systemLogs.map(function(s) {
+      var local = byId[s.log_id];
+      if (local && (local.updated_at || (local.history && local.history.length))) {
+        return Object.assign({}, s, {
+          updated_at: local.updated_at || s.updated_at,
+          history: Array.isArray(local.history) && local.history.length ? local.history : (s.history || [])
+        });
+      }
+      return s;
+    });
+    localStorage.setItem('xzd_logs', JSON.stringify(DATA.systemLogs));
+  } catch(e) {}
   // PR-G: URL 参数联动 (?student= ?cat=)
   var p = new URLSearchParams(window.location.search);
   if (p.get('student')) {
@@ -287,6 +327,14 @@ function renderSystem() {
     var draftCls = l.status === 'draft' ? ' opacity-80' : '';
     var editHref = 'counselor_log_edit.html?lid=' + encodeURIComponent(l.log_id);
     var editLabel = l.status === 'draft' ? '继续填写' : '编辑';
+    /* PR-H+: 创建/修改时间戳 */
+    var created = l.created_at || l.time || '';
+    var updated = l.updated_at || created;
+    var isModified = updated && updated !== created;
+    var timeRow = '<div class="time-row">'
+      + '<span class="ts created"><iconify-icon icon="solar:add-circle-linear"></iconify-icon><span class="label">创建</span>' + created + '</span>'
+      + (isModified ? '<span class="ts updated"><iconify-icon icon="solar:restart-linear"></iconify-icon><span class="label">最近修改</span>' + updated + '</span>' : '')
+      + '</div>';
     html += '<div class="log-card' + draftCls + '">'
       + '<div class="head">'
       + '<div class="left"><div class="tag-row">'
@@ -297,6 +345,7 @@ function renderSystem() {
       + '</div>'
       + '<div class="title">' + l.title + '</div>'
       + '<div class="body">' + l.body + '</div>'
+      + timeRow
       + '<div class="foot">'
       + '<div class="left-meta">关联:<span class="v">' + l.linked_student + '</span></div>'
       + '<div class="actions">'
@@ -317,6 +366,26 @@ function delLog(id) {
 function showLogDetail(id) {
   var log = DATA.systemLogs.find(function(x) { return x.log_id === id; });
   if (!log) return;
+  var created = log.created_at || log.time || '';
+  var updated = log.updated_at || created;
+  var isModified = updated && updated !== created;
+  /* PR-H+: 修改历史时间线 */
+  var history = log.history || [];
+  var historyHtml = '';
+  if (history.length > 0) {
+    historyHtml = '<div class="history-timeline">'
+      + '<div class="h-title"><iconify-icon icon="solar:history-bold-duotone"></iconify-icon>修改历史(共 ' + history.length + ' 次记录)</div>'
+      + '<ul>';
+    history.forEach(function(h) {
+      var actionLabel = h.action === 'created' ? '创建' : '修改';
+      historyHtml += '<li class="' + h.action + '">'
+        + '<span class="h-ts">' + h.ts + '</span>'
+        + '<span class="h-action">' + actionLabel + '</span>'
+        + '<div class="h-summary">' + (h.summary || '') + '</div>'
+        + '</li>';
+    });
+    historyHtml += '</ul></div>';
+  }
   var m = document.createElement('div');
   m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99;display:flex;align-items:flex-end;justify-content:center;';
   m.innerHTML = '<div style="background:#fff;width:375px;max-width:100%;border-radius:16px 16px 0 0;padding:16px 20px 24px;max-height:80%;overflow-y:auto;">'
@@ -327,7 +396,12 @@ function showLogDetail(id) {
     + '</div>'
     + '<h3 style="font-size:18px;font-weight:700;color:#111827;margin-bottom:8px;">' + log.title + '</h3>'
     + '<div style="font-size:11px;color:#888;margin-bottom:12px;">关联:<span style="color:#111827;font-weight:600;">' + log.linked_student + '</span> · ' + (log.status === 'submitted' ? '已提交' : '草稿') + '</div>'
+    + '<div style="font-size:11px;color:#888;margin-bottom:8px;line-height:1.6;">'
+    + '<span style="margin-right:14px;">🕒 创建:<span style="color:#111827;font-weight:600;">' + created + '</span></span>'
+    + (isModified ? '<span>✏️ 最近修改:<span style="color:#1E5AE6;font-weight:600;">' + updated + '</span></span>' : '<span style="color:#16A34A;">✓ 创建后未修改</span>')
+    + '</div>'
     + '<div style="font-size:14px;color:#374151;line-height:1.7;padding:14px;background:#F9FAFB;border-radius:10px;">' + log.body + '</div>'
+    + historyHtml
     + '<div style="display:flex;gap:10px;margin-top:18px;">'
     + '<button data-close style="flex:1;height:42px;background:#F2F3F5;color:#444;border:0;border-radius:21px;font-size:14px;font-weight:600;cursor:pointer;">关闭</button>'
     + '<a href="counselor_log_edit.html?lid=' + encodeURIComponent(log.log_id) + '" style="flex:1;height:42px;background:#1E5AE6;color:#fff;border-radius:21px;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;text-decoration:none;">编辑此日志</a>'

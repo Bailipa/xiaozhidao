@@ -115,6 +115,7 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 <span class="k">姓名</span><span class="v" id="kvName">张晓明</span>
 <span class="k">性别</span><span class="v" id="kvGender">男</span>
 <span class="k">政治面貌</span><span class="v">共青团员</span>
+<span class="k">身份证号</span><span class="v phone-masked" id="kvIdcard">110101********0011</span>
 <span class="k">班级</span><span class="v" id="kvClass">计算机系 计科1班</span>
 <span class="k">宿舍</span><a class="v dorm-link" id="kvDorm" href="counselor_student_dorm.html?no=2024001">3 号楼 101 室 <iconify-icon icon="solar:alt-arrow-right-linear"></iconify-icon></a>
 </div>
@@ -190,10 +191,10 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 <script>
 // 学生多 mock (按 ?no= 切换)
 const STU_DATA = {
-  '2024001': { name:'张晓明', surname:'张', gender:'男', risk:'high',  riskText:'红档风险', no:'2024001', klass:'计算机系 计科1班', dorm:'3 号楼 101 室', phoneOwn:'138 1234 8001', phoneEmg:'139 8765 1234', emgRel:'母亲 · 王秀英' },
-  '2024002': { name:'李华',   surname:'李', gender:'女', risk:'none', riskText:'无风险',   no:'2024002', klass:'计算机系 计科2班', dorm:'1 号楼 205 室', phoneOwn:'137 5555 2002', phoneEmg:'136 1111 2222', emgRel:'父亲 · 李建国' },
-  '2024005': { name:'赵子涵', surname:'赵', gender:'男', risk:'mid',  riskText:'黄档风险', no:'2024005', klass:'计算机系 软工1班', dorm:'2 号楼 308 室', phoneOwn:'135 6666 5005', phoneEmg:'134 3333 4444', emgRel:'母亲 · 赵美华' },
-  '2024009': { name:'孙宇轩', surname:'孙', gender:'男', risk:'low',  riskText:'蓝档风险', no:'2024009', klass:'计算机系 大数据1班', dorm:'5 号楼 402 室', phoneOwn:'158 7777 9009', phoneEmg:'157 9999 8888', emgRel:'父亲 · 孙志强' }
+  '2024001': { name:'张晓明', surname:'张', gender:'男', risk:'high',  riskText:'红档风险', no:'2024001', klass:'计算机系 计科1班', dorm:'3 号楼 101 室', phoneOwn:'138 1234 8001', phoneEmg:'139 8765 1234', emgRel:'母亲 · 王秀英', idcard:'110101201005200011' },
+  '2024002': { name:'李华',   surname:'李', gender:'女', risk:'none', riskText:'无风险',   no:'2024002', klass:'计算机系 计科2班', dorm:'1 号楼 205 室', phoneOwn:'137 5555 2002', phoneEmg:'136 1111 2222', emgRel:'父亲 · 李建国', idcard:'110102201102150022' },
+  '2024005': { name:'赵子涵', surname:'赵', gender:'男', risk:'mid',  riskText:'黄档风险', no:'2024005', klass:'计算机系 软工1班', dorm:'2 号楼 308 室', phoneOwn:'135 6666 5005', phoneEmg:'134 3333 4444', emgRel:'母亲 · 赵美华', idcard:'110108201107100035' },
+  '2024009': { name:'孙宇轩', surname:'孙', gender:'男', risk:'low',  riskText:'蓝档风险', no:'2024009', klass:'计算机系 大数据1班', dorm:'5 号楼 402 室', phoneOwn:'158 7777 9009', phoneEmg:'157 9999 8888', emgRel:'父亲 · 孙志强', idcard:'110105201108220039' }
 };
 
 /* 关联学生事件 mock (按姓名匹配;静态原型不走跨页数据源) */
@@ -300,6 +301,7 @@ function bindStudent(no) {
   document.getElementById('kvClass').textContent = s.klass;
   document.getElementById('kvDorm').innerHTML = escapeHtml(s.dorm) + ' <iconify-icon icon="solar:alt-arrow-right-linear"></iconify-icon>';
   document.getElementById('kvDorm').href = 'counselor_student_dorm.html?no=' + encodeURIComponent(s.no);
+  document.getElementById('kvIdcard').textContent = maskIdCard(s.idcard);
   document.getElementById('phoneOwn').textContent = maskPhone(s.phoneOwn);
   document.getElementById('phoneEmg').textContent = maskPhone(s.phoneEmg);
   window.__stu = s;

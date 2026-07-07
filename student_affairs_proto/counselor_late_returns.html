@@ -137,6 +137,18 @@ body { background-color: #1a1a1a; display: flex; justify-content: center; align-
 .empty-state .icon-circle iconify-icon { font-size: 40px; color: #D1D5DB; }
 .empty-state .title { font-size: 14px; font-weight: 700; color: var(--text-primary); }
 .empty-state .desc { font-size: 12px; color: var(--text-secondary); margin-top: 6px; }
+
+/* 日期范围筛选条 (PR-H+: 会议要求 - 最长 30 天回溯) */
+.date-range-bar { background: #fff; padding: 10px 16px; border-top: 1px solid var(--divider); display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.date-range-bar .lbl { font-size: 12px; color: var(--text-secondary); flex-shrink: 0; }
+.date-range-bar .date-input { flex: 1; min-width: 0; padding: 7px 10px; background: #F5F5F5; border: 1px solid #E5E7EB; border-radius: 8px; font-size: 12px; color: var(--text-primary); outline: none; box-sizing: border-box; font-family: inherit; }
+.date-range-bar .date-input:focus { border-color: var(--color-primary); background: #fff; }
+.date-range-bar .sep { color: #9CA3AF; font-size: 12px; flex-shrink: 0; }
+.date-range-bar .btn { padding: 7px 14px; background: var(--color-primary); color: #fff; border: 0; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; flex-shrink: 0; }
+.date-range-bar .btn.reset { background: #F3F4F6; color: var(--text-regular); }
+.date-range-bar .hint { font-size: 10px; color: var(--text-secondary); flex-basis: 100%; margin-top: 2px; line-height: 1.4; }
+.date-range-bar .hint.warn { color: var(--danger); }
+.date-range-bar .hint.ok   { color: var(--success); }
 </style>
 </head>
 <body>
@@ -162,6 +174,17 @@ body { background-color: #1a1a1a; display: flex; justify-content: center; align-
     <input id="lateSearch" name="lateSearch" class="bg-transparent text-sm w-full outline-none text-gray-700" placeholder="搜索学生姓名/学号/班级/点位/时间/事件/风险" type="text" autocomplete="off"/>
     <iconify-icon class="clear" id="clearSearch" icon="solar:close-circle-bold"></iconify-icon>
   </div>
+</div>
+
+<!-- 日期范围 (PR-H+: 会议要求 - 最长 30 天回溯) -->
+<div class="date-range-bar">
+  <span class="lbl">查询日期</span>
+  <input type="date" id="dateStart" class="date-input" aria-label="开始日期"/>
+  <span class="sep">至</span>
+  <input type="date" id="dateEnd" class="date-input" aria-label="结束日期"/>
+  <button type="button" class="btn" id="btnApplyDate">查询</button>
+  <button type="button" class="btn reset" id="btnResetDate">重置</button>
+  <div class="hint" id="dateHint">可查询最近 30 天内的晚归记录,超出范围将无法提交。</div>
 </div>
 
 <!-- Tab 筛选 -->
@@ -236,7 +259,7 @@ body { background-color: #1a1a1a; display: flex; justify-content: center; align-
   </div>
 
   <!-- 事件列表 -->
-  <div class="event-card" data-filter-key="today,pending" data-tier="red" data-tier-priority="1" data-search="张三 2024001 计科1班 北门闸机 23:15 人脸认证成功 红档 5分钟前">
+  <div class="event-card" data-filter-key="today,pending" data-tier="red" data-tier-priority="1" data-date="2026-05-10" data-search="张三 2024001 计科1班 北门闸机 23:15 人脸认证成功 红档 5分钟前">
     <div class="head">
       <div class="avatar">张</div>
       <div class="info">
@@ -307,7 +330,7 @@ body { background-color: #1a1a1a; display: flex; justify-content: center; align-
     </div>
   </div>
 
-  <div class="event-card" data-filter-key="week,done" data-tier="blue" data-tier-priority="3" data-search="钱七 2024005 计科2班 北门闸机 22:15 人证比对通过 蓝档 2天前 已结案">
+  <div class="event-card" data-filter-key="week,done" data-tier="blue" data-tier-priority="3" data-date="2026-05-11" data-search="钱七 2024005 计科2班 北门闸机 22:15 人证比对通过 蓝档 2天前 已结案">
     <div class="head">
       <div class="avatar">钱</div>
       <div class="info">
@@ -330,7 +353,7 @@ body { background-color: #1a1a1a; display: flex; justify-content: center; align-
     </div>
   </div>
 
-  <div class="event-card" data-filter-key="week,done" data-tier="blue" data-tier-priority="3" data-search="赵六 2024004 计科2班 东门闸机 23:42 合法卡认证成功 黄档 3天前 已结案">
+  <div class="event-card" data-filter-key="week,done" data-tier="blue" data-tier-priority="3" data-date="2026-05-09" data-search="赵六 2024004 计科2班 东门闸机 23:42 合法卡认证成功 黄档 3天前 已结案">
     <div class="head">
       <div class="avatar">赵</div>
       <div class="info">
@@ -460,7 +483,19 @@ function hideParentContact() {
 let currentTab = 'all';
 let currentTier = 'all';
 let currentSearch = '';
+/* PR-H+: 日期范围过滤状态 */
+let currentDateStart = '';
+let currentDateEnd = '';
 const TIER_ORDER = { red:1, yellow:2, blue:3, green:4 };
+const MAX_RANGE_DAYS = 30;
+
+function inDateRange(dateStr) {
+  if (!currentDateStart && !currentDateEnd) return true;
+  if (!dateStr) return false; /* 无日期事件卡在指定日期范围时不可见 */
+  if (currentDateStart && dateStr < currentDateStart) return false;
+  if (currentDateEnd && dateStr > currentDateEnd) return false;
+  return true;
+}
 
 function applyAllFilters() {
   let visible = 0;
@@ -468,10 +503,12 @@ function applyAllFilters() {
     var itemKey = item.dataset.filterKey || '';
     var itemTier = item.dataset.tier || '';
     var itemSearch = (item.dataset.search || '').toLowerCase();
+    var itemDate = item.dataset.date || '';
     var tabOk = currentTab === 'all' || itemKey === currentTab || itemKey.indexOf(currentTab) >= 0;
     var tierOk = currentTier === 'all' || itemTier === currentTier;
     var searchOk = !currentSearch || itemSearch.indexOf(currentSearch) >= 0;
-    var show = tabOk && tierOk && searchOk;
+    var dateOk = inDateRange(itemDate);
+    var show = tabOk && tierOk && searchOk && dateOk;
     item.style.display = show ? '' : 'none';
     if (show) visible++;
   });
@@ -556,6 +593,98 @@ document.getElementById('clearSearch').addEventListener('click', function() {
   applyAllFilters();
   inp.focus();
 });
+
+/* PR-H+: 日期范围 - 30 天回溯上限校验 + 应用/重置 */
+(function() {
+  var dateStart = document.getElementById('dateStart');
+  var dateEnd   = document.getElementById('dateEnd');
+  var btnApply  = document.getElementById('btnApplyDate');
+  var btnReset  = document.getElementById('btnResetDate');
+  var hint      = document.getElementById('dateHint');
+  if (!dateStart || !dateEnd || !btnApply) return;
+
+  /* 默认: 起始 = 今天 - 30 天, 结束 = 今天 */
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  function fmt(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  var today = new Date();
+  var defEnd = fmt(today);
+  var defStartDate = new Date(today.getTime() - (MAX_RANGE_DAYS - 1) * 86400000);
+  var defStart = fmt(defStartDate);
+  dateStart.max = defEnd;
+  dateEnd.max   = defEnd;
+  dateStart.value = defStart;
+  dateEnd.value   = defEnd;
+  currentDateStart = defStart;
+  currentDateEnd   = defEnd;
+
+  function showHint(msg, cls) {
+    if (!hint) return;
+    hint.textContent = msg;
+    hint.className = 'hint' + (cls ? (' ' + cls) : '');
+  }
+
+  function daysBetween(a, b) {
+    var da = new Date(a + 'T00:00:00');
+    var db = new Date(b + 'T00:00:00');
+    return Math.round((db - da) / 86400000);
+  }
+
+  function validate() {
+    var s = dateStart.value;
+    var e = dateEnd.value;
+    if (!s && !e) {
+      showHint('请选择查询日期范围,最长 30 天。', '');
+      return false;
+    }
+    if (s && !e) e = s;
+    if (!s && e) s = e;
+    if (s > e) {
+      showHint('开始日期不能晚于结束日期。', 'warn');
+      return false;
+    }
+    var diff = daysBetween(s, e);
+    if (diff > MAX_RANGE_DAYS - 1) {
+      showHint('查询范围超出 ' + MAX_RANGE_DAYS + ' 天上限(当前 ' + (diff + 1) + ' 天),请缩短范围后重试。', 'warn');
+      return false;
+    }
+    showHint('查询范围共 ' + (diff + 1) + ' 天(' + s + ' ~ ' + e + '),符合 30 天限制。', 'ok');
+    return true;
+  }
+
+  dateStart.addEventListener('change', validate);
+  dateEnd.addEventListener('change', validate);
+
+  btnApply.addEventListener('click', function() {
+    if (!validate()) {
+      showToast('日期范围无效:不可超过 30 天');
+      return;
+    }
+    currentDateStart = dateStart.value;
+    currentDateEnd   = dateEnd.value;
+    applyAllFilters();
+    showToast('已按日期范围筛选');
+  });
+
+  btnReset.addEventListener('click', function() {
+    dateStart.value = defStart;
+    dateEnd.value   = defEnd;
+    currentDateStart = defStart;
+    currentDateEnd   = defEnd;
+    validate();
+    applyAllFilters();
+    showToast('已重置为最近 30 天');
+  });
+
+  validate();
+})();
+
+function showToast(msg) {
+  var t = document.createElement('div');
+  t.className = 'app-toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function() { t.remove(); }, 1500);
+}
 
 /* 初始化: 刷新统计 + 排序 + 应用默认筛选 */
 (function() {

@@ -102,6 +102,31 @@
         @keyframes toastOut { from { opacity:1; } to { opacity:0; } }
         .app-toast { position:fixed; top:60px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.78); color:#fff; padding:10px 20px; border-radius:20px; font-size:14px; z-index:9999; animation: toastIn 0.25s ease-out; }
         .app-toast.out { animation: toastOut 0.25s ease-out forwards; }
+
+        /* PR-H+: 创建/修改时间戳(会议要求:工作记录需同时记录创建时间与修改时间) */
+        .edit-time-bar { background:#fff; border-radius:16px; margin:12px 16px 0; padding:12px 16px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:11px; color:#6B7280; }
+        .edit-time-bar .ts { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; background:#F5F6F8; border-radius:8px; }
+        .edit-time-bar .ts.created { background:#F5F6F8; color:#444; }
+        .edit-time-bar .ts.updated { background:#EFF6FF; color:var(--color-primary); font-weight:600; }
+        .edit-time-bar .ts iconify-icon { font-size:13px; }
+        .edit-time-bar .ts .label { color:#9CA3AF; margin-right:2px; }
+        .edit-time-bar .ts.updated .label { color:var(--color-primary); opacity:0.7; }
+        .edit-time-bar .mod-count { margin-left:auto; color:#9CA3AF; }
+
+        .edit-history { background:#fff; border-radius:16px; margin:12px 16px; padding:14px 16px; }
+        .edit-history .h-title { display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#191919; margin-bottom:10px; }
+        .edit-history .h-title iconify-icon { font-size:15px; color:var(--color-primary); }
+        .edit-history ul { list-style:none; margin:0; padding:0; max-height:180px; overflow-y:auto; }
+        .edit-history li { position:relative; padding:0 0 10px 18px; font-size:11px; color:#444; line-height:1.5; }
+        .edit-history li:last-child { padding-bottom:0; }
+        .edit-history li::before { content:''; position:absolute; left:5px; top:5px; width:7px; height:7px; border-radius:50%; background:#D1D5DB; border:2px solid #fff; box-shadow:0 0 0 1px #D1D5DB; }
+        .edit-history li.created::before { background:var(--color-primary); box-shadow:0 0 0 1px var(--color-primary); }
+        .edit-history li.updated::before { background:var(--warning); box-shadow:0 0 0 1px var(--warning); }
+        .edit-history li .h-ts { color:#6B7280; font-family:ui-monospace, "SF Mono", monospace; font-size:10px; }
+        .edit-history li .h-action { display:inline-block; padding:0 5px; border-radius:3px; font-size:9px; font-weight:600; margin-left:4px; }
+        .edit-history li.created .h-action { background:#EFF6FF; color:var(--color-primary); }
+        .edit-history li.updated .h-action { background:#FFF7E6; color:#C2700A; }
+        .edit-history li .h-summary { color:#191919; margin-top:2px; }
     </style>
 </head>
 <body>
@@ -171,6 +196,17 @@
 <label for="logPlace">地点</label>
 <input id="logPlace" name="logPlace" placeholder="请输入谈话地点" type="text" value="学生辅导办公室"/>
 </div>
+</div>
+<!-- PR-H+: 创建/修改时间戳(仅编辑已有日志时显示) -->
+<div class="edit-time-bar" id="editTimeBar" style="display:none;">
+  <span class="ts created" id="tsCreated"><iconify-icon icon="solar:add-circle-linear"></iconify-icon><span class="label">创建</span><span id="tsCreatedVal">—</span></span>
+  <span class="ts updated" id="tsUpdated"><iconify-icon icon="solar:restart-linear"></iconify-icon><span class="label">最近修改</span><span id="tsUpdatedVal">—</span></span>
+  <span class="mod-count" id="modCount">—</span>
+</div>
+<!-- PR-H+: 修改历史时间线 -->
+<div class="edit-history" id="editHistory" style="display:none;">
+  <div class="h-title"><iconify-icon icon="solar:history-bold-duotone"></iconify-icon><span id="editHistoryTitle">修改历史</span></div>
+  <ul id="editHistoryList"></ul>
 </div>
 <div class="form-group p-0">
 <textarea id="logContent" name="logContent" class="w-full p-4 h-40 outline-none text-sm text-gray-800 placeholder-gray-400 rounded-2xl" placeholder="详细描述谈话内容、学生反馈及后续计划..."></textarea>
@@ -451,12 +487,49 @@ function showToast(msg) {
   document.body.appendChild(t);
   setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 250); }, 1500);
 }
+
+/* PR-H+: 格式化当前时间为 'YYYY-MM-DD HH:mm' */
+function nowTs() {
+  var d = new Date();
+  var pad = function(n) { return n < 10 ? '0' + n : '' + n; };
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate())
+    + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+
+/* PR-H+: 把当前编辑结果写回 localStorage 中的对应日志,
+   追加历史时间戳(支持不限次数修改) */
+function persistLogUpdate(actionLabel) {
+  var editing = window.__editingLog;
+  if (!editing) return;
+  var logs = [];
+  try { logs = JSON.parse(localStorage.getItem('xzd_logs') || '[]'); } catch(e) { logs = []; }
+  var idx = logs.findIndex(function(x) { return x.log_id === editing.log_id; });
+  if (idx < 0) return;
+  var now = nowTs();
+  var newHistory = Array.isArray(editing.history) ? editing.history.slice() : [];
+  newHistory.push({ ts: now, action: 'updated', summary: actionLabel || '更新日志内容' });
+  var updated = Object.assign({}, editing, {
+    body: document.getElementById('logContent').value,
+    time: (document.getElementById('logDate').value || '') + ' ' + now.substring(11),
+    place: document.getElementById('logPlace').value,
+    updated_at: now,
+    history: newHistory
+  });
+  logs[idx] = updated;
+  try { localStorage.setItem('xzd_logs', JSON.stringify(logs)); } catch(e) {}
+  window.__editingLog = updated;
+}
+
 function saveDraft() {
+  /* PR-H+: 编辑草稿时同样记录修改 */
+  if (window.__editingLog) persistLogUpdate('保存草稿(修改内容)');
   showToast('保存草稿成功');
 }
 function submitLog() {
-  showToast('日志已提交（演示）');
-  setTimeout(function() { window.location.href = 'counselor_logs.html'; }, 600);
+  /* PR-H+: 编辑提交时记录新时间戳 */
+  if (window.__editingLog) persistLogUpdate('更新日志内容');
+  showToast(window.__editingLog ? '日志已更新(已记录修改时间戳)' : '日志已提交（演示）');
+  setTimeout(function() { window.location.href = 'counselor_logs.html'; }, 800);
 }
 function onFilesPicked(input) {
   var preview = document.getElementById('attachPreview');
@@ -473,6 +546,7 @@ function onFilesPicked(input) {
 }
 
 // ?lid= 回填(从 localStorage 读取,需要 counselor_logs.html 先写入)
+window.__editingLog = null;
 (function() {
   var lid = new URLSearchParams(window.location.search).get('lid');
   if (!lid) return;
@@ -480,6 +554,7 @@ function onFilesPicked(input) {
   try { logs = JSON.parse(localStorage.getItem('xzd_logs') || '[]'); } catch(e) {}
   var log = logs.find(function(x) { return x.log_id === lid; });
   if (!log) { showToast('未找到日志 ' + lid + '（请先访问工作日志页）'); return; }
+  window.__editingLog = log;
   document.getElementById('logDate').value = (log.time || '').split(' ')[0];
   document.getElementById('logPlace').value = log.place || '';
   document.getElementById('logContent').value = log.body || '';
@@ -494,6 +569,49 @@ function onFilesPicked(input) {
     if (lbl === catMap[log.category]) c.classList.add('active');
     else c.classList.remove('active');
   });
+
+  /* PR-H+: 渲染创建/修改时间戳 + 修改历史 */
+  var created = log.created_at || log.time || '';
+  var updated = log.updated_at || created;
+  var history = log.history || [];
+  var bar = document.getElementById('editTimeBar');
+  if (bar) {
+    bar.style.display = 'flex';
+    document.getElementById('tsCreatedVal').textContent = created || '—';
+    var updatedEl = document.getElementById('tsUpdated');
+    if (updated && updated !== created) {
+      document.getElementById('tsUpdatedVal').textContent = updated;
+      updatedEl.style.display = 'inline-flex';
+    } else {
+      updatedEl.style.display = 'none';
+    }
+    var modCount = history.filter(function(h){ return h.action === 'updated'; }).length;
+    var mc = document.getElementById('modCount');
+    if (mc) mc.textContent = modCount > 0 ? ('已修改 ' + modCount + ' 次') : '尚未修改';
+  }
+  var histBox = document.getElementById('editHistory');
+  var histList = document.getElementById('editHistoryList');
+  if (histBox && histList) {
+    if (history.length > 0) {
+      histBox.style.display = 'block';
+      document.getElementById('editHistoryTitle').textContent = '修改历史(共 ' + history.length + ' 条)';
+      var hh = '';
+      history.forEach(function(h) {
+        var actionLabel = h.action === 'created' ? '创建' : '修改';
+        hh += '<li class="' + h.action + '">'
+          + '<span class="h-ts">' + h.ts + '</span>'
+          + '<span class="h-action">' + actionLabel + '</span>'
+          + '<div class="h-summary">' + (h.summary || '') + '</div>'
+          + '</li>';
+      });
+      histList.innerHTML = hh;
+    } else {
+      histBox.style.display = 'block';
+      document.getElementById('editHistoryTitle').textContent = '修改历史';
+      histList.innerHTML = '<li style="color:#9CA3AF;text-align:center;padding:12px 0;">暂无修改记录</li>';
+    }
+  }
+
   showToast('已加载日志 ' + lid);
 })();
 </script></form>
