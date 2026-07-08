@@ -451,43 +451,31 @@ document.querySelectorAll('.sub-tabs span').forEach(function(t) {
 })();
 </script>
 <script>
-/* PR-H.3 v3: nav-back 智能返回 — 优先 referrer, 其次当前 URL */
+/* PR-H.4: nav-back 用 history.back() 替代 referrer (兼容 file:// + http:// + https://) */
 (function(){
   try {
     var sp = new URLSearchParams(location.search);
     var K = ['class','risk','dorm','from','filter','tier','type','anomaly','student','cat','lid','focus','mid','rid','q'];
     var parts = [];
     K.forEach(function(k){var v=sp.get(k); if(v!=null && v!=='') parts.push(k+'='+encodeURIComponent(v));});
-    /* referrer: 如果 referrer 是同源 counselor_*.html, 用它作为回退目标 */
-    var refBase = null, refParts = [];
-    if (document.referrer) {
-      try {
-        var refUrl = new URL(document.referrer);
-        var refName = refUrl.pathname.substring(refUrl.pathname.lastIndexOf('/') + 1);
-        if (refName.indexOf('counselor_') === 0 && refName.indexOf('.html') !== -1) {
-          refBase = refName;
-          var refSp = new URLSearchParams(refUrl.search);
-          K.forEach(function(k){var v=refSp.get(k); if(v!=null && v!=='') refParts.push(k+'='+encodeURIComponent(v));});
-        }
-      } catch(e) {}
-    }
-    document.querySelectorAll('.nav-bar a.p-2.-ml-2, a.nav-back, .nav-bar a[href^="counselor_"]').forEach(function(a){
+    document.querySelectorAll('.nav-bar a.p-2.-ml-2, a.nav-back').forEach(function(a){
       var h = a.getAttribute('href') || '';
       if (!h || h.indexOf('javascript:') === 0 || h[0] === '#') return;
       if (a.classList.contains('plus-tab') || a.classList.contains('fab')) return;
       var base = h.split('?')[0];
       var ex = new URLSearchParams(h.split('?')[1] || '');
       if (K.some(function(k){return ex.has(k);})) return;
-      var useParts = parts.length ? parts : refParts;
-      if (!useParts.length) return;
-      /* 如果 referrer 可用, 用 referrer 作为基础; 否则保留原 base */
-      var finalBase = refBase || base;
-      a.setAttribute('href', finalBase + '?' + useParts.join('&'));
+      if (history.length > 1) {
+        a.setAttribute('href', 'javascript:history.back()');
+        return;
+      }
+      if (parts.length) {
+        a.setAttribute('href', base + '?' + parts.join('&'));
+      }
     });
-  } catch(e) { console.error('PR-H.3 v3 nav-back error:', e); }
+  } catch(e) { console.error('PR-H.4 nav-back error:', e); }
 })();
-</script>
-<script>
+</script><script>
 /* PR-H.3 FAB: plus-tab/fab → log_edit 时携带 from= */
 (function(){
   try {

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>学生变动查看 - 学工助手</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+        :root {
+            --color-primary: #1E5AE6;
+            --color-bg-page: #F5F6F8;
+            --success: #07C160;
+            --warning: #FA9D3B;
+            --danger: #FA5151;
+        }
+        body { background-color: #1a1a1a; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+        .phone-shell { width: 375px; height: 812px; background: var(--color-bg-page); border-radius: 40px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+        .status-bar { height: 44px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #000; flex-shrink: 0; line-height: 1; }
+        .status-bar iconify-icon { display: inline-flex; align-items: center; justify-content: center; line-height: 1; font-size: 16px; }
+        .nav-bar { height: 44px; display: flex; align-items: center; padding: 0 16px; background: #fff; border-bottom: 1px solid #F3F4F6; position: relative; flex-shrink: 0; }
+        .nav-back { color: #191919; text-decoration: none; display: flex; align-items: center; gap: 4px; font-size: 14px; position: absolute; left: 12px; }
+        .nav-title { font-size: 16px; font-weight: 600; color: #191919; margin: 0 auto; }
+        .nav-action { position: absolute; right: 12px; color: var(--color-primary); text-decoration: none; font-size: 13px; display: flex; align-items: center; gap: 3px; }
+        .content { flex: 1; overflow-y: auto; }
+        .stats-card { margin: 12px 16px 8px; padding: 16px; border-radius: 16px; background: linear-gradient(135deg, #1E5AE6 0%, #4080FF 100%); color: #fff; box-shadow: 0 4px 12px rgba(30, 90, 230, 0.15); }
+        .stats-title { font-size: 12px; opacity: 0.9; margin-bottom: 12px; font-weight: 500; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
+        .stat-item { text-align: center; }
+        .stat-num { font-size: 22px; font-weight: 700; line-height: 1.2; }
+        .stat-label { font-size: 10px; opacity: 0.85; margin-top: 2px; }
+        .search-box { background: #fff; padding: 10px 16px 8px; }
+        .search-input { background: #F5F6F8; border-radius: 20px; padding: 8px 14px; display: flex; align-items: center; gap: 8px; }
+        .search-input input { flex: 1; border: 0; outline: none; background: transparent; font-size: 13px; color: #191919; }
+        .search-input iconify-icon { color: #9CA3AF; font-size: 16px; }
+        .chip-row { background: #fff; padding: 4px 16px 12px; display: flex; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+        .chip-row::-webkit-scrollbar { display: none; }
+        .class-chip-row { background: #fff; padding: 10px 16px 4px; border-bottom: 1px solid #F3F4F6; }
+        .class-chip-label { font-size: 11px; color: #9CA3AF; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
+        .class-chip-label::before { content: ''; display: inline-block; width: 3px; height: 10px; background: var(--color-primary); border-radius: 2px; }
+        .chip-row-inner { display: flex; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+        .chip-row-inner::-webkit-scrollbar { display: none; }
+        .chip { padding: 5px 12px; border-radius: 14px; font-size: 12px; font-weight: 500; background: #F5F6F8; color: #6B7280; cursor: pointer; flex-shrink: 0; transition: all 0.2s; user-select: none; }
+        .chip.active { background: var(--color-primary); color: #fff; }
+        .chip-badge { display: inline-block; margin-left: 4px; padding: 0 5px; background: rgba(255,255,255,0.25); border-radius: 8px; font-size: 10px; font-weight: 700; }
+        .chip:not(.active) .chip-badge { background: rgba(0,0,0,0.06); }
+        .change-card { background: #fff; border-radius: 12px; margin: 8px 16px; padding: 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
+        .change-card.hidden { display: none; }
+        .change-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .change-avatar { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; flex-shrink: 0; }
+        .change-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .change-meta { flex: 1; min-width: 0; }
+        .change-name { font-size: 14px; font-weight: 700; color: #191919; }
+        .change-no { font-size: 11px; color: #9CA3AF; margin-top: 2px; }
+        .type-tag { display: inline-flex; align-items: center; gap: 3px; padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; flex-shrink: 0; }
+        .type-tag.transfer_in  { background: #EFF6FF; color: #1E5AE6; }
+        .type-tag.transfer_out { background: #FFF7E6; color: #B45309; }
+        .type-tag.dropout     { background: #FEE2E2; color: #DC2626; }
+        .type-tag.leave       { background: #FEF3C7; color: #B45309; }
+        .type-tag.extended    { background: #F3E8FF; color: #7C3AED; }
+        .type-tag.military    { background: #D1FAE5; color: #047857; }
+        .type-tag iconify-icon { font-size: 12px; }
+        .change-path { background: #F9FAFB; border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; }
+        .path-row { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #4B5563; }
+        .path-row + .path-row { margin-top: 4px; }
+        .path-label { color: #9CA3AF; flex-shrink: 0; width: 40px; }
+        .path-value { flex: 1; font-weight: 500; color: #191919; }
+        .path-arrow { color: #9CA3AF; margin: 0 2px; }
+        .change-foot { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #9CA3AF; }
+        .change-reason { color: #6B7280; }
+        .empty-state { padding: 60px 32px; text-align: center; color: #9CA3AF; }
+        .empty-state iconify-icon { font-size: 48px; color: #D1D5DB; margin-bottom: 12px; }
+        .empty-state .tip { font-size: 13px; }
+        .tab-bar { height: 84px; background: #fff; border-top: 1px solid #E5E7EB; display: flex; justify-content: space-around; align-items: center; padding-bottom: 20px; flex-shrink: 0; }
+        .tab-item { display: flex; flex-direction: column; align-items: center; text-align: center; color: #9CA3AF; text-decoration: none; }
+        .tab-item.active { color: var(--color-primary); }
+        .tab-item iconify-icon { font-size: 24px; margin-bottom: 4px; }
+        .tab-item span { font-size: 11px; }
+        .home-indicator { height:34px; background:#fff; display:flex; justify-content:center; align-items:flex-end; padding-bottom:8px; flex-shrink:0; }
+        .home-indicator .bar { width:134px; height:5px; border-radius:3px; background:#000; opacity:0.85; }
+        .app-toast { position:fixed; top:60px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.78); color:#fff; padding:10px 20px; border-radius:20px; font-size:14px; z-index:9999; animation: toastIn 0.25s ease-out; }
+        @keyframes toastIn { from { opacity:0; transform:translate(-50%, -10px); } to { opacity:1; transform:translate(-50%, 0); } }
+</style>
+</head>
+<body>
+<div class="phone-shell">
+<div class="status-bar">
+<span>12:20</span>
+<div class="flex gap-1.5 text-[#000]">
+<iconify-icon icon="mingcute:signal-fill"></iconify-icon>
+<iconify-icon icon="mingcute:wifi-fill"></iconify-icon>
+<iconify-icon icon="mingcute:battery-fill"></iconify-icon>
+</div>
+</div>
+<div class="nav-bar">
+<a class="nav-back" href="counselor_workbench.html" aria-label="返回工作台" id="navBack">
+<iconify-icon icon="solar:alt-arrow-left-linear" style="font-size:18px;"></iconify-icon>
+<span>返回</span>
+</a>
+<h1 class="nav-title">学生变动查看</h1>
+<a class="nav-action" href="counselor_student_change_edit.html" id="navAction">
+<iconify-icon icon="solar:add-circle-bold" style="font-size:16px;"></iconify-icon>
+<span>新建变动</span>
+</a>
+</div>
+<div class="content">
+<!-- 统计卡 -->
+<div class="stats-card">
+<div class="stats-title">本学期学生异动总览</div>
+<div class="stats-grid">
+<div class="stat-item">
+<div class="stat-num" id="statTotal">18</div>
+<div class="stat-label">异动总数</div>
+</div>
+<div class="stat-item">
+<div class="stat-num" id="statMonth">5</div>
+<div class="stat-label">本月</div>
+</div>
+<div class="stat-item">
+<div class="stat-num" id="statIn">3</div>
+<div class="stat-label">转入</div>
+</div>
+<div class="stat-item">
+<div class="stat-num" id="statOut">8</div>
+<div class="stat-label">转出</div>
+</div>
+</div>
+</div>
+<!-- 搜索 -->
+<div class="search-box">
+<div class="search-input">
+<iconify-icon icon="solar:magnifer-linear"></iconify-icon>
+<input id="searchInput" type="text" placeholder="搜索学号、姓名" autocomplete="off"/>
+</div>
+</div>
+<!-- 分管班级筛选 -->
+<div class="class-chip-row" id="classChipRow">
+<div class="class-chip-label">分管班级</div>
+<div class="chip-row-inner">
+<div class="chip active" data-class="all">全部</div>
+<div class="chip" data-class="计科1班">计科1班</div>
+<div class="chip" data-class="计科2班">计科2班</div>
+<div class="chip" data-class="计科3班">计科3班</div>
+<div class="chip" data-class="计科4班">计科4班</div>
+<div class="chip" data-class="软工1班">软工1班</div>
+<div class="chip" data-class="软工2班">软工2班</div>
+<div class="chip" data-class="软工3班">软工3班</div>
+<div class="chip" data-class="AI1班">AI1班</div>
+</div>
+</div>
+<!-- 类型筛选 -->
+<div class="chip-row" id="chipRow">
+<div class="chip active" data-type="all">全部 <span class="chip-badge" id="cntAll">18</span></div>
+<div class="chip" data-type="transfer_in">转入 <span class="chip-badge" id="cntIn">3</span></div>
+<div class="chip" data-type="transfer_out">转出 <span class="chip-badge" id="cntOut">8</span></div>
+<div class="chip" data-type="dropout">退学 <span class="chip-badge" id="cntDrop">2</span></div>
+<div class="chip" data-type="leave">休学 <span class="chip-badge" id="cntLeave">3</span></div>
+<div class="chip" data-type="extended">延毕 <span class="chip-badge" id="cntExt">1</span></div>
+<div class="chip" data-type="military">参军 <span class="chip-badge" id="cntMil">1</span></div>
+</div>
+<!-- 列表 -->
+<div id="changeList">
+<!-- 18 条 mock 数据由 JS 渲染 -->
+</div>
+<div class="empty-state" id="emptyState" style="display:none;">
+<iconify-icon icon="solar:document-magnifer-linear"></iconify-icon>
+<div class="tip">未找到匹配的异动记录</div>
+</div>
+</div>
+<div class="tab-bar">
+<a class="tab-item" href="counselor_workbench.html">
+<iconify-icon icon="solar:home-2-linear"></iconify-icon>
+<span>工作台</span>
+</a>
+<a class="tab-item active" href="counselor_students.html">
+<iconify-icon icon="solar:users-group-rounded-linear"></iconify-icon>
+<span>学生</span>
+</a>
+<a class="tab-item" href="counselor_anomalies.html">
+<iconify-icon icon="solar:bell-bing-linear"></iconify-icon>
+<span>异常</span>
+</a>
+<a class="tab-item" href="counselor_logs.html">
+<iconify-icon icon="solar:document-text-linear"></iconify-icon>
+<span>日志</span>
+</a>
+<a class="tab-item" href="counselor_profile.html">
+<iconify-icon icon="solar:user-circle-linear"></iconify-icon>
+<span>我的</span>
+</a>
+</div>
+<div class="home-indicator"><div class="bar"></div></div>
+</div>
+
+<!-- 数据源 -->
+<script type="application/json" id="page-data">
+{
+  "changes": [
+    { "id":"CHG001", "no":"2024001", "name":"张晓明", "type":"transfer_out", "fromDept":"计算机系", "fromMajor":"计算机科学与技术", "fromClass":"计科1班", "toDept":"软件工程系", "toClass":"软工2班", "date":"2026-06-28", "operator":"王辅导员", "reason":"个人申请转专业" },
+    { "id":"CHG002", "no":"2024008", "name":"陈雨萱", "type":"leave", "fromDept":"人工智能学院", "fromMajor":"人工智能", "fromClass":"AI1班", "toDept":"（休学）", "toClass":"", "date":"2026-06-15", "operator":"王辅导员", "reason":"身体原因休学一学年" },
+    { "id":"CHG003", "no":"2023012", "name":"林晓东", "type":"military", "fromDept":"计算机系", "fromMajor":"计算机科学与技术", "fromClass":"计科3班", "toDept":"（应征入伍）", "toClass":"", "date":"2026-05-20", "operator":"王辅导员", "reason":"响应国家号召应征入伍" },
+    { "id":"CHG004", "no":"2025001", "name":"周明月", "type":"transfer_in", "fromDept":"通信工程", "fromMajor":"通信工程", "fromClass":"通工2班", "toDept":"计算机系", "toClass":"计科1班", "date":"2026-03-15", "operator":"王辅导员", "reason":"原专业调剂转入" },
+    { "id":"CHG005", "no":"2023055", "name":"黄子腾", "type":"dropout", "fromDept":"计算机系", "fromMajor":"软件工程", "fromClass":"计科2班", "toDept":"（退学）", "toClass":"", "date":"2026-04-08", "operator":"王辅导员", "reason":"个人原因申请退学" },
+    { "id":"CHG006", "no":"2024007", "name":"刘思琪", "type":"transfer_out", "fromDept":"计算机系", "fromMajor":"计算机科学与技术", "fromClass":"计科1班", "toDept":"人工智能学院", "toClass":"AI1班", "date":"2026-05-12", "operator":"王辅导员", "reason":"大一下学期转专业" },
+    { "id":"CHG007", "no":"2025002", "name":"吴梓涵", "type":"transfer_in", "fromDept":"机械工程", "fromMajor":"机械设计制造及其自动化", "fromClass":"机械2班", "toDept":"计算机系", "toClass":"软工1班", "date":"2026-03-22", "operator":"王辅导员", "reason":"大类招生专业分流" },
+    { "id":"CHG008", "no":"2022019", "name":"徐若曦", "type":"leave", "fromDept":"软件工程系", "fromMajor":"软件工程", "fromClass":"软工3班", "toDept":"（休学）", "toClass":"", "date":"2026-02-18", "operator":"王辅导员", "reason":"家庭原因休学" },
+    { "id":"CHG009", "no":"2024015", "name":"高伟杰", "type":"transfer_out", "fromDept":"计算机系", "fromMajor":"计算机科学与技术", "fromClass":"计科1班", "toDept":"网络安全学院", "toClass":"网安1班", "date":"2026-04-25", "operator":"王辅导员", "reason":"个人兴趣转专业" },
+    { "id":"CHG010", "no":"2024022", "name":"孙佳怡", "type":"leave", "fromDept":"计算机系", "fromMajor":"数据科学", "fromClass":"计科2班", "toDept":"（休学）", "toClass":"", "date":"2026-01-30", "operator":"王辅导员", "reason":"心理原因申请休学半年" },
+    { "id":"CHG011", "no":"2020033", "name":"周晨", "type":"extended", "fromDept":"计算机系", "fromMajor":"计算机科学与技术", "fromClass":"计科4班", "toDept":"计算机系", "toClass":"2020级延毕", "date":"2026-05-30", "operator":"王辅导员", "reason":"学分未修满申请延毕" },
+    { "id":"CHG012", "no":"2025003", "name":"何雨桐", "type":"transfer_in", "fromDept":"电子信息", "fromMajor":"电子信息工程", "fromClass":"电信1班", "toDept":"计算机系", "toClass":"计科2班", "date":"2026-03-08", "operator":"王辅导员", "reason":"跨院系转专业" },
+    { "id":"CHG013", "no":"2023041", "name":"韩天宇", "type":"transfer_out", "fromDept":"计算机系", "fromMajor":"软件工程", "fromClass":"计科2班", "toDept":"数据科学学院", "toClass":"数据1班", "date":"2026-04-18", "operator":"王辅导员", "reason":"主动申请转入新学院" },
+    { "id":"CHG014", "no":"2024048", "name":"宋雅琪", "type":"transfer_out", "fromDept":"软件工程系", "fromMajor":"软件工程", "fromClass":"软工1班", "toDept":"计算机系", "toClass":"计科1班", "date":"2026-05-05", "operator":"王辅导员", "reason":"大类招生二次分流" },
+    { "id":"CHG015", "no":"2022067", "name":"邓子轩", "type":"dropout", "fromDept":"计算机系", "fromMajor":"计算机科学与技术", "fromClass":"计科3班", "toDept":"（退学）", "toClass":"", "date":"2025-12-12", "operator":"王辅导员", "reason":"创业申请退学" },
+    { "id":"CHG016", "no":"2024018", "name":"冯一鸣", "type":"transfer_out", "fromDept":"计算机系", "fromMajor":"计算机科学与技术", "fromClass":"计科1班", "toDept":"外国语学院", "toClass":"英语1班", "date":"2025-11-28", "operator":"王辅导员", "reason":"个人兴趣转专业" },
+    { "id":"CHG017", "no":"2025021", "name":"罗欣怡", "type":"transfer_out", "fromDept":"人工智能学院", "fromMajor":"人工智能", "fromClass":"AI1班", "toDept":"计算机系", "toClass":"计科2班", "date":"2025-10-15", "operator":"王辅导员", "reason":"大类招生二次分流" },
+    { "id":"CHG018", "no":"2024033", "name":"蔡明阳", "type":"transfer_out", "fromDept":"软件工程系", "fromMajor":"软件工程", "fromClass":"软工1班", "toDept":"计算机系", "toClass":"计科2班", "date":"2025-09-20", "operator":"王辅导员", "reason":"大类招生二次分流" }
+  ]
+}
+</script>
+
+<script>
+(function() {
+  const DATA = JSON.parse(document.getElementById('page-data').textContent);
+  const TYPE_INFO = {
+    transfer_in:  { label: '转入', icon: 'solar:login-3-bold' },
+    transfer_out: { label: '转出', icon: 'solar:logout-bold' },
+    dropout:      { label: '退学', icon: 'solar:close-circle-bold' },
+    leave:        { label: '休学', icon: 'solar:pause-circle-bold' },
+    extended:     { label: '延毕', icon: 'solar:clock-circle-bold' },
+    military:     { label: '参军', icon: 'solar:shield-keyhole-bold' }
+  };
+  const TYPE_LABELS_KEY = { transfer_in:1, transfer_out:1, dropout:1, leave:1, extended:1, military:1 };
+
+  const storedRaw = localStorage.getItem('xzd-changes');
+  if (storedRaw) {
+    try {
+      const stored = JSON.parse(storedRaw);
+      if (Array.isArray(stored) && stored.length) {
+        DATA.changes = stored.concat(DATA.changes);
+      }
+    } catch(e) {}
+  }
+
+  const list = document.getElementById('changeList');
+  const empty = document.getElementById('emptyState');
+  let activeType = 'all';
+  let activeClass = 'all';
+  let activeKeyword = '';
+
+  /* PR-H.2: read URL params on entry */
+  (function(){
+    var p = new URLSearchParams(window.location.search);
+    var t = p.get('type');
+    if (t && TYPE_LABELS_KEY[t]) {
+      activeType = t;
+      document.querySelectorAll('#chipRow .chip').forEach(function(c){c.classList.remove('active');});
+      var matchChip = document.querySelector('#chipRow .chip[data-type="'+t+'"]');
+      if (matchChip) matchChip.classList.add('active');
+    }
+    var from = p.get('from');
+    var back = document.getElementById('navBack');
+    if (back) {
+      if (from === 'students') back.setAttribute('href', 'counselor_students.html');
+      else if (from === 'workbench') back.setAttribute('href', 'counselor_workbench.html');
+      else back.setAttribute('href', 'counselor_workbench.html');
+    }
+    var navAction = document.getElementById('navAction');
+    if (navAction && activeType !== 'all') {
+      navAction.setAttribute('href', 'counselor_student_change_edit.html?type=' + encodeURIComponent(activeType));
+    }
+  })();
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  }
+
+  function avatarUrl(name) {
+    const ch = escapeHtml((name || '?').charAt(0));
+    return `https://ui-avatars.com/api/?name=${ch}&background=1E5AE6&color=fff&size=128&bold=true&font-size=0.5`;
+  }
+
+  function render() {
+    const kw = activeKeyword.trim().toLowerCase();
+    const filtered = DATA.changes.filter(c => {
+      if (activeType !== 'all' && c.type !== activeType) return false;
+      if (activeClass !== 'all') {
+        const inFrom = c.fromClass === activeClass;
+        const inTo = c.toClass === activeClass;
+        if (!inFrom && !inTo) return false;
+      }
+      if (kw) {
+        const hay = (c.no + ' ' + c.name + ' ' + (c.fromClass||'') + ' ' + (c.toClass||'')).toLowerCase();
+        if (!hay.includes(kw)) return false;
+      }
+      return true;
+    });
+
+    if (filtered.length === 0) {
+      list.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+
+    list.innerHTML = filtered.map(c => {
+      const info = TYPE_INFO[c.type] || { label: c.type, icon: 'solar:question-circle-bold' };
+      const toText = c.toDept + (c.toClass ? '·' + c.toClass : '');
+      const fromText = c.fromDept + (c.fromMajor ? ' · ' + c.fromMajor : '') + (c.fromClass ? ' · ' + c.fromClass : '');
+      return `
+<div class="change-card" data-type="${c.type}" data-search="${escapeHtml((c.no+' '+c.name).toLowerCase())}">
+<div class="change-head">
+<div class="change-avatar"><img src="${avatarUrl(c.name)}" alt=""/></div>
+<div class="change-meta">
+<div class="change-name">${escapeHtml(c.name)}</div>
+<div class="change-no">${escapeHtml(c.no)} · ${escapeHtml(c.fromClass || '')}</div>
+</div>
+<span class="type-tag ${c.type}">
+<iconify-icon icon="${info.icon}"></iconify-icon>
+${escapeHtml(info.label)}
+</span>
+</div>
+<div class="change-path">
+<div class="path-row"><span class="path-label">原专业</span><span class="path-value">${escapeHtml(fromText)}</span></div>
+<div class="path-row"><span class="path-label">${c.type === 'transfer_in' ? '调入' : c.type === 'transfer_out' ? '转至' : c.type === 'extended' ? '延毕至' : '异动至'}</span><span class="path-value">${escapeHtml(toText)}</span></div>
+</div>
+<div class="change-foot">
+<span class="change-reason">备注：${escapeHtml(c.reason || '—')}</span>
+<span>${escapeHtml(c.date)} · ${escapeHtml(c.operator)}</span>
+</div>
+</div>`;
+    }).join('');
+  }
+
+  function updateCounts() {
+    const all = DATA.changes.length;
+    const byType = { transfer_in:0, transfer_out:0, dropout:0, leave:0, extended:0, military:0 };
+    DATA.changes.forEach(c => { if (byType[c.type] != null) byType[c.type]++; });
+    document.getElementById('cntAll').textContent = all;
+    document.getElementById('cntIn').textContent = byType.transfer_in;
+    document.getElementById('cntOut').textContent = byType.transfer_out;
+    document.getElementById('cntDrop').textContent = byType.dropout;
+    document.getElementById('cntLeave').textContent = byType.leave;
+    document.getElementById('cntExt').textContent = byType.extended;
+    document.getElementById('cntMil').textContent = byType.military;
+    document.getElementById('statTotal').textContent = all;
+    document.getElementById('statIn').textContent = byType.transfer_in;
+    document.getElementById('statOut').textContent = byType.transfer_out;
+    const now = new Date();
+    const monthCount = DATA.changes.filter(c => {
+      const d = new Date(c.date);
+      return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+    }).length;
+    document.getElementById('statMonth').textContent = monthCount;
+  }
+
+  document.getElementById('classChipRow').addEventListener('click', e => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    document.querySelectorAll('#classChipRow .chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    activeClass = chip.dataset.class;
+    render();
+  });
+
+  document.getElementById('chipRow').addEventListener('click', e => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    document.querySelectorAll('#chipRow .chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    activeType = chip.dataset.type;
+    render();
+  });
+
+  document.getElementById('searchInput').addEventListener('input', e => {
+    activeKeyword = e.target.value;
+    render();
+  });
+
+  updateCounts();
+  render();
+})();
+</script>
+<script>
+/* PR-H.4: nav-back 用 history.back() 替代 referrer (兼容 file:// + http:// + https://) */
+(function(){
+  try {
+    var sp = new URLSearchParams(location.search);
+    var K = ['class','risk','dorm','from','filter','tier','type','anomaly','student','cat','lid','focus','mid','rid','q'];
+    var parts = [];
+    K.forEach(function(k){var v=sp.get(k); if(v!=null && v!=='') parts.push(k+'='+encodeURIComponent(v));});
+    document.querySelectorAll('.nav-bar a.p-2.-ml-2, a.nav-back').forEach(function(a){
+      var h = a.getAttribute('href') || '';
+      if (!h || h.indexOf('javascript:') === 0 || h[0] === '#') return;
+      if (a.classList.contains('plus-tab') || a.classList.contains('fab')) return;
+      var base = h.split('?')[0];
+      var ex = new URLSearchParams(h.split('?')[1] || '');
+      if (K.some(function(k){return ex.has(k);})) return;
+      if (history.length > 1) {
+        a.setAttribute('href', 'javascript:history.back()');
+        return;
+      }
+      if (parts.length) {
+        a.setAttribute('href', base + '?' + parts.join('&'));
+      }
+    });
+  } catch(e) { console.error('PR-H.4 nav-back error:', e); }
+})();
+</script></body>
+</html>

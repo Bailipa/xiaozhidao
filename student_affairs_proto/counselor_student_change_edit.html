@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>学生变动调整 - 学工助手</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+        :root {
+            --color-primary: #1E5AE6;
+            --color-bg-page: #F5F6F8;
+            --success: #07C160;
+            --warning: #FA9D3B;
+            --danger: #FA5151;
+            --text-primary: #191919;
+            --text-secondary: #888;
+        }
+        body { background-color: #1a1a1a; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+        .phone-shell { width: 375px; height: 812px; background: var(--color-bg-page); border-radius: 40px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+        .status-bar { height: 44px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #000; flex-shrink: 0; line-height: 1; }
+        .status-bar iconify-icon { display: inline-flex; align-items: center; justify-content: center; line-height: 1; font-size: 16px; }
+        .nav-bar { height: 44px; display: flex; align-items: center; padding: 0 16px; background: #fff; border-bottom: 1px solid #F3F4F6; position: relative; flex-shrink: 0; }
+        .nav-back { color: #191919; text-decoration: none; display: flex; align-items: center; gap: 4px; font-size: 14px; position: absolute; left: 12px; }
+        .nav-title { font-size: 16px; font-weight: 600; color: #191919; margin: 0 auto; }
+        .content { flex: 1; overflow-y: auto; padding-bottom: 100px; }
+        .intro-card { background: #EFF6FF; border-left: 3px solid var(--color-primary); margin: 12px 16px 0; padding: 10px 12px; border-radius: 8px; font-size: 11px; color: #1E40AF; line-height: 1.6; }
+        .seg-row { background: #fff; margin: 12px 16px 0; padding: 6px; border-radius: 12px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+        .seg-btn { padding: 8px 4px; border-radius: 8px; font-size: 12px; font-weight: 500; color: #6B7280; text-align: center; cursor: pointer; transition: all 0.2s; user-select: none; }
+        .seg-btn.active { background: var(--color-primary); color: #fff; }
+        .seg-btn iconify-icon { display: block; font-size: 16px; margin-bottom: 2px; }
+        .form-group { background: #fff; border-radius: 12px; margin: 12px 16px; padding: 4px 16px; }
+        .form-group .group-title { font-size: 13px; font-weight: 600; color: #191919; padding: 10px 0 6px; border-bottom: 1px solid #F3F4F6; display: flex; align-items: center; gap: 6px; }
+        .form-group .group-title iconify-icon { color: var(--color-primary); font-size: 14px; }
+        .input-row { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #F3F4F6; }
+        .input-row:last-child { border-bottom: 0; }
+        .input-row label { width: 88px; font-size: 13px; color: #6B7280; flex-shrink: 0; }
+        .input-row label.required::after { content: ' *'; color: var(--danger); }
+        .input-row input, .input-row select, .input-row textarea { flex: 1; border: 0; outline: none; font-size: 13px; text-align: right; color: #111827; background: transparent; resize: none; font-family: inherit; }
+        .input-row textarea { text-align: left; min-height: 60px; padding: 4px 0; }
+        .input-row input::placeholder, .input-row textarea::placeholder { color: #C0C4CC; }
+        .search-row { display: flex; gap: 8px; padding: 12px 0; border-bottom: 1px solid #F3F4F6; }
+        .search-row input { flex: 1; border: 1px solid #E5E7EB; outline: none; font-size: 13px; padding: 8px 12px; border-radius: 8px; background: #F9FAFB; color: #111827; }
+        .search-row input:focus { border-color: var(--color-primary); background: #fff; }
+        .search-row button { padding: 8px 16px; border-radius: 8px; background: var(--color-primary); color: #fff; font-size: 12px; font-weight: 600; border: 0; cursor: pointer; flex-shrink: 0; }
+        .student-card { background: #F9FAFB; border-radius: 8px; padding: 12px; margin-top: 12px; display: none; }
+        .student-card.show { display: block; }
+        .student-card .sc-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .student-card .sc-avatar { width: 36px; height: 36px; border-radius: 50%; overflow: hidden; flex-shrink: 0; }
+        .student-card .sc-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .student-card .sc-info { flex: 1; min-width: 0; }
+        .student-card .sc-name { font-size: 14px; font-weight: 700; color: #191919; }
+        .student-card .sc-meta { font-size: 11px; color: #9CA3AF; margin-top: 2px; }
+        .student-card .sc-detail { font-size: 12px; color: #4B5563; line-height: 1.6; padding-top: 8px; border-top: 1px dashed #E5E7EB; }
+        .form-panel { display: none; }
+        .form-panel.active { display: block; }
+        .form-section-title { font-size: 13px; font-weight: 600; color: #191919; padding: 12px 16px 8px; display: flex; align-items: center; gap: 6px; }
+        .form-section-title iconify-icon { color: var(--color-primary); font-size: 16px; }
+        .action-bar { position: absolute; left: 0; right: 0; bottom: 0; background: #fff; border-top: 1px solid #F3F4F6; padding: 10px 16px 20px; display: flex; gap: 10px; }
+        .btn { flex: 1; padding: 12px; border-radius: 24px; font-size: 14px; font-weight: 600; border: 0; cursor: pointer; transition: all 0.2s; }
+        .btn-cancel { background: #F3F4F6; color: #6B7280; }
+        .btn-primary { background: var(--color-primary); color: #fff; }
+        .btn-primary:disabled { background: #C0C4CC; cursor: not-allowed; }
+        .app-toast { position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:rgba(0,0,0,0.78); color:#fff; padding:10px 20px; border-radius:20px; font-size:14px; z-index:9999; animation: toastIn 0.25s ease-out; }
+        @keyframes toastIn { from { opacity:0; transform:translate(-50%, -50%) scale(0.9); } to { opacity:1; transform:translate(-50%, -50%) scale(1); } }
+        .home-indicator { position: absolute; left: 0; right: 0; bottom: 0; height: 34px; background: #fff; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 8px; pointer-events: none; }
+        .home-indicator .bar { width: 134px; height: 5px; border-radius: 3px; background: #000; opacity: 0.85; }
+        .risk-tag { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; margin-left: 6px; }
+        .risk-tag.high { background: #FEE2E2; color: #DC2626; }
+        .risk-tag.mid  { background: #FEF3C7; color: #B45309; }
+        .risk-tag.low  { background: #DBEAFE; color: #3B82F6; }
+        .risk-tag.none { background: #F3F4F6; color: #888; }
+</style>
+</head>
+<body>
+<div class="phone-shell">
+<div class="status-bar">
+<span>12:20</span>
+<div class="flex gap-1.5 text-[#000]">
+<iconify-icon icon="mingcute:signal-fill"></iconify-icon>
+<iconify-icon icon="mingcute:wifi-fill"></iconify-icon>
+<iconify-icon icon="mingcute:battery-fill"></iconify-icon>
+</div>
+</div>
+<div class="nav-bar">
+<a class="nav-back" href="counselor_student_changes.html" aria-label="返回" id="navBack">
+<iconify-icon icon="solar:alt-arrow-left-linear" style="font-size:18px;"></iconify-icon>
+<span>返回</span>
+</a>
+<h1 class="nav-title">学生变动调整</h1>
+</div>
+<div class="content">
+<div class="intro-card">
+<div>本操作将<strong>永久留存</strong>学生异动记录，请确保信息准确。</div>
+<div style="margin-top:4px;">转入为新增学生，其他 5 类需通过<strong>学号唯一检索</strong>操作。</div>
+</div>
+
+<!-- 操作类型 seg -->
+<div class="seg-row" id="segRow">
+<div class="seg-btn active" data-type="transfer_in">
+<iconify-icon icon="solar:login-3-bold"></iconify-icon>
+转入
+</div>
+<div class="seg-btn" data-type="transfer_out">
+<iconify-icon icon="solar:logout-bold"></iconify-icon>
+转出
+</div>
+<div class="seg-btn" data-type="dropout">
+<iconify-icon icon="solar:close-circle-bold"></iconify-icon>
+退学
+</div>
+<div class="seg-btn" data-type="leave">
+<iconify-icon icon="solar:pause-circle-bold"></iconify-icon>
+休学
+</div>
+<div class="seg-btn" data-type="extended">
+<iconify-icon icon="solar:clock-circle-bold"></iconify-icon>
+延毕
+</div>
+<div class="seg-btn" data-type="military">
+<iconify-icon icon="solar:shield-keyhole-bold"></iconify-icon>
+参军
+</div>
+</div>
+
+<!-- 转入表单 -->
+<div class="form-panel active" id="panel-transfer_in">
+<div class="form-section-title"><iconify-icon icon="solar:user-plus-bold-duotone"></iconify-icon>学生基础信息</div>
+<div class="form-group">
+<div class="input-row"><label class="required">学号</label><input type="text" id="ti_no" placeholder="如 2025009"/></div>
+<div class="input-row"><label class="required">姓名</label><input type="text" id="ti_name" placeholder="请输入"/></div>
+<div class="input-row"><label class="required">性别</label>
+<select id="ti_gender"><option value="">请选择</option><option>男</option><option>女</option></select>
+</div>
+<div class="input-row"><label>手机号</label><input type="tel" id="ti_phone" placeholder="选填"/></div>
+<div class="input-row"><label>身份证号</label><input type="text" id="ti_idcard" placeholder="选填"/></div>
+<div class="input-row"><label>邮箱</label><input type="email" id="ti_email" placeholder="选填"/></div>
+</div>
+<div class="form-section-title"><iconify-icon icon="solar:square-academic-cap-bold-duotone"></iconify-icon>原专业信息</div>
+<div class="form-group">
+<div class="input-row"><label class="required">原学校</label><input type="text" id="ti_from_school" placeholder="如 XX 大学"/></div>
+<div class="input-row"><label class="required">原院系</label><input type="text" id="ti_from_dept" placeholder="如 通信工程"/></div>
+<div class="input-row"><label class="required">原专业</label><input type="text" id="ti_from_major" placeholder="如 通信工程"/></div>
+<div class="input-row"><label>原年级</label><input type="text" id="ti_from_grade" placeholder="如 2024 级"/></div>
+</div>
+<div class="form-section-title"><iconify-icon icon="solar:target-bold-duotone"></iconify-icon>目标班级信息</div>
+<div class="form-group">
+<div class="input-row"><label class="required">目标院系</label>
+<select id="ti_to_dept"><option value="">请选择</option><option>计算机系</option><option>软件工程系</option><option>人工智能学院</option><option>网络安全学院</option></select>
+</div>
+<div class="input-row"><label class="required">目标专业</label>
+<select id="ti_to_major"><option value="">请选择</option><option>计算机科学与技术</option><option>软件工程</option><option>人工智能</option><option>数据科学</option></select>
+</div>
+<div class="input-row"><label class="required">目标年级</label>
+<select id="ti_to_grade"><option value="">请选择</option><option>2024 级</option><option>2025 级</option><option>2026 级</option></select>
+</div>
+<div class="input-row"><label class="required">目标班级</label>
+<select id="ti_to_class"><option value="">请选择</option><option>计科1班</option><option>计科2班</option><option>软工1班</option><option>软工2班</option><option>AI1班</option></select>
+</div>
+<div class="input-row"><label>备注</label><textarea id="ti_remark" placeholder="选填"></textarea></div>
+</div>
+</div>
+
+<!-- 其他 5 类共用表单 -->
+<div class="form-panel" id="panel-other">
+<div class="form-section-title"><iconify-icon icon="solar:magnifer-bold-duotone"></iconify-icon>学生检索</div>
+<div class="form-group">
+<div class="search-row">
+<input type="text" id="ot_search" placeholder="输入学号检索（仅学号）"/>
+<button type="button" id="ot_search_btn">检索</button>
+</div>
+<div class="student-card" id="ot_student">
+<div class="sc-head">
+<div class="sc-avatar"><img id="ot_avatar" src="" alt=""/></div>
+<div class="sc-info">
+<div class="sc-name"><span id="ot_name"></span><span class="risk-tag" id="ot_risk"></span></div>
+<div class="sc-meta" id="ot_meta"></div>
+</div>
+</div>
+<div class="sc-detail" id="ot_detail"></div>
+</div>
+</div>
+<div class="form-section-title"><iconify-icon icon="solar:document-text-bold-duotone"></iconify-icon>异动信息</div>
+<div class="form-group">
+<div class="input-row"><label>操作类型</label><input type="text" id="ot_type_label" readonly/></div>
+<div class="input-row"><label class="required">操作日期</label><input type="date" id="ot_date"/></div>
+<div class="input-row"><label class="required">操作原因</label><textarea id="ot_reason" placeholder="请详细说明本次异动原因（必填）"></textarea></div>
+</div>
+</div>
+
+<div style="height: 90px;"></div>
+</div>
+
+<!-- 底部操作 -->
+<div class="action-bar">
+<button class="btn btn-cancel" id="btnCancel" type="button">取消</button>
+<button class="btn btn-primary" id="btnSubmit" type="button">提交变动</button>
+</div>
+<div class="home-indicator"><div class="bar"></div></div>
+</div>
+
+<!-- 检索数据源 -->
+<script type="application/json" id="page-data">
+{
+  "students": [
+    { "no":"2024001", "name":"张晓明", "gender":"男", "class":"计科1班", "dept":"计算机系", "major":"计算机科学与技术", "grade":"2024 级", "phone":"138****1234", "idcard":"110102********0022", "risk":"红档风险", "riskLevel":"high", "dorm":"3号楼 302" },
+    { "no":"2024002", "name":"李华", "gender":"女", "class":"计科2班", "dept":"计算机系", "major":"计算机科学与技术", "grade":"2024 级", "phone":"139****5678", "idcard":"110108********0035", "risk":"无风险", "riskLevel":"none", "dorm":"1号楼 201" },
+    { "no":"2024005", "name":"赵子涵", "gender":"男", "class":"软工1班", "dept":"软件工程系", "major":"软件工程", "grade":"2024 级", "phone":"137****9012", "idcard":"110105********0011", "risk":"黄档风险", "riskLevel":"mid", "dorm":"2号楼 405" },
+    { "no":"2024007", "name":"刘思琪", "gender":"女", "class":"计科1班", "dept":"计算机系", "major":"计算机科学与技术", "grade":"2024 级", "phone":"136****3456", "idcard":"110107********0089", "risk":"黄档风险", "riskLevel":"mid", "dorm":"1号楼 305" },
+    { "no":"2024008", "name":"陈雨萱", "gender":"女", "class":"AI1班", "dept":"人工智能学院", "major":"人工智能", "grade":"2024 级", "phone":"135****7890", "idcard":"110109********0027", "risk":"红档风险", "riskLevel":"high", "dorm":"5号楼 101" },
+    { "no":"2024015", "name":"高伟杰", "gender":"男", "class":"计科1班", "dept":"计算机系", "major":"计算机科学与技术", "grade":"2024 级", "phone":"134****2345", "idcard":"110102********0063", "risk":"蓝档风险", "riskLevel":"low", "dorm":"3号楼 408" },
+    { "no":"2024022", "name":"孙佳怡", "gender":"女", "class":"计科2班", "dept":"计算机系", "major":"计算机科学与技术", "grade":"2024 级", "phone":"133****6789", "idcard":"110103********0044", "risk":"蓝档风险", "riskLevel":"low", "dorm":"1号楼 502" },
+    { "no":"2024033", "name":"蔡明阳", "gender":"男", "class":"软工1班", "dept":"软件工程系", "major":"软件工程", "grade":"2024 级", "phone":"132****0123", "idcard":"110108********0072", "risk":"无风险", "riskLevel":"none", "dorm":"2号楼 207" }
+  ],
+  "typeLabels": {
+    "transfer_in":  "转入（新增学生）",
+    "transfer_out": "转出",
+    "dropout":      "退学",
+    "leave":        "休学",
+    "extended":     "延毕",
+    "military":     "参军"
+  },
+  "operatorName": "王辅导员"
+}
+</script>
+
+<script>
+(function() {
+  const DATA = JSON.parse(document.getElementById('page-data').textContent);
+  const TYPE_LABELS = DATA.typeLabels;
+  const TYPE_ICON = {
+    transfer_in: 'login-3-bold', transfer_out: 'logout-bold', dropout: 'close-circle-bold',
+    leave: 'pause-circle-bold', extended: 'clock-circle-bold', military: 'shield-keyhole-bold'
+  };
+
+  let activeType = 'transfer_in';
+  let selectedStudent = null;
+
+  /* PR-H.2: read URL params on entry, set initial seg + back link */
+  function _xzdApplyType(t) {
+    if (!t || !DATA.typeLabels[t]) return;
+    activeType = t;
+    document.querySelectorAll('.seg-btn').forEach(function(b){b.classList.remove('active');});
+    var btn = document.querySelector('.seg-btn[data-type="'+t+'"]');
+    if (btn) btn.classList.add('active');
+    document.querySelectorAll('.form-panel').forEach(function(p){p.classList.remove('active');});
+    var panelId = t === 'transfer_in' ? 'panel-transfer_in' : 'panel-other';
+    var panel = document.getElementById(panelId);
+    if (panel) panel.classList.add('active');
+    if (t !== 'transfer_in') $('ot_type_label').value = DATA.typeLabels[t] || t;
+  }
+  (function(){
+    var p = new URLSearchParams(window.location.search);
+    var t = p.get('type');
+    _xzdApplyType(t);
+    var back = document.getElementById('navBack');
+    if (back) {
+      var href = 'counselor_student_changes.html';
+      if (t && DATA.typeLabels[t]) href += '?type=' + encodeURIComponent(t);
+      back.setAttribute('href', href);
+    }
+  })();
+
+  function $(id) { return document.getElementById(id); }
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  }
+  function avatarUrl(name) {
+    const ch = escapeHtml((name || '?').charAt(0));
+    return `https://ui-avatars.com/api/?name=${ch}&background=1E5AE6&color=fff&size=128&bold=true&font-size=0.5`;
+  }
+  function todayStr() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+  function showToast(msg) {
+    const t = document.createElement('div');
+    t.className = 'app-toast';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 1800);
+  }
+
+  $('ot_date').value = todayStr();
+
+  document.getElementById('segRow').addEventListener('click', e => {
+    const btn = e.target.closest('.seg-btn');
+    if (!btn) return;
+    document.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeType = btn.dataset.type;
+    document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+    const panelId = activeType === 'transfer_in' ? 'panel-transfer_in' : 'panel-other';
+    const panel = $(panelId);
+    if (panel) panel.classList.add('active');
+    if (activeType !== 'transfer_in') {
+      $('ot_type_label').value = TYPE_LABELS[activeType] || activeType;
+    }
+    selectedStudent = null;
+    $('ot_student').classList.remove('show');
+    $('ot_search').value = '';
+    $('ot_reason').value = '';
+  });
+
+  function doSearch() {
+    const q = $('ot_search').value.trim();
+    if (!q) { showToast('请输入学号'); return; }
+    const found = DATA.students.find(s => s.no === q);
+    const card = $('ot_student');
+    if (!found) {
+      selectedStudent = null;
+      card.classList.remove('show');
+      showToast('未找到该学号学生');
+      return;
+    }
+    selectedStudent = found;
+    $('ot_avatar').src = avatarUrl(found.name);
+    $('ot_name').textContent = found.name;
+    const riskEl = $('ot_risk');
+    riskEl.textContent = found.risk;
+    riskEl.className = 'risk-tag ' + (found.riskLevel || 'none');
+    $('ot_meta').textContent = found.no + ' · ' + found.dept + ' · ' + found.class;
+    $('ot_detail').innerHTML =
+      '性别：' + escapeHtml(found.gender) + ' · 联系方式：' + escapeHtml(found.phone) + '<br/>' +
+      '专业：' + escapeHtml(found.major) + ' · 年级：' + escapeHtml(found.grade) + '<br/>' +
+      '宿舍：' + escapeHtml(found.dorm) + ' · 身份证：' + escapeHtml(found.idcard);
+    card.classList.add('show');
+  }
+  $('ot_search_btn').addEventListener('click', doSearch);
+  $('ot_search').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); doSearch(); } });
+
+  $('btnCancel').addEventListener('click', () => {
+    if (confirm('确认取消本次操作？已填写内容将丢失。')) {
+      var href = 'counselor_student_changes.html?type=' + encodeURIComponent(activeType);
+      window.location.href = href;
+    }
+  });
+
+  $('btnSubmit').addEventListener('click', () => {
+    if (activeType === 'transfer_in') {
+      const no = $('ti_no').value.trim();
+      const name = $('ti_name').value.trim();
+      const gender = $('ti_gender').value;
+      const fromSchool = $('ti_from_school').value.trim();
+      const fromDept = $('ti_from_dept').value.trim();
+      const fromMajor = $('ti_from_major').value.trim();
+      const toDept = $('ti_to_dept').value;
+      const toMajor = $('ti_to_major').value;
+      const toGrade = $('ti_to_grade').value;
+      const toClass = $('ti_to_class').value;
+      if (!no || !name || !gender || !fromSchool || !fromDept || !fromMajor || !toDept || !toMajor || !toGrade || !toClass) {
+        showToast('请填写所有必填项');
+        return;
+      }
+      if (DATA.students.some(s => s.no === no)) {
+        showToast('该学号已存在，请检查');
+        return;
+      }
+      const record = {
+        id: 'CHG' + Date.now().toString().slice(-6),
+        no: no, name: name,
+        type: 'transfer_in',
+        fromDept: fromDept + (fromMajor ? '·' + fromMajor : '') + '（' + fromSchool + '）',
+        fromClass: '',
+        toDept: toDept, toClass: toClass,
+        date: todayStr(),
+        operator: DATA.operatorName,
+        reason: $('ti_remark').value.trim() || '转专业 / 调入'
+      };
+      saveRecord(record);
+      showToast('转入成功：' + name + ' 已归入 ' + toClass);
+      setTimeout(function(){ window.location.href = 'counselor_student_changes.html?type=' + encodeURIComponent(activeType); }, 1200);
+    } else {
+      if (!selectedStudent) { showToast('请先检索学生'); return; }
+      const reason = $('ot_reason').value.trim();
+      const date = $('ot_date').value;
+      if (!reason) { showToast('请填写操作原因'); return; }
+      if (!date) { showToast('请选择操作日期'); return; }
+      const record = {
+        id: 'CHG' + Date.now().toString().slice(-6),
+        no: selectedStudent.no, name: selectedStudent.name,
+        type: activeType,
+        fromDept: selectedStudent.dept,
+        fromClass: selectedStudent.class,
+        toDept: targetDept(activeType, selectedStudent),
+        toClass: targetClass(activeType, selectedStudent),
+        date: date,
+        operator: DATA.operatorName,
+        reason: reason
+      };
+      saveRecord(record);
+      showToast((TYPE_LABELS[activeType] || '异动') + '成功：' + selectedStudent.name);
+      setTimeout(function(){ window.location.href = 'counselor_student_changes.html?type=' + encodeURIComponent(activeType); }, 1200);
+    }
+  });
+
+  function targetDept(type, s) {
+    if (type === 'dropout') return '（退学）';
+    if (type === 'leave') return '（休学）';
+    if (type === 'military') return '（应征入伍）';
+    if (type === 'extended') return s.dept;
+    return s.dept;
+  }
+  function targetClass(type, s) {
+    if (type === 'dropout') return '';
+    if (type === 'leave') return '';
+    if (type === 'military') return '';
+    if (type === 'extended') return s.grade + '延毕';
+    return s.class;
+  }
+
+  function saveRecord(r) {
+    let list = [];
+    try { list = JSON.parse(localStorage.getItem('xzd-changes') || '[]'); } catch(e) {}
+    list.unshift(r);
+    localStorage.setItem('xzd-changes', JSON.stringify(list));
+  }
+})();
+</script>
+<script>
+/* PR-H.4: nav-back 用 history.back() 替代 referrer (兼容 file:// + http:// + https://) */
+(function(){
+  try {
+    var sp = new URLSearchParams(location.search);
+    var K = ['class','risk','dorm','from','filter','tier','type','anomaly','student','cat','lid','focus','mid','rid','q'];
+    var parts = [];
+    K.forEach(function(k){var v=sp.get(k); if(v!=null && v!=='') parts.push(k+'='+encodeURIComponent(v));});
+    document.querySelectorAll('.nav-bar a.p-2.-ml-2, a.nav-back').forEach(function(a){
+      var h = a.getAttribute('href') || '';
+      if (!h || h.indexOf('javascript:') === 0 || h[0] === '#') return;
+      if (a.classList.contains('plus-tab') || a.classList.contains('fab')) return;
+      var base = h.split('?')[0];
+      var ex = new URLSearchParams(h.split('?')[1] || '');
+      if (K.some(function(k){return ex.has(k);})) return;
+      if (history.length > 1) {
+        a.setAttribute('href', 'javascript:history.back()');
+        return;
+      }
+      if (parts.length) {
+        a.setAttribute('href', base + '?' + parts.join('&'));
+      }
+    });
+  } catch(e) { console.error('PR-H.4 nav-back error:', e); }
+})();
+</script></body>
+</html>
