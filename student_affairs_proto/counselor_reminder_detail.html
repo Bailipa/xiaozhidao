@@ -187,7 +187,7 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
   </div>
 </div>
 <div class="action-bar">
-  <a class="btn secondary" href="counselor_reminder_create.html">编辑</a>
+  <a class="btn secondary" href="counselor_reminder_create.html?id=R001" id="editLink">编辑</a>
   <button class="btn primary" onclick="resendReminder()">
     <iconify-icon icon="solar:refresh-circle-bold"></iconify-icon>
     重新发送
@@ -286,6 +286,39 @@ function resendReminder() {
   if (new URLSearchParams(window.location.search).get('resent') === 'true') {
     setTimeout(resendReminder, 300);
   }
+})();
+
+/* PR-H.2: pass ?id= into edit link + reminder_logs link + preserve filter on back */
+(function(){
+  var sp = new URLSearchParams(window.location.search);
+  var id = sp.get('id') || 'R001';
+  var edit = document.getElementById('editLink');
+  if (edit) edit.setAttribute('href', 'counselor_reminder_create.html?id=' + encodeURIComponent(id));
+  var navAction = document.querySelector('.nav-bar a[href="counselor_reminder_logs.html"]');
+  if (navAction) navAction.setAttribute('href', 'counselor_reminder_logs.html?reminder_id=' + encodeURIComponent(id));
+  var parts = [];
+  ['filter','cat','from'].forEach(function(k){var v=sp.get(k); if(v!=null&&v!=='') parts.push(k+'='+encodeURIComponent(v));});
+  if (id) parts.unshift('id=' + encodeURIComponent(id));
+  var navBack = document.querySelector('.nav-bar a[href="counselor_reminders.html"]');
+  if (navBack) navBack.setAttribute('href', 'counselor_reminders.html?' + parts.join('&'));
+})();
+</script>
+<script>
+/* PR-H.2: pass ?id= into edit link + reminder_logs link + preserve filter on back (独立脚本, 不被上脚本异常阻断) */
+(function(){
+  try {
+    var sp = new URLSearchParams(window.location.search);
+    var id = sp.get('id') || 'R001';
+    var edit = document.getElementById('editLink');
+    if (edit) edit.setAttribute('href', 'counselor_reminder_create.html?id=' + encodeURIComponent(id));
+    var navAction = document.querySelector('.nav-bar a[href="counselor_reminder_logs.html"]');
+    if (navAction) navAction.setAttribute('href', 'counselor_reminder_logs.html?reminder_id=' + encodeURIComponent(id));
+    var parts = [];
+    ['filter','cat','from'].forEach(function(k){var v=sp.get(k); if(v!=null&&v!=='') parts.push(k+'='+encodeURIComponent(v));});
+    if (id) parts.unshift('id=' + encodeURIComponent(id));
+    var navBack = document.querySelector('.nav-bar a[href="counselor_reminders.html"]');
+    if (navBack) navBack.setAttribute('href', 'counselor_reminders.html?' + parts.join('&'));
+  } catch(e) { console.error('PR-H.2 nav bootstrap error:', e); }
 })();
 </script>
 </body>

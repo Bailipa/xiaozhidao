@@ -115,7 +115,7 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 </div>
 </div>
 <div class="nav-bar">
-<a class="p-2 -ml-2" href="counselor_anomalies.html" aria-label="异常跟进"><iconify-icon class="text-xl" icon="solar:alt-arrow-left-linear"></iconify-icon></a>
+<a class="p-2 -ml-2" href="counselor_anomalies.html" aria-label="异常跟进" id="navBack"><iconify-icon class="text-xl" icon="solar:alt-arrow-left-linear"></iconify-icon></a>
 <h1 class="flex-1 text-center text-base font-bold text-gray-900">异常详情</h1>
 </div>
 <div class="content pb-10">
@@ -294,6 +294,16 @@ function bindAnomaly(id) {
   document.getElementById('followCount').textContent = a.timeline.length;
 }
 bindAnomaly(new URLSearchParams(window.location.search).get('anomaly') || 'AN001');
+
+/* PR-H.2: preserve ?filter= ?student= when returning to anomalies list */
+(function(){
+  var sp = new URLSearchParams(window.location.search);
+  var parts = [];
+  ['filter','student','from'].forEach(function(k){var v=sp.get(k); if(v!=null&&v!=='') parts.push(k+'='+encodeURIComponent(v));});
+  if (!parts.length) return;
+  var back = document.getElementById('navBack');
+  if (back) back.setAttribute('href', 'counselor_anomalies.html?' + parts.join('&'));
+})();
 </script></form>
 
 </body>

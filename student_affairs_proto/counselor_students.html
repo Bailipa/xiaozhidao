@@ -69,6 +69,22 @@
         .filter-chip { cursor: pointer; user-select: none; }
         .app-toast { position:fixed; top:60px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.78); color:#fff; padding:10px 20px; border-radius:20px; font-size:14px; z-index:9999; animation: toastIn 0.25s ease-out; }
         @keyframes toastIn { from { opacity:0; transform:translate(-50%, -10px); } to { opacity:1; transform:translate(-50%, 0); } }
+        /* PR-H 转入学生联动区 */
+        #transferInSection { background: #fff; margin: 8px 16px 4px; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); border: 1px solid #EFF6FF; }
+        .transfer-in-header { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+        .ti-dot { width: 4px; height: 12px; background: var(--color-primary); border-radius: 2px; }
+        .ti-title { font-size: 13px; font-weight: 700; color: #191919; }
+        .ti-count { font-size: 10px; color: #fff; background: var(--color-primary); padding: 1px 6px; border-radius: 8px; font-weight: 700; }
+        .ti-more { margin-left: auto; font-size: 11px; color: var(--color-primary); text-decoration: none; }
+        .transfer-in-list { display: flex; flex-direction: column; gap: 8px; }
+        .ti-item { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px dashed #F3F4F6; text-decoration: none; color: inherit; }
+        .ti-item:last-child { border-bottom: 0; }
+        .ti-avatar { width: 32px; height: 32px; border-radius: 50%; overflow: hidden; flex-shrink: 0; }
+        .ti-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .ti-info { flex: 1; min-width: 0; }
+        .ti-name { font-size: 13px; font-weight: 600; color: #191919; }
+        .ti-meta { font-size: 11px; color: #9CA3AF; margin-top: 2px; }
+        .ti-tag { font-size: 9px; padding: 2px 6px; border-radius: 4px; background: #EFF6FF; color: var(--color-primary); font-weight: 600; flex-shrink: 0; }
     </style>
 </head>
 <body>
@@ -103,10 +119,24 @@
     <iconify-icon icon="solar:upload-square-bold-duotone"></iconify-icon>
     数据导入
   </a>
-  <a class="quick-tool" href="counselor_student_dorm.html" aria-label="宿舍">
+  <a class="quick-tool" href="counselor_student_dorm.html" aria-label="宿舍" id="qtDorm">
     <iconify-icon icon="solar:home-smile-angle-bold-duotone"></iconify-icon>
     宿舍
   </a>
+  <a class="quick-tool" href="counselor_student_changes.html" aria-label="学生变动" id="qtChanges">
+    <iconify-icon icon="solar:user-switch-bold-duotone"></iconify-icon>
+    学生变动
+  </a>
+</div>
+<!-- 本学期转入学生 (联动自学生变动调整提交) -->
+<div id="transferInSection" style="display:none;">
+  <div class="transfer-in-header">
+    <span class="ti-dot"></span>
+    <span class="ti-title">本学期转入学生</span>
+    <span class="ti-count" id="tiCount">0</span>
+    <a class="ti-more" href="counselor_student_changes.html?type=transfer_in&from=students">查看全部 →</a>
+  </div>
+  <div class="transfer-in-list" id="transferInList"></div>
 </div>
 <div class="content pt-2" id="studentList">
 <form id="xzdForm" onsubmit="event.preventDefault();" novalidate autocomplete="on">
@@ -244,7 +274,7 @@
     <iconify-icon icon="solar:home-2-linear"></iconify-icon>
     <span>工作台</span>
   </a>
-  <a class="tab-item active" href="counselor_students.html">
+  <a class="tab-item active" href="counselor_students.html" id="tabStudents">
     <iconify-icon icon="solar:users-group-rounded-bold"></iconify-icon>
     <span>学生</span>
   </a>
@@ -382,9 +412,9 @@ function renderEventSummary() {
     var summary = document.createElement('div');
     summary.className = 'event-summary mt-2';
     summary.innerHTML =
-      '<a class="es-chip es-logs' + (e.logs === 0 ? ' es-zero' : '') + '" href="counselor_logs.html?student=' + encodeURIComponent(name) + '"><iconify-icon icon="solar:document-text-bold" style="font-size:11px;"></iconify-icon>' + e.logs + ' 条日志</a>' +
-      '<a class="es-chip es-anom' + (e.anomalies === 0 ? ' es-zero' : '') + '" href="counselor_anomalies.html?student=' + encodeURIComponent(name) + '"><iconify-icon icon="solar:danger-triangle-bold" style="font-size:11px;"></iconify-icon>' + e.anomalies + ' 个异常</a>' +
-      '<a class="es-chip es-talks' + (e.talks === 0 ? ' es-zero' : '') + '" href="counselor_logs.html?student=' + encodeURIComponent(name) + '&cat=c1"><iconify-icon icon="solar:chat-round-dots-bold" style="font-size:11px;"></iconify-icon>' + e.talks + ' 次谈心谈话</a>';
+      '<a class="es-chip es-logs' + (e.logs === 0 ? ' es-zero' : '') + '" href="counselor_logs.html?student=' + encodeURIComponent(name) + '&from=students"><iconify-icon icon="solar:document-text-bold" style="font-size:11px;"></iconify-icon>' + e.logs + ' 条日志</a>' +
+      '<a class="es-chip es-anom' + (e.anomalies === 0 ? ' es-zero' : '') + '" href="counselor_anomalies.html?student=' + encodeURIComponent(name) + '&from=students"><iconify-icon icon="solar:danger-triangle-bold" style="font-size:11px;"></iconify-icon>' + e.anomalies + ' 个异常</a>' +
+      '<a class="es-chip es-talks' + (e.talks === 0 ? ' es-zero' : '') + '" href="counselor_logs.html?student=' + encodeURIComponent(name) + '&cat=c1&from=students"><iconify-icon icon="solar:chat-round-dots-bold" style="font-size:11px;"></iconify-icon>' + e.talks + ' 次谈心谈话</a>';
     flex1.appendChild(summary);
 
     /* 宿舍快捷入口 */
@@ -402,6 +432,68 @@ function renderEventSummary() {
   });
 }
 renderEventSummary();
+
+/* PR-H.2: 保留 filter 上下文 (class/risk/dorm) 跨页跳转 */
+(function(){
+  var FILTER_KEYS = ['class','risk','dorm','from'];
+  var sp = new URLSearchParams(window.location.search);
+  var parts = [];
+  FILTER_KEYS.forEach(function(k){var v=sp.get(k); if(v!=null&&v!=='') parts.push(k+'='+encodeURIComponent(v));});
+  if (!parts.length) return;
+  var joinTo = function(baseHref){
+    var qIdx = baseHref.indexOf('?');
+    if (qIdx === -1) return baseHref + '?' + parts.join('&');
+    return baseHref + '&' + parts.join('&');
+  };
+  /* student-item links (Bugs #8) */
+  document.querySelectorAll('a.student-item').forEach(function(a){
+    a.setAttribute('href', joinTo(a.getAttribute('href') || ''));
+  });
+  /* quick-tool 宿舍 + 学生变动 (Bugs #9, #10) */
+  document.querySelectorAll('#qtDorm, #qtChanges').forEach(function(a){
+    a.setAttribute('href', joinTo(a.getAttribute('href') || ''));
+  });
+  /* tab-bar 学生 tab (Bug #12) */
+  var tab = document.getElementById('tabStudents');
+  if (tab) tab.setAttribute('href', joinTo('counselor_students.html'));
+})();
+
+/* PR-H 联动: 读取 localStorage 中的转入学生 */
+(function() {
+  var section = document.getElementById('transferInSection');
+  var list = document.getElementById('transferInList');
+  var countEl = document.getElementById('tiCount');
+  var raw = null;
+  try { raw = localStorage.getItem('xzd-changes'); } catch(e) {}
+  if (!raw) return;
+  var all;
+  try { all = JSON.parse(raw); } catch(e) { return; }
+  if (!Array.isArray(all)) return;
+  var seen = {};
+  var transfers = [];
+  all.forEach(function(c) {
+    if (c.type !== 'transfer_in') return;
+    if (seen[c.no]) return;
+    seen[c.no] = true;
+    transfers.push(c);
+  });
+  if (transfers.length === 0) return;
+  countEl.textContent = transfers.length;
+  list.innerHTML = transfers.map(function(c) {
+    var ch = (c.name || '?').charAt(0);
+    var avatar = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(ch) + '&background=1E5AE6&color=fff&size=128&bold=true&font-size=0.5';
+    var meta = (c.toDept || '') + (c.toClass ? ' · ' + c.toClass : '');
+    return '<a class="ti-item" href="counselor_student_detail.html?no=' + encodeURIComponent(c.no) + '">' +
+      '<div class="ti-avatar"><img src="' + avatar + '" alt=""/></div>' +
+      '<div class="ti-info">' +
+        '<div class="ti-name">' + c.name + ' <span style="font-size:10px;color:#9CA3AF;font-weight:400;">· ' + c.no + '</span></div>' +
+        '<div class="ti-meta">原：' + (c.fromDept || '—') + ' → ' + meta + '</div>' +
+      '</div>' +
+      '<span class="ti-tag">新转入</span>' +
+    '</a>';
+  }).join('');
+  section.style.display = 'block';
+})();
 </script></form>
 
 

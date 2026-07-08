@@ -84,10 +84,10 @@
 </div>
 </div>
 <div class="nav-bar">
-<a class="p-2 -ml-2" href="counselor_reminders.html" aria-label="提醒列表">
+<a class="p-2 -ml-2" href="counselor_reminders.html" aria-label="提醒列表" id="navBack">
 <iconify-icon class="text-xl" icon="solar:alt-arrow-left-linear"></iconify-icon>
 </a>
-<h1 class="flex-1 text-center text-base font-bold text-gray-900">新建提醒</h1>
+<h1 class="flex-1 text-center text-base font-bold text-gray-900" id="navTitle">新建提醒</h1>
 </div>
 <div class="content">
 <form id="xzdForm" onsubmit="event.preventDefault();" novalidate autocomplete="on">
@@ -122,7 +122,7 @@
 </div>
 </div>
 <div class="action-bar">
-<button class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-100" onclick="window.location.href='counselor_reminders.html'">保存并开启提醒</button>
+<button class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-100" id="submitBtn">保存并开启提醒</button>
 </div>
 </div>
 <!-- 学生选择器(底部弹起) -->
@@ -156,6 +156,42 @@
   </div>
 </div>
 <script>
+        /* PR-H.2: ?id= 编辑模式预填 + 提交按 id/PUT 处理 */
+        var REMINDER_DATA = {
+          'R001': { title:'明早 8:00 班会通知', time:'2026-06-30T08:00', range:'__class:计科1班', lead:'30分钟' },
+          'R002': { title:'离校信息统计填报',   time:'2026-06-29T17:00', range:'__class:大数据1班', lead:'1小时' }
+        };
+        (function(){
+          var sp = new URLSearchParams(window.location.search);
+          var id = sp.get('id');
+          var editMode = id && REMINDER_DATA[id];
+          var titleEl = document.getElementById('navTitle');
+          var btn = document.getElementById('submitBtn');
+          var back = document.getElementById('navBack');
+          if (back) back.setAttribute('href', 'counselor_reminders.html' + (id ? '?id=' + encodeURIComponent(id) : ''));
+          if (editMode) {
+            if (titleEl) titleEl.textContent = '编辑提醒';
+            if (btn) btn.textContent = '保存修改';
+            var d = REMINDER_DATA[id];
+            setTimeout(function(){
+              var t = document.getElementById('reminderTitle'); if (t && d.title) t.value = d.title;
+              var ti = document.getElementById('reminderTime'); if (ti && d.time) ti.value = d.time;
+              var lead = document.getElementById('reminderLead'); if (lead && d.lead) lead.value = d.lead;
+              if (d.range) {
+                var display = document.getElementById('reminderRangeDisplay');
+                if (display) {
+                  display.classList.remove('placeholder');
+                  var cls = d.range.replace('__class:', '');
+                  display.textContent = cls + ' (32人)';
+                }
+              }
+            }, 0);
+          }
+          if (btn) btn.addEventListener('click', function(){
+            var target = 'counselor_reminders.html' + (id ? '?id=' + encodeURIComponent(id) : '');
+            window.location.href = target;
+          });
+        })();
         /*
           API Contract (后端实现时按此对接):
           GET /api/me/students?keyword=&class_name=&risk_level=&page=1&size=20

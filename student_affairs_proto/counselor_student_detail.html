@@ -81,7 +81,7 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 </div>
 </div>
 <div class="nav-bar">
-<a class="p-2 -ml-2" href="counselor_students.html" aria-label="学生列表"><iconify-icon class="text-xl" icon="solar:alt-arrow-left-linear"></iconify-icon></a>
+<a class="p-2 -ml-2" href="counselor_students.html" aria-label="学生列表" id="navBack"><iconify-icon class="text-xl" icon="solar:alt-arrow-left-linear"></iconify-icon></a>
 <h1 class="flex-1 text-center text-base font-bold text-gray-900">学生详情</h1>
 </div>
 
@@ -300,7 +300,7 @@ function bindStudent(no) {
   document.getElementById('kvGender').textContent = s.gender;
   document.getElementById('kvClass').textContent = s.klass;
   document.getElementById('kvDorm').innerHTML = escapeHtml(s.dorm) + ' <iconify-icon icon="solar:alt-arrow-right-linear"></iconify-icon>';
-  document.getElementById('kvDorm').href = 'counselor_student_dorm.html?no=' + encodeURIComponent(s.no);
+  document.getElementById('kvDorm').href = 'counselor_student_dorm.html?no=' + encodeURIComponent(s.no) + (_xzdExtraQs() ? '&' + _xzdExtraQs() : '');
   document.getElementById('kvIdcard').textContent = maskIdCard(s.idcard);
   document.getElementById('phoneOwn').textContent = maskPhone(s.phoneOwn);
   document.getElementById('phoneEmg').textContent = maskPhone(s.phoneEmg);
@@ -437,6 +437,34 @@ function showAudit(idx) {
 (function() {
   var no = new URLSearchParams(window.location.search).get('no') || '2024001';
   bindStudent(no);
+})();
+
+/* PR-H.2: preserve class/risk/dorm/from when leaving the page */
+function _xzdExtraQs() {
+  var sp = new URLSearchParams(window.location.search);
+  var keep = ['class','risk','dorm','from'];
+  var parts = [];
+  keep.forEach(function(k){var v=sp.get(k); if(v!=null&&v!=='') parts.push(k+'='+encodeURIComponent(v));});
+  return parts.join('&');
+}
+(function(){
+  var qs = _xzdExtraQs();
+  var back = document.getElementById('navBack');
+  if (back) back.setAttribute('href', 'counselor_students.html' + (qs ? '?' + qs : ''));
+})();
+</script>
+<script>
+/* PR-H.2: navBack rewrite in 独立 script block (避免被上方 bindStudent 异常阻断) */
+(function(){
+  try {
+    var sp = new URLSearchParams(window.location.search);
+    var keep = ['class','risk','dorm','from'];
+    var parts = [];
+    keep.forEach(function(k){var v=sp.get(k); if(v!=null&&v!=='') parts.push(k+'='+encodeURIComponent(v));});
+    var qs = parts.join('&');
+    var back = document.getElementById('navBack');
+    if (back) back.setAttribute('href', 'counselor_students.html' + (qs ? '?' + qs : ''));
+  } catch(e) { console.error('navBack rewrite error:', e); }
 })();
 
 document.querySelectorAll('.tab-bar a').forEach(t => {

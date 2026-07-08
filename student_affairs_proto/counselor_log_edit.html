@@ -140,7 +140,7 @@
 </div>
 </div>
 <div class="nav-bar">
-<a class="p-2 -ml-2" href="counselor_logs.html" aria-label="我的日志">
+<a class="p-2 -ml-2" href="counselor_logs.html" aria-label="我的日志" id="navBack">
 <iconify-icon class="text-xl" icon="solar:close-circle-linear"></iconify-icon>
 </a>
 <h1 class="flex-1 text-center text-base font-bold text-gray-900">新建日志</h1>
@@ -529,7 +529,13 @@ function submitLog() {
   /* PR-H+: 编辑提交时记录新时间戳 */
   if (window.__editingLog) persistLogUpdate('更新日志内容');
   showToast(window.__editingLog ? '日志已更新(已记录修改时间戳)' : '日志已提交（演示）');
-  setTimeout(function() { window.location.href = 'counselor_logs.html'; }, 800);
+  /* PR-H.2: 保留来源参数 (student/cat/from/dorm) */
+  var sp = new URLSearchParams(window.location.search);
+  var keep = ['student','cat','from','dorm'];
+  var parts = [];
+  keep.forEach(function(k){var v=sp.get(k); if(v!=null&&v!=='') parts.push(k+'='+encodeURIComponent(v));});
+  var target = 'counselor_logs.html' + (parts.length ? '?' + parts.join('&') : '');
+  setTimeout(function() { window.location.href = target; }, 800);
 }
 function onFilesPicked(input) {
   var preview = document.getElementById('attachPreview');
@@ -613,6 +619,16 @@ window.__editingLog = null;
   }
 
   showToast('已加载日志 ' + lid);
+})();
+
+/* PR-H.2: 保留来源参数到返回链接 (Bug #31) */
+(function(){
+  var sp = new URLSearchParams(window.location.search);
+  var keep = ['student','cat','from','dorm','lid'];
+  var parts = [];
+  keep.forEach(function(k){var v=sp.get(k); if(v!=null&&v!=='') parts.push(k+'='+encodeURIComponent(v));});
+  var back = document.getElementById('navBack');
+  if (back) back.setAttribute('href', 'counselor_logs.html' + (parts.length ? '?' + parts.join('&') : ''));
 })();
 </script></form>
 

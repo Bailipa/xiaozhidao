@@ -174,9 +174,16 @@ body { background-color: #1a1a1a; display: flex; justify-content: center; align-
 </div>
 <script>
 (function(){
-  var no = new URLSearchParams(window.location.search).get('no') || '2024001';
+  var sp = new URLSearchParams(window.location.search);
+  var no = sp.get('no') || '2024001';
   var b = document.getElementById('backBtn');
   if (b) b.href = 'counselor_student_detail.html?no=' + encodeURIComponent(no);
+  /* PR-H.2: chain ?no= into log_edit and late_returns (Bugs #16, #17) */
+  var extra = '&no=' + encodeURIComponent(no);
+  var log = document.querySelector('a[href="counselor_log_edit.html"]');
+  if (log) log.href = 'counselor_log_edit.html?from=dorm&dorm=' + encodeURIComponent(no) + '&student=' + encodeURIComponent(no);
+  var late = document.querySelector('a[href="counselor_late_returns.html"]');
+  if (late) late.href = 'counselor_late_returns.html?from=dorm&dorm=' + encodeURIComponent(no);
 })();
 </script>
 </body>

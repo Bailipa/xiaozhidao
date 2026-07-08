@@ -97,7 +97,7 @@
 </a>
 <div class="content pt-2 pb-20">
 <!-- 异常项 -->
-<a class="anomaly-card block" data-risk="red" data-status="未跟进" href="counselor_anomaly_detail.html">
+<a class="anomaly-card block" data-risk="red" data-status="未跟进" data-anomaly="AN001" href="counselor_anomaly_detail.html?anomaly=AN001" id="anomCard1">
 <div class="flex justify-between items-start mb-3">
 <div class="flex items-center gap-1.5">
 <div class="w-2 h-2 rounded-full bg-red-500"></div>
@@ -122,7 +122,7 @@
 <span class="px-4 py-1.5 bg-blue-600 text-white text-xs rounded-lg font-bold">去跟进</span>
 </div>
 </a>
-<a class="anomaly-card block" data-risk="yellow" data-status="已约谈" href="counselor_anomaly_detail.html">
+<a class="anomaly-card block" data-risk="yellow" data-status="已约谈" data-anomaly="AN002" href="counselor_anomaly_detail.html?anomaly=AN002" id="anomCard2">
 <div class="flex justify-between items-start mb-3">
 <div class="flex items-center gap-1.5">
 <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
@@ -147,7 +147,7 @@
 <span class="px-4 py-1.5 border border-blue-600 text-blue-600 text-xs rounded-lg font-bold">查看记录</span>
 </div>
 </a>
-<a class="anomaly-card block" data-risk="yellow" data-status="已结案" href="counselor_anomaly_detail.html">
+<a class="anomaly-card block" data-risk="yellow" data-status="已结案" data-anomaly="AN003" href="counselor_anomaly_detail.html?anomaly=AN003" id="anomCard3">
 <div class="flex justify-between items-start mb-3">
 <div class="flex items-center gap-1.5">
 <div class="w-2 h-2 rounded-full bg-gray-400"></div>
@@ -231,6 +231,17 @@ document.querySelectorAll('.filter-tab').forEach(function(tab) {
     document.querySelectorAll('.filter-tab').forEach(function(t) { t.classList.remove('active'); });
     tab.classList.add('active');
     var key = tab.dataset.filter;
+    /* PR-H.2: filter URL 化 */
+    try { history.replaceState({}, '', location.pathname + (key === 'all' ? '' : '?filter=' + encodeURIComponent(key))); } catch(e) {}
+    /* PR-H.2: chain current filter into card hrefs */
+    try {
+      var extra = (key === 'all') ? '' : '&filter=' + encodeURIComponent(key);
+      document.querySelectorAll('.anomaly-card').forEach(function(card){
+        var h = card.getAttribute('href') || '';
+        h = h.replace(/[?&]filter=[^&]*/g, '');
+        card.setAttribute('href', h + extra);
+      });
+    } catch(e) {}
     var visible = 0;
     document.querySelectorAll('.anomaly-card').forEach(function(card) {
       var show = false;
@@ -251,6 +262,38 @@ document.querySelectorAll('.filter-tab').forEach(function(tab) {
     }
   });
 });
+
+/* PR-H.2: chain current filter into card hrefs (so detail page receives ?filter=) */
+(function(){
+  var sp = new URLSearchParams(window.location.search);
+  var extra = [];
+  ['filter','student','from'].forEach(function(k){var v=sp.get(k); if(v!=null&&v!=='') extra.push(k+'='+encodeURIComponent(v));});
+  if (!extra.length) return;
+  var suffix = '&' + extra.join('&');
+  document.querySelectorAll('.anomaly-card').forEach(function(card){
+    var h = card.getAttribute('href') || '';
+    card.setAttribute('href', h + suffix);
+  });
+})();
+
+/* PR-H.2: ?filter= 预选 + URL 状态回填 */
+(function(){
+  var f = new URLSearchParams(window.location.search).get('filter');
+  if (!f) return;
+  var tab = document.querySelector('.filter-tab[data-filter="' + f + '"]');
+  if (!tab) return;
+  document.querySelectorAll('.filter-tab').forEach(function(t){t.classList.remove('active');});
+  tab.classList.add('active');
+  var visible = 0;
+  document.querySelectorAll('.anomaly-card').forEach(function(card){
+    var show = false;
+    if (f === 'all') show = true;
+    else if (f === '未结案') show = (card.dataset.status !== '已结案');
+    else show = (card.dataset.risk === f || card.dataset.status === f);
+    card.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+})();
 </script>
 <script>
 (function(){

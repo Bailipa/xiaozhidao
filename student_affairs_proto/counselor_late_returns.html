@@ -162,7 +162,7 @@ body { background-color: #1a1a1a; display: flex; justify-content: center; align-
   </div>
 </div>
 <div class="nav-bar">
-  <a class="p-2 -ml-2" href="counselor_workbench.html" aria-label="工作台"><iconify-icon class="text-xl" icon="solar:alt-arrow-left-linear"></iconify-icon></a>
+  <a class="p-2 -ml-2" href="counselor_workbench.html" aria-label="工作台" id="navBack"><iconify-icon class="text-xl" icon="solar:alt-arrow-left-linear"></iconify-icon></a>
   <h1 class="flex-1 text-center text-base font-bold text-gray-900">晚归专项</h1>
   <a class="p-2 -mr-2" href="counselor_imports.html" aria-label="数据导入"><iconify-icon class="text-xl text-blue-600" icon="solar:upload-square-bold"></iconify-icon></a>
 </div>
@@ -278,7 +278,7 @@ body { background-color: #1a1a1a; display: flex; justify-content: center; align-
       <span class="time">5 分钟前</span>
       <div class="actions">
         <a class="btn-mini warn" href="#" onclick="showParentContact('张三'); return false;">联系家长</a>
-        <a class="btn-mini primary" href="counselor_anomaly_detail.html">跟进</a>
+        <a class="btn-mini primary" href="counselor_anomaly_detail.html?anomaly=AN001">跟进</a>
       </div>
     </div>
   </div>
@@ -302,7 +302,7 @@ body { background-color: #1a1a1a; display: flex; justify-content: center; align-
       <span class="time">2 小时前</span>
       <div class="actions">
         <a class="btn-mini warn" href="#" onclick="showParentContact('王五'); return false;">联系家长</a>
-        <a class="btn-mini primary" href="counselor_anomaly_detail.html">跟进</a>
+        <a class="btn-mini primary" href="counselor_anomaly_detail.html?anomaly=AN002">跟进</a>
       </div>
     </div>
   </div>
@@ -568,6 +568,10 @@ document.querySelectorAll('.filter-tab').forEach(tab => {
     document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
     tab.classList.add('active');
     currentTab = tab.dataset.filter;
+    /* PR-H.2: URL 化 filter */
+    var sp = new URLSearchParams(window.location.search);
+    if (currentTab && currentTab !== 'all') sp.set('filter', currentTab); else sp.delete('filter');
+    var s = sp.toString(); try { history.replaceState({}, '', location.pathname + (s ? '?' + s : '')); } catch(e) {}
     applyAllFilters();
   });
 });
@@ -576,9 +580,29 @@ document.querySelectorAll('.tier-tab').forEach(tab => {
     document.querySelectorAll('.tier-tab').forEach(t => t.classList.remove('active'));
     tab.classList.add('active');
     currentTier = tab.dataset.tier;
+    /* PR-H.2: URL 化 tier */
+    var sp = new URLSearchParams(window.location.search);
+    if (currentTier && currentTier !== 'all') sp.set('tier', currentTier); else sp.delete('tier');
+    var s = sp.toString(); try { history.replaceState({}, '', location.pathname + (s ? '?' + s : '')); } catch(e) {}
     applyAllFilters();
   });
 });
+
+/* PR-H.2: ?filter= / ?tier= / ?from= 预选 chip */
+(function(){
+  var sp = new URLSearchParams(window.location.search);
+  var f = sp.get('filter');
+  if (f) { var t = document.querySelector('.filter-tab[data-filter="'+f+'"]'); if (t) { document.querySelectorAll('.filter-tab').forEach(function(x){x.classList.remove('active');}); t.classList.add('active'); currentTab = f; } }
+  var ti = sp.get('tier');
+  if (ti) { var t = document.querySelector('.tier-tab[data-tier="'+ti+'"]'); if (t) { document.querySelectorAll('.tier-tab').forEach(function(x){x.classList.remove('active');}); t.classList.add('active'); currentTier = ti; } }
+  /* Bug #22: back link uses history.back() if from=workbench otherwise default */
+  var from = sp.get('from');
+  var back = document.getElementById('navBack');
+  if (back) {
+    if (from === 'dorm') back.setAttribute('href', 'javascript:history.back()');
+  }
+  if (f || ti) applyAllFilters();
+})();
 document.getElementById('lateSearch').addEventListener('input', function(e) {
   currentSearch = e.target.value.trim().toLowerCase();
   var clr = document.getElementById('clearSearch');
