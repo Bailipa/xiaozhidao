@@ -117,7 +117,6 @@ body { background-color:#1a1a1a; display:flex; justify-content:center; align-ite
 <div class="nav-bar">
   <a class="p-2 -ml-2" href="counselor_reminders.html" aria-label="提醒列表"><iconify-icon class="text-xl" icon="solar:alt-arrow-left-linear"></iconify-icon></a>
 <h1 class="flex-1 text-center text-base font-bold text-gray-900">提醒详情</h1>
-<a class="p-2 -mr-2 text-blue-600" href="counselor_reminder_logs.html" aria-label="提醒日志"><iconify-icon class="text-xl" icon="solar:document-text-bold-duotone"></iconify-icon></a>
 </div>
 <div class="content">
   <div class="reminder-card">
@@ -321,30 +320,5 @@ function resendReminder() {
   } catch(e) { console.error('PR-H.2 nav bootstrap error:', e); }
 })();
 </script>
-<script>
-/* PR-H.4: nav-back 用 history.back() 替代 referrer (兼容 file:// + http:// + https://) */
-(function(){
-  try {
-    var sp = new URLSearchParams(location.search);
-    var K = ['class','risk','dorm','from','filter','tier','type','anomaly','student','cat','lid','focus','mid','rid','q'];
-    var parts = [];
-    K.forEach(function(k){var v=sp.get(k); if(v!=null && v!=='') parts.push(k+'='+encodeURIComponent(v));});
-    document.querySelectorAll('.nav-bar a.p-2.-ml-2, a.nav-back').forEach(function(a){
-      var h = a.getAttribute('href') || '';
-      if (!h || h.indexOf('javascript:') === 0 || h[0] === '#') return;
-      if (a.classList.contains('plus-tab') || a.classList.contains('fab')) return;
-      var base = h.split('?')[0];
-      var ex = new URLSearchParams(h.split('?')[1] || '');
-      if (K.some(function(k){return ex.has(k);})) return;
-      if (history.length > 1) {
-        a.setAttribute('href', 'javascript:history.back()');
-        return;
-      }
-      if (parts.length) {
-        a.setAttribute('href', base + '?' + parts.join('&'));
-      }
-    });
-  } catch(e) { console.error('PR-H.4 nav-back error:', e); }
-})();
-</script></body>
+</body>
 </html>

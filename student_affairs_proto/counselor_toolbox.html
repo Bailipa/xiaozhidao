@@ -85,26 +85,6 @@
 
 <div class="section-h">数据工具</div>
 <div class="card">
-<a class="tool-row" href="counselor_imports.html">
-<div class="ic bg-cyan-50 text-cyan-600">
-<iconify-icon icon="solar:upload-square-bold-duotone"></iconify-icon>
-</div>
-<div class="body">
-<div class="title">数据导入</div>
-<div class="desc">学生 / 宿舍 / 门禁 / 辅导员映射</div>
-</div>
-<iconify-icon class="arrow" icon="solar:alt-arrow-right-linear"></iconify-icon>
-</a>
-<a class="tool-row" href="counselor_student_dorm.html">
-<div class="ic bg-rose-50 text-rose-600">
-<iconify-icon icon="solar:home-smile-angle-bold-duotone"></iconify-icon>
-</div>
-<div class="body">
-<div class="title">宿舍</div>
-<div class="desc">宿舍分配 / 床位 / 卫生检查</div>
-</div>
-<iconify-icon class="arrow" icon="solar:alt-arrow-right-linear"></iconify-icon>
-</a>
 </div>
 </div>
 <div class="tab-bar">
@@ -132,31 +112,6 @@
 <div class="home-indicator"><div class="bar"></div></div>
 </div>
 <script>
-/* PR-H.4: nav-back 用 history.back() 替代 referrer (兼容 file:// + http:// + https://) */
-(function(){
-  try {
-    var sp = new URLSearchParams(location.search);
-    var K = ['class','risk','dorm','from','filter','tier','type','anomaly','student','cat','lid','focus','mid','rid','q'];
-    var parts = [];
-    K.forEach(function(k){var v=sp.get(k); if(v!=null && v!=='') parts.push(k+'='+encodeURIComponent(v));});
-    document.querySelectorAll('.nav-bar a.p-2.-ml-2, a.nav-back').forEach(function(a){
-      var h = a.getAttribute('href') || '';
-      if (!h || h.indexOf('javascript:') === 0 || h[0] === '#') return;
-      if (a.classList.contains('plus-tab') || a.classList.contains('fab')) return;
-      var base = h.split('?')[0];
-      var ex = new URLSearchParams(h.split('?')[1] || '');
-      if (K.some(function(k){return ex.has(k);})) return;
-      if (history.length > 1) {
-        a.setAttribute('href', 'javascript:history.back()');
-        return;
-      }
-      if (parts.length) {
-        a.setAttribute('href', base + '?' + parts.join('&'));
-      }
-    });
-  } catch(e) { console.error('PR-H.4 nav-back error:', e); }
-})();
-</script><script>
 /* PR-H.3 FAB: plus-tab/fab → log_edit 时携带 from= */
 (function(){
   try {

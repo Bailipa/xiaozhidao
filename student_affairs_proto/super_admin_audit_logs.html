@@ -341,30 +341,5 @@ function onAdvanced() { showToast('高级筛选(演示):已弹出时间范围');
   row.addEventListener('wheel', function(e){ if (e.deltaY === 0) return; e.preventDefault(); row.scrollLeft += e.deltaY; }, {passive:false});
 })();
 </script>
-<script>
-/* PR-H.4: nav-back 用 history.back() 替代 referrer (兼容 file:// + http:// + https://) */
-(function(){
-  try {
-    var sp = new URLSearchParams(location.search);
-    var K = ['class','risk','dorm','from','filter','tier','type','anomaly','student','cat','lid','focus','mid','rid','q'];
-    var parts = [];
-    K.forEach(function(k){var v=sp.get(k); if(v!=null && v!=='') parts.push(k+'='+encodeURIComponent(v));});
-    document.querySelectorAll('.nav-bar a.p-2.-ml-2, a.nav-back').forEach(function(a){
-      var h = a.getAttribute('href') || '';
-      if (!h || h.indexOf('javascript:') === 0 || h[0] === '#') return;
-      if (a.classList.contains('plus-tab') || a.classList.contains('fab')) return;
-      var base = h.split('?')[0];
-      var ex = new URLSearchParams(h.split('?')[1] || '');
-      if (K.some(function(k){return ex.has(k);})) return;
-      if (history.length > 1) {
-        a.setAttribute('href', 'javascript:history.back()');
-        return;
-      }
-      if (parts.length) {
-        a.setAttribute('href', base + '?' + parts.join('&'));
-      }
-    });
-  } catch(e) { console.error('PR-H.4 nav-back error:', e); }
-})();
-</script></body>
+</body>
 </html>

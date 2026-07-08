@@ -115,18 +115,6 @@
 </div>
 </div>
 <div class="quick-tools">
-  <a class="quick-tool" href="counselor_imports.html" aria-label="数据导入" id="qtImports">
-    <iconify-icon icon="solar:upload-square-bold-duotone"></iconify-icon>
-    数据导入
-  </a>
-  <a class="quick-tool" href="counselor_student_dorm.html" aria-label="宿舍" id="qtDorm">
-    <iconify-icon icon="solar:home-smile-angle-bold-duotone"></iconify-icon>
-    宿舍
-  </a>
-  <a class="quick-tool" href="counselor_student_changes.html" aria-label="学生变动" id="qtChanges">
-    <iconify-icon icon="solar:user-switch-bold-duotone"></iconify-icon>
-    学生变动
-  </a>
 </div>
 <!-- 本学期转入学生 (联动自学生变动调整提交) -->
 <div id="transferInSection" style="display:none;">
@@ -449,10 +437,7 @@ renderEventSummary();
   document.querySelectorAll('a.student-item').forEach(function(a){
     a.setAttribute('href', joinTo(a.getAttribute('href') || ''));
   });
-  /* quick-tool 宿舍 + 学生变动 + 数据导入 (Bugs #9, #10, #34) */
-  document.querySelectorAll('#qtDorm, #qtChanges, #qtImports').forEach(function(a){
-    a.setAttribute('href', joinTo(a.getAttribute('href') || ''));
-  });
+
   /* tab-bar 学生 tab (Bug #12) */
   var tab = document.getElementById('tabStudents');
   if (tab) tab.setAttribute('href', joinTo('counselor_students.html'));
@@ -498,31 +483,6 @@ renderEventSummary();
 
 
 <script>
-/* PR-H.4: nav-back 用 history.back() 替代 referrer (兼容 file:// + http:// + https://) */
-(function(){
-  try {
-    var sp = new URLSearchParams(location.search);
-    var K = ['class','risk','dorm','from','filter','tier','type','anomaly','student','cat','lid','focus','mid','rid','q'];
-    var parts = [];
-    K.forEach(function(k){var v=sp.get(k); if(v!=null && v!=='') parts.push(k+'='+encodeURIComponent(v));});
-    document.querySelectorAll('.nav-bar a.p-2.-ml-2, a.nav-back').forEach(function(a){
-      var h = a.getAttribute('href') || '';
-      if (!h || h.indexOf('javascript:') === 0 || h[0] === '#') return;
-      if (a.classList.contains('plus-tab') || a.classList.contains('fab')) return;
-      var base = h.split('?')[0];
-      var ex = new URLSearchParams(h.split('?')[1] || '');
-      if (K.some(function(k){return ex.has(k);})) return;
-      if (history.length > 1) {
-        a.setAttribute('href', 'javascript:history.back()');
-        return;
-      }
-      if (parts.length) {
-        a.setAttribute('href', base + '?' + parts.join('&'));
-      }
-    });
-  } catch(e) { console.error('PR-H.4 nav-back error:', e); }
-})();
-</script><script>
 /* PR-H.3 FAB: plus-tab/fab → log_edit 时携带 from= */
 (function(){
   try {

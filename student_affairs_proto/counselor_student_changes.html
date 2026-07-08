@@ -98,10 +98,6 @@
 <span>返回</span>
 </a>
 <h1 class="nav-title">学生变动查看</h1>
-<a class="nav-action" href="counselor_student_change_edit.html" id="navAction">
-<iconify-icon icon="solar:add-circle-bold" style="font-size:16px;"></iconify-icon>
-<span>新建变动</span>
-</a>
 </div>
 <div class="content">
 <!-- 统计卡 -->
@@ -176,6 +172,10 @@
 <iconify-icon icon="solar:users-group-rounded-linear"></iconify-icon>
 <span>学生</span>
 </a>
+<a class="plus-tab" href="counselor_student_change_edit.html" aria-label="新建变动">
+<iconify-icon icon="solar:add-square-bold" style="font-size:30px;"></iconify-icon>
+</a>
+<div class="w-12"></div>
 <a class="tab-item" href="counselor_anomalies.html">
 <iconify-icon icon="solar:bell-bing-linear"></iconify-icon>
 <span>异常</span>
@@ -380,30 +380,5 @@ ${escapeHtml(info.label)}
   render();
 })();
 </script>
-<script>
-/* PR-H.4: nav-back 用 history.back() 替代 referrer (兼容 file:// + http:// + https://) */
-(function(){
-  try {
-    var sp = new URLSearchParams(location.search);
-    var K = ['class','risk','dorm','from','filter','tier','type','anomaly','student','cat','lid','focus','mid','rid','q'];
-    var parts = [];
-    K.forEach(function(k){var v=sp.get(k); if(v!=null && v!=='') parts.push(k+'='+encodeURIComponent(v));});
-    document.querySelectorAll('.nav-bar a.p-2.-ml-2, a.nav-back').forEach(function(a){
-      var h = a.getAttribute('href') || '';
-      if (!h || h.indexOf('javascript:') === 0 || h[0] === '#') return;
-      if (a.classList.contains('plus-tab') || a.classList.contains('fab')) return;
-      var base = h.split('?')[0];
-      var ex = new URLSearchParams(h.split('?')[1] || '');
-      if (K.some(function(k){return ex.has(k);})) return;
-      if (history.length > 1) {
-        a.setAttribute('href', 'javascript:history.back()');
-        return;
-      }
-      if (parts.length) {
-        a.setAttribute('href', base + '?' + parts.join('&'));
-      }
-    });
-  } catch(e) { console.error('PR-H.4 nav-back error:', e); }
-})();
-</script></body>
+</body>
 </html>
