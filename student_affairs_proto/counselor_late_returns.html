@@ -164,9 +164,9 @@ body { background-color: #1a1a1a; display: flex; justify-content: center; align-
 <div class="nav-bar">
   <a class="p-2 -ml-2" href="counselor_workbench.html" aria-label="工作台" id="navBack"><iconify-icon class="text-xl" icon="solar:alt-arrow-left-linear"></iconify-icon></a>
   <h1 class="flex-1 text-center text-base font-bold text-gray-900">晚归专项</h1>
-  <button class="p-2 -mr-2 text-blue-600 flex items-center gap-1" id="btnDateSettings" type="button" aria-label="日期设置" onclick="openDateSettings()">
+  <button class="p-2 -mr-2 text-blue-600 flex items-center gap-1" id="btnDateSettings" type="button" aria-label="判定设置" onclick="openDateSettings()">
     <iconify-icon class="text-xl" icon="solar:settings-linear"></iconify-icon>
-    <span class="text-xs font-bold" style="display:inline;">日期</span>
+    <span class="text-xs font-bold" style="display:inline;">设置</span>
   </button>
 </div>
 
@@ -446,26 +446,72 @@ body { background-color: #1a1a1a; display: flex; justify-content: center; align-
 </div>
 </div>
 </div>
-<!-- 日期设置弹窗 (PR-H.5+) -->
+<!-- 晚归判定设置弹窗 (PR-H.5+) -->
 <div class="hidden fixed inset-0 z-50 flex items-end justify-center" id="dateSettingsModal">
 <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeDateSettings()"></div>
-<div class="bg-white rounded-t-3xl w-full p-5 relative z-10 animate-slide-up">
+<div class="bg-white rounded-t-3xl w-full p-5 relative z-10 animate-slide-up max-h-[85vh] overflow-y-auto">
   <div class="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4"></div>
-  <h3 class="text-base font-bold text-gray-900 mb-1">选择晚归日期范围</h3>
-  <p class="text-xs text-gray-400 mb-5">最长 30 天,留空则显示全部</p>
-  <div class="space-y-3 mb-5">
-    <div>
-      <label class="text-xs text-gray-500 mb-1 block">起始日期</label>
-      <input type="date" id="settingsDateStart" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-blue-500" />
+  <h3 class="text-base font-bold text-gray-900 mb-1">晚归判定设置</h3>
+  <p class="text-xs text-gray-400 mb-5">配置晚归阈值与夜不归宿判定规则</p>
+
+  <!-- 1. 晚归阈值 (时段) -->
+  <div class="mb-5">
+    <div class="flex items-center justify-between mb-2">
+      <label class="text-sm font-bold text-gray-900">晚归阈值</label>
+      <span class="text-xs text-gray-400" id="lateThresholdLabel">22:30 后未归校</span>
     </div>
-    <div>
-      <label class="text-xs text-gray-500 mb-1 block">结束日期</label>
-      <input type="date" id="settingsDateEnd" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-blue-500" />
+    <p class="text-xs text-gray-500 mb-3">超过该时间仍未返校记为晚归</p>
+    <div class="grid grid-cols-5 gap-2" id="lateThresholdGroup">
+      <button type="button" data-value="22:00" class="late-threshold-btn py-2 text-sm font-bold rounded-xl border-2 border-gray-200 text-gray-600 bg-white">22:00</button>
+      <button type="button" data-value="22:30" class="late-threshold-btn py-2 text-sm font-bold rounded-xl border-2 border-blue-600 bg-blue-50 text-blue-600">22:30</button>
+      <button type="button" data-value="23:00" class="late-threshold-btn py-2 text-sm font-bold rounded-xl border-2 border-gray-200 text-gray-600 bg-white">23:00</button>
+      <button type="button" data-value="23:30" class="late-threshold-btn py-2 text-sm font-bold rounded-xl border-2 border-gray-200 text-gray-600 bg-white">23:30</button>
+      <button type="button" data-value="00:00" class="late-threshold-btn py-2 text-sm font-bold rounded-xl border-2 border-gray-200 text-gray-600 bg-white">00:00</button>
     </div>
   </div>
+
+  <!-- 2. 夜不归宿判定 (条件) -->
+  <div class="mb-5">
+    <div class="flex items-center justify-between mb-2">
+      <label class="text-sm font-bold text-gray-900">夜不归宿判定</label>
+      <span class="text-xs text-gray-400" id="overnightLabel">凌晨 02:00 后未归</span>
+    </div>
+    <p class="text-xs text-gray-500 mb-3">满足以下任一条件记为夜不归宿</p>
+    <div class="space-y-2" id="overnightGroup">
+      <label class="overnight-opt flex items-center gap-3 p-3 bg-white border-2 border-gray-200 rounded-xl cursor-pointer">
+        <input type="radio" name="overnight" value="after_00" class="accent-blue-600" />
+        <div class="flex-1">
+          <div class="text-sm font-bold text-gray-900">凌晨 00:00 后仍未归校</div>
+          <div class="text-xs text-gray-400 mt-0.5">跨过零点仍未返校</div>
+        </div>
+      </label>
+      <label class="overnight-opt flex items-center gap-3 p-3 bg-blue-50 border-2 border-blue-600 rounded-xl cursor-pointer">
+        <input type="radio" name="overnight" value="after_02" class="accent-blue-600" checked />
+        <div class="flex-1">
+          <div class="text-sm font-bold text-blue-600">凌晨 02:00 后仍未归校</div>
+          <div class="text-xs text-gray-400 mt-0.5">超过凌晨 2 点仍未返校(标准定义)</div>
+        </div>
+      </label>
+      <label class="overnight-opt flex items-center gap-3 p-3 bg-white border-2 border-gray-200 rounded-xl cursor-pointer">
+        <input type="radio" name="overnight" value="24h" class="accent-blue-600" />
+        <div class="flex-1">
+          <div class="text-sm font-bold text-gray-900">24 小时内未归校</div>
+          <div class="text-xs text-gray-400 mt-0.5">整整一天未返校</div>
+        </div>
+      </label>
+      <label class="overnight-opt flex items-center gap-3 p-3 bg-white border-2 border-gray-200 rounded-xl cursor-pointer">
+        <input type="radio" name="overnight" value="2_nights" class="accent-blue-600" />
+        <div class="flex-1">
+          <div class="text-sm font-bold text-gray-900">连续 2 晚未归校</div>
+          <div class="text-xs text-gray-400 mt-0.5">累计两天整晚未返校</div>
+        </div>
+      </label>
+    </div>
+  </div>
+
   <div class="flex gap-3">
-    <button class="flex-1 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold" type="button" onclick="closeDateSettings()">取消</button>
-    <button class="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold" type="button" onclick="applyDateSettings()">确定</button>
+    <button id="btnSettingsCancel" class="flex-1 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold" type="button" onclick="closeDateSettings()">取消</button>
+    <button id="btnSettingsApply" class="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold" type="button" onclick="applyDateSettings()">确定</button>
   </div>
 </div>
 </div>
@@ -474,12 +520,40 @@ body { background-color: #1a1a1a; display: flex; justify-content: center; align-
 .animate-slide-up { animation: slideUp 0.25s ease-out; }
 </style>
 <script>
-/* PR-H.5+: 日期设置弹窗控制 */
+/* PR-H.5+: 晚归判定设置弹窗控制 */
+var lateThreshold = '22:30';
+var overnightRule = 'after_02';
+var OVERNIGHT_LABELS = { after_00: '凌晨 00:00 后未归', after_02: '凌晨 02:00 后未归', '24h': '24 小时未归', '2_nights': '连续 2 晚未归' };
+function paintThreshold(value) {
+  document.querySelectorAll('.late-threshold-btn').forEach(function(b){
+    var on = b.dataset.value === value;
+    b.className = on
+      ? 'late-threshold-btn py-2 text-sm font-bold rounded-xl border-2 border-blue-600 bg-blue-50 text-blue-600'
+      : 'late-threshold-btn py-2 text-sm font-bold rounded-xl border-2 border-gray-200 text-gray-600 bg-white';
+  });
+  var lbl = document.getElementById('lateThresholdLabel');
+  if (lbl) lbl.textContent = value + ' 后未归校';
+}
+function paintOvernight(value) {
+  document.querySelectorAll('input[name="overnight"]').forEach(function(r){
+    r.checked = (r.value === value);
+    var opt = r.closest('.overnight-opt');
+    if (r.checked) {
+      opt.className = 'overnight-opt flex items-center gap-3 p-3 bg-blue-50 border-2 border-blue-600 rounded-xl cursor-pointer';
+      opt.querySelector('.text-sm').className = 'text-sm font-bold text-blue-600';
+    } else {
+      opt.className = 'overnight-opt flex items-center gap-3 p-3 bg-white border-2 border-gray-200 rounded-xl cursor-pointer';
+      opt.querySelector('.text-sm').className = 'text-sm font-bold text-gray-900';
+    }
+  });
+  var olbl = document.getElementById('overnightLabel');
+  if (olbl) olbl.textContent = OVERNIGHT_LABELS[value] || '';
+}
 function openDateSettings() {
   var modal = document.getElementById('dateSettingsModal');
   if (!modal) return;
-  document.getElementById('settingsDateStart').value = document.getElementById('dateStart').value;
-  document.getElementById('settingsDateEnd').value = document.getElementById('dateEnd').value;
+  paintThreshold(lateThreshold);
+  paintOvernight(overnightRule);
   modal.classList.remove('hidden');
 }
 function closeDateSettings() {
@@ -487,26 +561,22 @@ function closeDateSettings() {
   if (modal) modal.classList.add('hidden');
 }
 function applyDateSettings() {
-  var s = document.getElementById('settingsDateStart').value;
-  var e = document.getElementById('settingsDateEnd').value;
-  var mainStart = document.getElementById('dateStart');
-  var mainEnd = document.getElementById('dateEnd');
-  mainStart.value = s;
-  mainEnd.value = e;
-  if (s && e) {
-    var diff = Math.round((new Date(e + 'T00:00:00') - new Date(s + 'T00:00:00')) / 86400000);
-    if (diff > 29) {
-      showToast('日期范围超出 30 天上限');
-      return;
-    }
-  }
-  currentDateStart = s;
-  currentDateEnd = e;
-  applyAllFilters();
+  var active = document.querySelector('.late-threshold-btn.border-blue-600');
+  if (active) lateThreshold = active.dataset.value;
+  var oActive = document.querySelector('input[name="overnight"]:checked');
+  if (oActive) overnightRule = oActive.value;
   closeDateSettings();
-  if (s && e) showToast('已应用日期范围');
-  else showToast('已清除日期范围');
+  showToast('已保存判定规则: ' + lateThreshold + ' / ' + overnightRule);
 }
+document.addEventListener('click', function(e){
+  var t = e.target.closest('.late-threshold-btn');
+  if (t) { paintThreshold(t.dataset.value); return; }
+  var o = e.target.closest('.overnight-opt');
+  if (o) {
+    var radio = o.querySelector('input[type="radio"]');
+    if (radio) paintOvernight(radio.value);
+  }
+});
 </script>
 <script>
   家长数据 mock(演示用,真实场景下应来自后端):
