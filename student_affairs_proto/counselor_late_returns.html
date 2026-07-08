@@ -164,6 +164,9 @@ body { background-color: #1a1a1a; display: flex; justify-content: center; align-
 <div class="nav-bar">
   <a class="p-2 -ml-2" href="counselor_workbench.html" aria-label="工作台" id="navBack"><iconify-icon class="text-xl" icon="solar:alt-arrow-left-linear"></iconify-icon></a>
   <h1 class="flex-1 text-center text-base font-bold text-gray-900">晚归专项</h1>
+  <button class="p-2 -mr-2 text-gray-600" id="btnDateSettings" type="button" aria-label="日期设置" onclick="openDateSettings()">
+    <iconify-icon class="text-xl" icon="solar:tuner-2-linear"></iconify-icon>
+  </button>
 </div>
 
 <!-- 搜索框 (PR-G+) -->
@@ -442,8 +445,69 @@ body { background-color: #1a1a1a; display: flex; justify-content: center; align-
 </div>
 </div>
 </div>
+<!-- 日期设置弹窗 (PR-H.5+) -->
+<div class="hidden fixed inset-0 z-50 flex items-end justify-center" id="dateSettingsModal">
+<div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeDateSettings()"></div>
+<div class="bg-white rounded-t-3xl w-full p-5 relative z-10 animate-slide-up">
+  <div class="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4"></div>
+  <h3 class="text-base font-bold text-gray-900 mb-1">选择晚归日期范围</h3>
+  <p class="text-xs text-gray-400 mb-5">最长 30 天,留空则显示全部</p>
+  <div class="space-y-3 mb-5">
+    <div>
+      <label class="text-xs text-gray-500 mb-1 block">起始日期</label>
+      <input type="date" id="settingsDateStart" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-blue-500" />
+    </div>
+    <div>
+      <label class="text-xs text-gray-500 mb-1 block">结束日期</label>
+      <input type="date" id="settingsDateEnd" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-blue-500" />
+    </div>
+  </div>
+  <div class="flex gap-3">
+    <button class="flex-1 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold" type="button" onclick="closeDateSettings()">取消</button>
+    <button class="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold" type="button" onclick="applyDateSettings()">确定</button>
+  </div>
+</div>
+</div>
+<style>
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.animate-slide-up { animation: slideUp 0.25s ease-out; }
+</style>
 <script>
-/*
+/* PR-H.5+: 日期设置弹窗控制 */
+function openDateSettings() {
+  var modal = document.getElementById('dateSettingsModal');
+  if (!modal) return;
+  document.getElementById('settingsDateStart').value = document.getElementById('dateStart').value;
+  document.getElementById('settingsDateEnd').value = document.getElementById('dateEnd').value;
+  modal.classList.remove('hidden');
+}
+function closeDateSettings() {
+  var modal = document.getElementById('dateSettingsModal');
+  if (modal) modal.classList.add('hidden');
+}
+function applyDateSettings() {
+  var s = document.getElementById('settingsDateStart').value;
+  var e = document.getElementById('settingsDateEnd').value;
+  var mainStart = document.getElementById('dateStart');
+  var mainEnd = document.getElementById('dateEnd');
+  mainStart.value = s;
+  mainEnd.value = e;
+  if (s && e) {
+    var diff = Math.round((new Date(e + 'T00:00:00') - new Date(s + 'T00:00:00')) / 86400000);
+    if (diff > 29) {
+      showToast('日期范围超出 30 天上限');
+      return;
+    }
+  }
+  currentDateStart = s;
+  currentDateEnd = e;
+  applyAllFilters();
+  closeDateSettings();
+  if (s && e) showToast('已应用日期范围');
+  else showToast('已清除日期范围');
+}
+</script>
+<script>
   家长数据 mock(演示用,真实场景下应来自后端):
   GET /api/students/{student_no}/emergency-contact
   Response 200: {
@@ -635,10 +699,10 @@ document.getElementById('clearSearch').addEventListener('click', function() {
   var defStart = fmt(defStartDate);
   dateStart.max = defEnd;
   dateEnd.max   = defEnd;
-  dateStart.value = defStart;
-  dateEnd.value   = defEnd;
-  currentDateStart = defStart;
-  currentDateEnd   = defEnd;
+  dateStart.value = '';
+  dateEnd.value   = '';
+  currentDateStart = '';
+  currentDateEnd   = '';
 
   function showHint(msg, cls) {
     if (!hint) return;
@@ -655,10 +719,10 @@ document.getElementById('clearSearch').addEventListener('click', function() {
   function validate() {
     var s = dateStart.value;
     var e = dateEnd.value;
-    if (!s && !e) {
-      showHint('请选择查询日期范围,最长 30 天。', '');
-      return false;
-    }
+  if (!s && !e) {
+    showHint('默认显示全部 (未应用日期范围)。', '');
+    return true;
+  }
     if (s && !e) e = s;
     if (!s && e) s = e;
     if (s > e) {
@@ -698,7 +762,7 @@ document.getElementById('clearSearch').addEventListener('click', function() {
     showToast('已重置为最近 30 天');
   });
 
-  validate();
+  if (dateStart.value && dateEnd.value) validate();
 })();
 
 function showToast(msg) {
